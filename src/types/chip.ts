@@ -54,6 +54,12 @@ export type MappingRole =
   | 'UART_TX' | 'UART_RX' | 'PWM' | 'ADC' | 'DAC'
   | 'Touch' | 'Custom'
 
+export interface PinAssignment {
+  gpio: number
+  role: MappingRole
+  label: string
+}
+
 export type FilterKey =
   | 'all'
   | 'safe_output'            // not input_only, not flash_reserved
