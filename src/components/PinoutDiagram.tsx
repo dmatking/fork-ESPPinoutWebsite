@@ -2,49 +2,48 @@ import { useApp } from '../context/AppContext'
 import { filterPins } from '../utils/filterPins'
 import type { Pin } from '../types/chip'
 
-// Color of the pad rectangle that touches the chip body — primary capability wins
-function padBg(pin: Pin): string {
-  if (!pin.isUsable) return 'bg-red-950'
-  const c = pin.constraints
-  const caps = pin.capabilities
-  if (c.some(x => x.severity === 'danger'))   return 'bg-red-800'
-  if (c.some(x => x.id === 'adc2_no_wifi'))   return 'bg-orange-700'
-  if (caps.includes('adc1'))                   return 'bg-emerald-800'
-  if (caps.includes('dac'))                    return 'bg-teal-700'
-  if (caps.includes('touch'))                  return 'bg-cyan-800'
-  if (caps.includes('i2c'))                    return 'bg-blue-800'
-  if (caps.includes('spi'))                    return 'bg-violet-800'
-  if (caps.includes('uart'))                   return 'bg-amber-800'
-  if (caps.includes('usb'))                    return 'bg-pink-800'
-  if (c.some(x => x.id === 'strapping_pin'))   return 'bg-yellow-800'
-  return 'bg-gray-700'
+const ROW_H = 28
+
+// Badge background + text color per function name
+function getBadge(name: string): { bg: string; text: string } {
+  const u = name.toUpperCase()
+  if (u === 'GND')                                             return { bg: '#374151', text: '#9ca3af' }
+  if (/^3V3$|^VCC$|^VIN$|^VBUS$/.test(u))                    return { bg: '#7f1d1d', text: '#fca5a5' }
+  if (/^EN$|^RST$|^RESET$/.test(u))                          return { bg: '#134e4a', text: '#5eead4' }
+  if (/^ADC1_/.test(u))                                       return { bg: '#7c2d12', text: '#fed7aa' }
+  if (/^ADC2_/.test(u))                                       return { bg: '#92400e', text: '#fde68a' }
+  if (/^DAC/.test(u))                                         return { bg: '#713f12', text: '#fde047' }
+  if (/^TOUCH/.test(u))                                       return { bg: '#164e63', text: '#67e8f9' }
+  if (/^MT(DI|CK|MS|DO)$/.test(u))                           return { bg: '#292524', text: '#78716c' }
+  if (/^(VSPI|HSPI|V_SPI)|MOSI$|MISO$|^SCK$/.test(u))       return { bg: '#1e3a8a', text: '#93c5fd' }
+  if (/SDA$|SCL$/.test(u))                                    return { bg: '#1e40af', text: '#bfdbfe' }
+  if (/^U[0-2](TXD|RXD|RTS|CTS)/.test(u))                   return { bg: '#14532d', text: '#86efac' }
+  if (/^GPIO/.test(u))                                        return { bg: '#3b0764', text: '#d8b4fe' }
+  if (/^SD_/.test(u))                                         return { bg: '#4a1d96', text: '#c4b5fd' }
+  if (/USB|JTAG/.test(u))                                     return { bg: '#831843', text: '#f9a8d4' }
+  if (/CLK|XTAL/.test(u))                                     return { bg: '#0c4a6e', text: '#7dd3fc' }
+  return                                                              { bg: '#1f2937', text: '#9ca3af' }
 }
 
-function padBorderColor(pin: Pin, selected: boolean): string {
-  if (selected) return '#4ade80'
-  if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger')) return '#ef4444'
-  if (pin.constraints.some(c => c.id === 'adc2_no_wifi'))  return '#f97316'
-  if (pin.capabilities.includes('adc1'))   return '#10b981'
-  if (pin.capabilities.includes('dac'))    return '#14b8a6'
-  if (pin.capabilities.includes('touch'))  return '#06b6d4'
+// Dot + line color by primary capability
+function connectorColor(pin: Pin): string {
+  if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger')) return '#4b5563'
+  if (pin.capabilities.includes('adc1'))   return '#ea580c'
+  if (pin.capabilities.includes('adc2'))   return '#f97316'
+  if (pin.capabilities.includes('dac'))    return '#ca8a04'
+  if (pin.capabilities.includes('touch'))  return '#0891b2'
   if (pin.capabilities.includes('i2c'))    return '#3b82f6'
-  if (pin.capabilities.includes('spi'))    return '#8b5cf6'
-  if (pin.capabilities.includes('uart'))   return '#f59e0b'
-  if (pin.capabilities.includes('usb'))    return '#ec4899'
-  if (pin.constraints.some(c => c.id === 'strapping_pin')) return '#ca8a04'
-  return '#4b5563'
+  if (pin.capabilities.includes('spi'))    return '#6366f1'
+  if (pin.capabilities.includes('uart'))   return '#22c55e'
+  if (pin.constraints.some(c => c.id === 'strapping_pin')) return '#eab308'
+  return '#6b7280'
 }
 
-function gpioTextColor(pin: Pin, selected: boolean): string {
-  if (selected) return '#86efac'
-  if (!pin.isUsable) return '#f87171'
-  if (pin.constraints.some(c => c.severity === 'danger')) return '#fca5a5'
-  return '#4ade80'
-}
-
-// First non-GPIO name is the most useful alt function (e.g. ADC2_CH1, U0TXD)
-function getAlt(pin: Pin): string {
-  return pin.names.find(n => !n.startsWith('GPIO')) ?? ''
+// Put GPIO badge closest to chip (last on left, first on right)
+function sortedNames(names: string[], side: 'left' | 'right'): string[] {
+  const gpio = names.filter(n => /^GPIO\d/.test(n))
+  const other = names.filter(n => !/^GPIO\d/.test(n))
+  return side === 'left' ? [...other, ...gpio] : [...gpio, ...other]
 }
 
 interface PinRowProps {
@@ -57,67 +56,68 @@ interface PinRowProps {
 }
 
 function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: PinRowProps) {
-  const alt = getAlt(pin)
-  const borderColor = padBorderColor(pin, isSelected)
-  const textColor = gpioTextColor(pin, isSelected)
-  const isLeft = side === 'left'
+  const color = connectorColor(pin)
+  const names = sortedNames(pin.names, side)
 
-  const PinPad = (
+  const badgeContent = (
+    <>
+      {mappingLabel && (
+        <span
+          className="font-mono text-[9px] font-semibold px-1.5 flex-shrink-0 rounded"
+          style={{ background: 'rgba(59,130,246,0.25)', color: '#93c5fd', lineHeight: '16px', height: 16 }}
+        >
+          {mappingLabel}
+        </span>
+      )}
+      {names.map(name => {
+        const { bg, text } = getBadge(name)
+        return (
+          <span
+            key={name}
+            className="font-mono text-[9px] font-semibold px-1.5 flex-shrink-0 rounded"
+            style={{ background: bg, color: text, lineHeight: '16px', height: 16 }}
+          >
+            {name}
+          </span>
+        )
+      })}
+    </>
+  )
+
+  const dot = (
     <div
-      className={`w-3 self-stretch flex-shrink-0 border-y transition-colors duration-100 ${padBg(pin)}`}
-      style={{ borderColor }}
+      className="flex-shrink-0 rounded-full"
+      style={{ width: 8, height: 8, background: color }}
     />
   )
 
-  const GpioNum = (
-    <span
-      className="font-mono font-bold text-xs w-6 text-center flex-shrink-0 tabular-nums leading-none"
-      style={{
-        color: textColor,
-        textDecoration: !pin.isUsable ? 'line-through' : 'none',
-      }}
-    >
-      {pin.gpio}
-    </span>
+  const line = (
+    <div className="flex-shrink-0" style={{ width: 14, height: 1, background: '#374151' }} />
   )
-
-  const AltLabel = alt ? (
-    <span className="font-mono text-[11px] text-gray-400 truncate leading-none">{alt}</span>
-  ) : null
-
-  const MappingLabel = mappingLabel ? (
-    <span
-      className="text-[10px] font-medium truncate flex-shrink-0 max-w-[60px] px-1 rounded"
-      style={{ color: '#93c5fd', background: 'rgba(59,130,246,0.15)' }}
-    >
-      {mappingLabel}
-    </span>
-  ) : null
 
   return (
     <div
       onClick={onClick}
-      className={`flex items-stretch h-[26px] cursor-pointer transition-colors select-none
-        ${isFiltered ? '' : 'opacity-[0.15]'}
-        ${isSelected ? 'bg-green-950/50' : 'hover:bg-white/[0.03]'}
+      className={`flex items-center cursor-pointer transition-colors select-none
+        ${isFiltered ? '' : 'opacity-[0.1]'}
+        ${isSelected ? 'bg-green-950/40' : 'hover:bg-white/[0.04]'}
       `}
+      style={{ height: ROW_H, borderBottom: '1px solid #0f172a' }}
     >
-      {isLeft ? (
+      {side === 'left' ? (
         <>
-          <div className="flex items-center justify-end gap-1.5 w-48 px-2 min-w-0 overflow-hidden">
-            {MappingLabel}
-            {AltLabel}
-            {GpioNum}
+          <div className="flex-1 flex items-center justify-end gap-1 min-w-0 overflow-hidden pr-1.5">
+            {badgeContent}
           </div>
-          {PinPad}
+          {line}
+          {dot}
         </>
       ) : (
         <>
-          {PinPad}
-          <div className="flex items-center gap-1.5 w-48 px-2 min-w-0 overflow-hidden">
-            {GpioNum}
-            {AltLabel}
-            {MappingLabel}
+          {dot}
+          {line}
+          <div className="flex-1 flex items-center justify-start gap-1 min-w-0 overflow-hidden pl-1.5">
+            {badgeContent}
           </div>
         </>
       )}
@@ -125,17 +125,85 @@ function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: Pi
   )
 }
 
+function ChipBody({ family }: { family: string }) {
+  // Antenna comb: alternating heights for a PCB trace look
+  const combHeights = [8, 14, 8, 18, 8, 14, 8, 18, 8, 14, 8]
+
+  return (
+    <div
+      className="flex-shrink-0 self-stretch flex flex-col"
+      style={{ width: 116, background: '#090e14', border: '2px solid #2d3748', borderRadius: 3 }}
+    >
+      {/* Antenna section */}
+      <div
+        className="flex justify-center items-end gap-[2px] flex-shrink-0"
+        style={{ paddingTop: 8, paddingBottom: 6, borderBottom: '1px solid #1f2937' }}
+      >
+        {combHeights.map((h, i) => (
+          <div key={i} style={{ width: 3, height: h, background: '#2d3748', borderRadius: 1 }} />
+        ))}
+      </div>
+
+      {/* Main body content */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 px-3">
+        {/* Wi-Fi arcs */}
+        <div className="relative flex items-end justify-center" style={{ width: 36, height: 22 }}>
+          <div
+            className="absolute rounded-full"
+            style={{ width: 5, height: 5, background: '#374151', bottom: 0, left: '50%', transform: 'translateX(-50%)' }}
+          />
+          {[14, 24, 34].map((w, i) => (
+            <div
+              key={i}
+              className="absolute"
+              style={{
+                width: w, height: w / 2,
+                borderTop: `2px solid ${i === 2 ? '#1f2937' : '#374151'}`,
+                borderRadius: '50% 50% 0 0',
+                bottom: 3,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Chip text */}
+        <div className="text-center leading-tight">
+          <div className="font-mono text-[7px] tracking-widest mb-1" style={{ color: '#4b5563' }}>
+            Wi-Fi · BT · BLE
+          </div>
+          <div className="font-mono font-bold tracking-wide" style={{ fontSize: 10, color: '#6b7280' }}>
+            {family}
+          </div>
+          <div className="font-mono text-[6px] mt-1" style={{ color: '#374151', letterSpacing: '0.1em' }}>
+            ESPRESSIF
+          </div>
+        </div>
+
+        <div className="font-mono text-[6px]" style={{ color: '#1f2937' }}>
+          FCC ID: 2AC7Z
+        </div>
+      </div>
+
+      {/* Ground thermal pad */}
+      <div className="flex justify-center flex-shrink-0 pb-2">
+        <div style={{ width: 56, height: 10, background: '#111827', border: '1px solid #1f2937', borderRadius: 1 }} />
+      </div>
+    </div>
+  )
+}
+
 const LEGEND = [
-  ['#10b981', 'ADC1 (WiFi-safe)'],
-  ['#f97316', 'ADC2 (WiFi conflict)'],
-  ['#06b6d4', 'Touch'],
-  ['#3b82f6', 'I2C'],
-  ['#8b5cf6', 'SPI'],
-  ['#f59e0b', 'UART'],
-  ['#ec4899', 'USB/JTAG'],
-  ['#ca8a04', 'Strapping'],
-  ['#ef4444', 'Danger / Reserved'],
-  ['#4b5563', 'GPIO / PWM'],
+  { bg: '#7f1d1d', text: '#fca5a5', label: 'Power' },
+  { bg: '#374151', text: '#9ca3af', label: 'GND' },
+  { bg: '#7c2d12', text: '#fed7aa', label: 'ADC1 (WiFi-safe)' },
+  { bg: '#92400e', text: '#fde68a', label: 'ADC2 (WiFi conflict)' },
+  { bg: '#713f12', text: '#fde047', label: 'DAC' },
+  { bg: '#164e63', text: '#67e8f9', label: 'Touch' },
+  { bg: '#3b0764', text: '#d8b4fe', label: 'GPIO' },
+  { bg: '#1e3a8a', text: '#93c5fd', label: 'SPI' },
+  { bg: '#1e40af', text: '#bfdbfe', label: 'I2C' },
+  { bg: '#14532d', text: '#86efac', label: 'UART' },
+  { bg: '#0c4a6e', text: '#7dd3fc', label: 'Clock' },
 ] as const
 
 export function PinoutDiagram() {
@@ -153,14 +221,14 @@ export function PinoutDiagram() {
   return (
     <div
       className="rounded-xl border overflow-hidden"
-      style={{ background: '#080d10', borderColor: '#1f2937' }}
+      style={{ background: '#060b10', borderColor: '#1f2937' }}
     >
       {/* Diagram */}
       <div className="p-4 pb-3 overflow-x-auto">
         <div className="flex items-stretch justify-center min-w-fit mx-auto">
 
           {/* Left pin bank */}
-          <div className="flex flex-col gap-px">
+          <div className="flex flex-col">
             {leftPins.map(pin => (
               <PinRow
                 key={pin.gpio}
@@ -174,52 +242,11 @@ export function PinoutDiagram() {
             ))}
           </div>
 
-          {/* IC chip body */}
-          <div
-            className="flex-shrink-0 w-[60px] flex flex-col items-center justify-center relative"
-            style={{
-              background: '#0c1015',
-              borderLeft: '2px solid #374151',
-              borderRight: '2px solid #374151',
-            }}
-          >
-            {/* IC package notch at top */}
-            <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-3 rounded-b-full"
-              style={{
-                background: '#080d10',
-                borderBottom: '2px solid #374151',
-                borderLeft: '2px solid #374151',
-                borderRight: '2px solid #374151',
-              }}
-            />
-            {/* Chip family label, rotated */}
-            <span
-              className="font-mono rotate-90 whitespace-nowrap select-none"
-              style={{
-                fontSize: '9px',
-                letterSpacing: '0.2em',
-                color: '#374151',
-                textTransform: 'uppercase',
-              }}
-            >
-              {chip.family}
-            </span>
-            {/* Pin-1 indicator */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                bottom: 8,
-                right: 8,
-                width: 5,
-                height: 5,
-                border: '1px solid #374151',
-              }}
-            />
-          </div>
+          {/* IC body */}
+          <ChipBody family={chip.family} />
 
           {/* Right pin bank */}
-          <div className="flex flex-col gap-px">
+          <div className="flex flex-col">
             {rightPins.map(pin => (
               <PinRow
                 key={pin.gpio}
@@ -238,16 +265,18 @@ export function PinoutDiagram() {
 
       {/* Legend */}
       <div
-        className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1"
+        className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1.5"
         style={{ borderTop: '1px solid #1f2937' }}
       >
-        {LEGEND.map(([color, label]) => (
-          <span key={label} className="flex items-center gap-1.5 text-gray-500" style={{ fontSize: 11 }}>
+        {LEGEND.map(({ bg, text, label }) => (
+          <span key={label} className="flex items-center gap-1.5" style={{ fontSize: 10 }}>
             <span
-              className="flex-shrink-0 rounded-sm"
-              style={{ width: 10, height: 10, background: color, opacity: 0.8 }}
-            />
-            {label}
+              className="font-mono text-[8px] font-semibold px-1.5 rounded flex-shrink-0"
+              style={{ background: bg, color: text, lineHeight: '14px', height: 14 }}
+            >
+              {label.split(' ')[0]}
+            </span>
+            <span style={{ color: '#6b7280' }}>{label}</span>
           </span>
         ))}
       </div>
