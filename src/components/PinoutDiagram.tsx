@@ -3,6 +3,7 @@ import { filterPins } from '../utils/filterPins'
 import type { Pin, Chip } from '../types/chip'
 
 const ROW_H = 26
+const CHIP_W = 176
 
 function getBadge(name: string): { bg: string; text: string } {
   const u = name.toUpperCase()
@@ -60,7 +61,26 @@ function PinRow({ pin, side, pinIndex, isSelected, isFiltered, mappingLabel, onC
   const color = connectorColor(pin)
   const names = sortedNames(pin.names, side)
 
-  const badgeList = (
+  const hasDanger  = pin.constraints.some(c => c.severity === 'danger')
+  const hasWarning = !hasDanger && pin.constraints.length > 0
+
+  const constraintBadge = hasDanger ? (
+    <span
+      className="font-mono font-bold rounded-sm flex-shrink-0"
+      style={{ background: '#3f0808', color: '#f87171', fontSize: 9, lineHeight: '15px', height: 15, padding: '0 4px' }}
+    >
+      ✕
+    </span>
+  ) : hasWarning ? (
+    <span
+      className="font-mono font-bold rounded-sm flex-shrink-0"
+      style={{ background: '#3a1a00', color: '#fbbf24', fontSize: 9, lineHeight: '15px', height: 15, padding: '0 4px' }}
+    >
+      ⚠
+    </span>
+  ) : null
+
+  const functionBadges = (
     <>
       {mappingLabel && (
         <span
@@ -116,8 +136,10 @@ function PinRow({ pin, side, pinIndex, isSelected, isFiltered, mappingLabel, onC
     >
       {side === 'left' ? (
         <>
+          {/* outermost = farthest from chip = first rendered in justify-end row */}
           <div className="flex-1 flex items-center justify-end gap-[3px] min-w-0 overflow-hidden pr-1.5">
-            {badgeList}
+            {constraintBadge}
+            {functionBadges}
           </div>
           {connLine}
           {pinNumBox}
@@ -131,7 +153,8 @@ function PinRow({ pin, side, pinIndex, isSelected, isFiltered, mappingLabel, onC
           {pinNumBox}
           {connLine}
           <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
-            {badgeList}
+            {functionBadges}
+            {constraintBadge}
           </div>
         </>
       )}
@@ -139,73 +162,202 @@ function PinRow({ pin, side, pinIndex, isSelected, isFiltered, mappingLabel, onC
   )
 }
 
-function ChipBody({ chip }: { chip: Chip }) {
-  const combs = [5, 10, 5, 16, 5, 12, 5, 18, 5, 12, 5, 16, 5, 10, 5]
-  const radioLabel = [chip.hasWifi && 'Wi-Fi', chip.hasBle && 'BLE', chip.hasBluetooth && 'BT'].filter(Boolean).join(' · ')
+// Copper-traced antenna comb tine positions: [dx from center, height]
+const ANTENNA_TINES: [number, number][] = [
+  [-46, 10], [-40,  7], [-34, 18], [-28,  7], [-22, 13],
+  [-16,  7], [-10, 22], [ -4,  7], [  2, 16], [  8,  7],
+  [ 14, 18], [ 20,  7], [ 26, 12], [ 32,  7], [ 38,  9],
+]
+
+function ChipBody({ chip, height }: { chip: Chip; height: number }) {
+  const W = CHIP_W
+  const H = height
+  const cx = W / 2
+
+  const antennaH   = 50
+  const shieldM    = 11
+  const shieldTop  = antennaH + 7
+  const shieldBot  = H - 16
+  const shieldH    = shieldBot - shieldTop
+  const shieldW    = W - shieldM * 2
+  const uid        = chip.id
+
+  // WiFi arcs base (roughly 38% down the shield)
+  const wcy = shieldTop + Math.round(shieldH * 0.38)
+  // Text block center
+  const textY = wcy + 18
+
+  const radioLabel = [
+    chip.hasWifi && 'Wi-Fi',
+    chip.hasBle  && 'BLE',
+    chip.hasBluetooth && 'BT',
+  ].filter(Boolean).join(' · ')
 
   return (
-    <div
-      className="flex-shrink-0 self-stretch flex flex-col"
-      style={{ width: 172, background: '#0c1117', border: '1.5px solid #1e3050', borderRadius: 4 }}
+    <svg
+      width={W}
+      height={H}
+      style={{ flexShrink: 0, display: 'block' }}
+      xmlns="http://www.w3.org/2000/svg"
     >
-      {/* PCB antenna comb */}
-      <div
-        className="flex-shrink-0 flex justify-center items-end gap-[2px]"
-        style={{ padding: '8px 14px 5px', background: '#0e1825', borderBottom: '1px solid #18283c' }}
+      <defs>
+        <linearGradient id={`shield-${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#1e2d40" />
+          <stop offset="45%"  stopColor="#192638" />
+          <stop offset="100%" stopColor="#141f2e" />
+        </linearGradient>
+        <linearGradient id={`pcb-${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#0b1420" />
+          <stop offset="100%" stopColor="#091018" />
+        </linearGradient>
+      </defs>
+
+      {/* ── PCB base ── */}
+      <rect width={W} height={H} fill={`url(#pcb-${uid})`} rx="3" />
+      <rect x="0.75" y="0.75" width={W-1.5} height={H-1.5} fill="none" stroke="#1e3255" strokeWidth="1.5" rx="2.5" />
+
+      {/* ── Antenna section ── */}
+      <rect width={W} height={antennaH} fill="#0d1928" rx="3" />
+      {/* square out the bottom edge of the rx above */}
+      <rect y={antennaH - 6} width={W} height={6} fill="#0d1928" />
+      <line x1="0" y1={antennaH} x2={W} y2={antennaH} stroke="#1a2e45" strokeWidth="0.75" />
+
+      {/* Copper horizontal base trace */}
+      <rect x={cx - 48} y={antennaH - 12} width={96} height={2.5} fill="#c2782a" />
+      {/* Copper vertical tines */}
+      {ANTENNA_TINES.map(([dx, th], i) => (
+        <rect
+          key={i}
+          x={cx + dx}
+          y={antennaH - 12 - th}
+          width={3.5}
+          height={th}
+          fill={i % 3 === 0 ? '#d08530' : '#c2782a'}
+          rx="0.5"
+        />
+      ))}
+      {/* Copper sheen overlay */}
+      {ANTENNA_TINES.map(([dx, th], i) => (
+        <rect key={`s${i}`} x={cx + dx} y={antennaH - 12 - th} width={1} height={th} fill="#e8a04a" opacity="0.3" />
+      ))}
+
+      {/* ── RF Shield shadow ── */}
+      <rect x={shieldM + 2} y={shieldTop + 2} width={shieldW} height={shieldH} fill="#000" rx="2.5" opacity="0.4" />
+
+      {/* ── RF Shield body ── */}
+      <rect x={shieldM} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#shield-${uid})`} rx="2.5" />
+
+      {/* Shield top-edge highlight (simulates machined edge bevel) */}
+      <rect x={shieldM} y={shieldTop} width={shieldW} height={3} fill="#3a566e" rx="1" opacity="0.55" />
+      {/* Shield right-edge subtle highlight */}
+      <rect x={shieldM + shieldW - 2} y={shieldTop + 3} width={2} height={shieldH - 3} fill="#2a4055" rx="0" opacity="0.3" />
+
+      {/* Shield outer border */}
+      <rect x={shieldM} y={shieldTop} width={shieldW} height={shieldH} fill="none" stroke="#2a3e58" strokeWidth="0.75" rx="2.5" />
+
+      {/* Inner inset frame */}
+      <rect x={shieldM + 5} y={shieldTop + 5} width={shieldW - 10} height={shieldH - 10} fill="none" stroke="#192a3c" strokeWidth="0.5" rx="1.5" opacity="0.5" />
+
+      {/* Corner mounting screws */}
+      {([
+        [shieldM + 9,           shieldTop + 9],
+        [shieldM + shieldW - 9, shieldTop + 9],
+        [shieldM + 9,           shieldTop + shieldH - 9],
+        [shieldM + shieldW - 9, shieldTop + shieldH - 9],
+      ] as [number, number][]).map(([sx, sy], i) => (
+        <g key={i}>
+          <circle cx={sx} cy={sy} r={4} fill="#0e1c2c" stroke="#253a52" strokeWidth="0.75" />
+          <line x1={sx - 2.2} y1={sy} x2={sx + 2.2} y2={sy} stroke="#1e3050" strokeWidth="0.9" />
+          <line x1={sx} y1={sy - 2.2} x2={sx} y2={sy + 2.2} stroke="#1e3050" strokeWidth="0.9" />
+        </g>
+      ))}
+
+      {/* ── Wi-Fi signal arcs ── */}
+      {[10, 18, 26].map((r, i) => (
+        <path
+          key={i}
+          d={`M ${cx - r},${wcy} A ${r} ${r} 0 0 1 ${cx + r},${wcy}`}
+          fill="none"
+          stroke={['#36587a', '#254466', '#1a3355'][i]}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cx={cx} cy={wcy} r={2.5} fill="#253a55" />
+
+      {/* ── Branding text ── */}
+      <text
+        x={cx} y={textY + 14}
+        textAnchor="middle"
+        fontSize="8.5"
+        fontFamily="'Courier New', Courier, monospace"
+        fontWeight="700"
+        fill="#4a6a8a"
+        letterSpacing="2.5"
       >
-        {combs.map((h, i) => (
-          <div
-            key={i}
-            style={{ width: 3.5, height: h, background: i % 2 === 0 ? '#1e3050' : '#263d60', borderRadius: '1px 1px 0 0' }}
-          />
-        ))}
-      </div>
+        ESPRESSIF
+      </text>
+      <text
+        x={cx} y={textY + 30}
+        textAnchor="middle"
+        fontSize="14"
+        fontFamily="'Courier New', Courier, monospace"
+        fontWeight="800"
+        fill="#5e82a0"
+        letterSpacing="1.5"
+      >
+        {chip.family}
+      </text>
+      {radioLabel && (
+        <text
+          x={cx} y={textY + 44}
+          textAnchor="middle"
+          fontSize="6.5"
+          fontFamily="'Courier New', Courier, monospace"
+          fill="#1e3456"
+          letterSpacing="0.5"
+        >
+          {radioLabel}
+        </text>
+      )}
 
-      {/* Module body */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-4">
-        {/* Wi-Fi arcs */}
-        <div className="relative flex items-end justify-center" style={{ width: 32, height: 22 }}>
-          <div className="absolute rounded-full" style={{ width: 4, height: 4, background: '#1e3050', bottom: 0, left: '50%', transform: 'translateX(-50%)' }} />
-          {[8, 16, 24].map((w, i) => (
-            <div
-              key={i}
-              className="absolute"
-              style={{
-                width: w, height: w / 2,
-                border: `1.5px solid ${['#2d4a6e', '#1e3558', '#162845'][i]}`,
-                borderBottom: 'none',
-                borderRadius: `${w}px ${w}px 0 0`,
-                bottom: 2, left: '50%', transform: 'translateX(-50%)',
-              }}
-            />
-          ))}
-        </div>
+      {/* CE + FCC markings */}
+      <text
+        x={cx - 18} y={shieldTop + shieldH - 12}
+        textAnchor="middle"
+        fontSize="9"
+        fontFamily="serif"
+        fontWeight="700"
+        fill="#1e3050"
+        letterSpacing="0.5"
+      >
+        CE
+      </text>
+      <text
+        x={cx + 18} y={shieldTop + shieldH - 12}
+        textAnchor="middle"
+        fontSize="7"
+        fontFamily="'Courier New', Courier, monospace"
+        fontWeight="700"
+        fill="#1e3050"
+      >
+        FCC
+      </text>
+      <text
+        x={cx} y={shieldTop + shieldH - 3}
+        textAnchor="middle"
+        fontSize="5"
+        fontFamily="'Courier New', Courier, monospace"
+        fill="#14263a"
+        letterSpacing="0.5"
+      >
+        ID: 2AC7Z-ESP32WROOM32
+      </text>
 
-        {/* Branding */}
-        <div className="text-center" style={{ lineHeight: 1.5 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: '#4a6580', letterSpacing: '0.2em', fontFamily: 'monospace' }}>
-            ESPRESSIF
-          </div>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#5a7a96', letterSpacing: '0.06em', fontFamily: 'monospace', marginTop: 4 }}>
-            {chip.family}
-          </div>
-          {radioLabel && (
-            <div style={{ fontSize: 7, color: '#1e3050', fontFamily: 'monospace', marginTop: 3, letterSpacing: '0.05em' }}>
-              {radioLabel}
-            </div>
-          )}
-        </div>
-
-        <div style={{ fontSize: 7, color: '#18283c', fontFamily: 'monospace', letterSpacing: '0.08em' }}>
-          FCC ID: 2AC7Z
-        </div>
-      </div>
-
-      {/* GND thermal pad */}
-      <div className="flex-shrink-0 flex justify-center pb-2 pt-1" style={{ borderTop: '1px solid #18283c' }}>
-        <div style={{ width: 64, height: 8, background: '#080e14', border: '1px solid #1e3050', borderRadius: 1 }} />
-      </div>
-    </div>
+      {/* ── GND thermal pad ── */}
+      <rect x={cx - 32} y={H - 13} width={64} height={9} fill="#070c14" stroke="#1a3050" strokeWidth="0.75" rx="1" />
+      <text x={cx} y={H - 6} textAnchor="middle" fontSize="4.5" fontFamily="monospace" fill="#1e3050">GND</text>
+    </svg>
   )
 }
 
@@ -230,8 +382,10 @@ export function PinoutDiagram() {
 
   const sorted = [...chip.pins].sort((a, b) => a.gpio - b.gpio)
   const mid = Math.ceil(sorted.length / 2)
-  const leftPins = sorted.slice(0, mid)
+  const leftPins  = sorted.slice(0, mid)
   const rightPins = sorted.slice(mid)
+
+  const chipHeight = Math.max(leftPins.length, rightPins.length) * ROW_H
 
   const toggle = (pin: Pin) =>
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
@@ -239,7 +393,7 @@ export function PinoutDiagram() {
   return (
     <div className="rounded-xl border overflow-hidden" style={{ background: '#060b12', borderColor: '#1a2535' }}>
       <div className="p-4 pb-3 overflow-x-auto">
-        <div className="flex items-stretch justify-center min-w-fit mx-auto">
+        <div className="flex items-start justify-center min-w-fit mx-auto">
 
           {/* Left pin bank */}
           <div className="flex flex-col">
@@ -258,7 +412,7 @@ export function PinoutDiagram() {
           </div>
 
           {/* IC module body */}
-          <ChipBody chip={chip} />
+          <ChipBody chip={chip} height={chipHeight} />
 
           {/* Right pin bank */}
           <div className="flex flex-col">
