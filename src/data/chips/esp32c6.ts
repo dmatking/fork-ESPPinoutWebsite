@@ -18,6 +18,14 @@ export const esp32c6: Chip = {
     'GPIO24/25 are USB Serial/JTAG D−/D+.',
     'No DAC, no capacitive touch.',
   ],
+  module: {
+    name: 'ESP32-C6-MINI-1',
+    form: 'mini',
+    arch: 'Single-core RISC-V',
+    pcb: 'black',
+    accent: '#f97316',
+    radios: 'Wi-Fi 6 · BLE 5 · 802.15.4',
+  },
   pins: [
     ...[0,1,2,3,4,5,6,7].map(n => ({
       gpio: n, names: [`GPIO${n}`, ...(n < 6 ? [`ADC1_CH${n}`] : [])],

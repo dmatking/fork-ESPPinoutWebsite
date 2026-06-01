@@ -32,6 +32,14 @@ export const esp32wrover: Chip = {
     'GPIO12 must be LOW at boot for 3.3 V flash.',
   ],
   packageLayout: WROVER_LAYOUT,
+  module: {
+    name: 'ESP32-WROVER-E',
+    form: 'wrover',
+    arch: 'Dual-core Xtensa LX6 · 8 MB PSRAM',
+    pcb: 'black',
+    accent: '#6366f1',
+    radios: 'Wi-Fi 4 · BT · BLE',
+  },
   pins: ESP32_BASE_PINS.map(pin => {
     if (pin.gpio === 16 || pin.gpio === 17) {
       return { ...pin, constraints: [PSRAM_RESERVED], isUsable: false }

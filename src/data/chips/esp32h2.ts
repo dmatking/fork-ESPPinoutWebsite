@@ -18,6 +18,14 @@ export const esp32h2: Chip = {
     'GPIO26/27 are USB Serial/JTAG.',
     'No DAC, no capacitive touch.',
   ],
+  module: {
+    name: 'ESP32-H2-MINI-1',
+    form: 'mini',
+    arch: 'Single-core RISC-V',
+    pcb: 'black',
+    accent: '#ec4899',
+    radios: 'BLE 5 · 802.15.4 · no Wi-Fi',
+  },
   pins: [
     ...[0,1,2,3,4,5].map(n => ({
       gpio: n, names: [`GPIO${n}`, `ADC1_CH${n}`], capabilities: ['gpio','adc1','pwm'] as ('gpio'|'adc1'|'pwm')[], constraints: [], isUsable: true,

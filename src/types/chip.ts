@@ -35,6 +35,22 @@ export interface Pin {
   notes?: string
 }
 
+// Physical module identity — drives the realistic on-screen module rendering.
+// Different ESP families ship in visually distinct modules:
+//   'wroom'  → rectangular metal can, full-width meander PCB antenna (WROOM-32, S2/S3-WROOM-1)
+//   'wrover' → same width but taller, black PCB, extra PSRAM (WROVER)
+//   'mini'   → small module, antenna on a notched keep-out tab off the top corner (C3/C6/H2-MINI-1)
+export type ModuleForm = 'wroom' | 'wrover' | 'mini'
+
+export interface ModuleInfo {
+  name: string               // silkscreen label, e.g. 'ESP32-S3-WROOM-1'
+  form: ModuleForm           // physical family → shape + antenna treatment
+  arch: string               // e.g. 'Dual-core Xtensa LX6', 'Single-core RISC-V'
+  pcb: 'green' | 'black'     // PCB substrate color
+  accent: string             // hex accent matching the family (selector colors)
+  radios: string             // accurate radio markings, e.g. 'Wi-Fi 4 · BT · BLE'
+}
+
 export interface Chip {
   id: string                 // e.g. 'esp32', 'esp32s3'
   name: string               // e.g. 'ESP32 (WROOM/WROVER)'
@@ -48,6 +64,7 @@ export interface Chip {
   notes: string[]            // chip-level gotchas
   pins: Pin[]
   packageLayout?: PackageLayout
+  module?: ModuleInfo        // physical module appearance
 }
 
 export type MappingRole =

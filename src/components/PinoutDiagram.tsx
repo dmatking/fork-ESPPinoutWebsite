@@ -1,6 +1,7 @@
+import type { ReactNode } from 'react'
 import { useApp } from '../context/AppContext'
 import { filterPins } from '../utils/filterPins'
-import type { Pin, Chip, LayoutPin } from '../types/chip'
+import type { Pin, Chip, LayoutPin, ModuleInfo } from '../types/chip'
 
 const ROW_H = 30
 
@@ -264,172 +265,173 @@ function BottomPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClic
 
 // ─── SVG Chip body ────────────────────────────────────────────────────────────
 
+// Default module identity for chips that don't declare one yet.
+function resolveModule(chip: Chip): ModuleInfo {
+  if (chip.module) return chip.module
+  return {
+    name: chip.packageLayout?.name ?? chip.family,
+    form: 'wroom',
+    arch: `${chip.cores}-core`,
+    pcb: 'green',
+    accent: '#3b82f6',
+    radios: [chip.hasWifi && 'Wi-Fi', chip.hasBluetooth && 'BT', chip.hasBle && 'BLE'].filter(Boolean).join(' · '),
+  }
+}
+
+// Square-wave serpentine — reads as an etched meander PCB antenna trace.
+function meanderPath(x0: number, x1: number, yTop: number, yBot: number): string {
+  const teeth = Math.max(5, Math.round((x1 - x0) / 11))
+  const w = (x1 - x0) / teeth
+  let d = `M ${x0},${yBot}`
+  for (let i = 0; i <= teeth; i++) {
+    const x = x0 + i * w
+    const y = i % 2 === 0 ? yTop : yBot
+    d += ` L ${x.toFixed(1)},${y.toFixed(1)}`
+    if (i < teeth) d += ` L ${(x + w).toFixed(1)},${y.toFixed(1)}`
+  }
+  return d
+}
+
+// Deterministic 8×8 data-matrix-ish pattern, seeded from the chip id.
+function dataMatrix(seed: string, x: number, y: number, cell: number): ReactNode {
+  let h = 2166136261
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) }
+  const cells: ReactNode[] = []
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      // Solid L-finder on left + bottom edge (real data-matrix look)
+      const finder = c === 0 || r === 7
+      h = Math.imul(h ^ (r * 8 + c), 16777619)
+      const on = finder || (h & 0x10000) !== 0
+      if (on) cells.push(<rect key={`${r}-${c}`} x={x + c * cell} y={y + r * cell} width={cell} height={cell} fill="#2a3a48" />)
+    }
+  }
+  return <g opacity="0.85">{cells}</g>
+}
+
 function ChipBody({ chip, sideHeight, bottomCount }: { chip: Chip; sideHeight: number; bottomCount: number }) {
-  const W = Math.max(220, bottomCount * 26)
-  const H = sideHeight
-  const cx = W / 2
+  const m = resolveModule(chip)
+  const isMini = m.form === 'mini'
   const uid = chip.id
 
+  const W = isMini ? 190 : Math.max(220, bottomCount * 26)
+  const H = sideHeight
+  const cx = W / 2
+
   // Layout zones
-  const pcbBorder  = 8    // green PCB visible around edge
-  const antennaH   = 48   // top zone = PCB antenna area (no RF shield)
-  const padH       = 16   // bottom gold castellated pads
-  const shieldL    = pcbBorder
-  const shieldW    = W - pcbBorder * 2
-  const shieldTop  = antennaH
-  const shieldBot  = H - padH
-  const shieldH    = shieldBot - shieldTop
+  const pcbBorder = 7
+  const antennaH  = isMini ? 56 : 46   // top RF / antenna keep-out zone
+  const padH      = 14                  // bottom gold castellated pads
+  const shieldL   = pcbBorder
+  const shieldW   = W - pcbBorder * 2
+  const shieldTop = antennaH
+  const shieldBot = H - padH
+  const shieldH   = shieldBot - shieldTop
+  const my        = shieldTop + shieldH / 2   // shield vertical centre for branding
 
-  // Wi-Fi arc center
-  const wcy = shieldTop + Math.round(shieldH * 0.27)
+  // PCB substrate palette
+  const pcb = m.pcb === 'black'
+    ? { a: '#1c1e24', b: '#0c0d11', edge: '#33363f', silk: '#44474f' }
+    : { a: '#1b331b', b: '#0e1e0e', edge: '#2c5c2e', silk: '#3a6a3c' }
 
-  const moduleName = chip.packageLayout ? chip.packageLayout.name : chip.family
-  const radioLabel = [chip.hasWifi && 'Wi-Fi', chip.hasBle && 'BLE', chip.hasBluetooth && 'BT'].filter(Boolean).join(' · ')
+  // Antenna trace tint, lifted toward the family accent
+  const traceMain = m.pcb === 'black' ? '#6a6e78' : '#3f7a36'
+  const traceDim  = m.pcb === 'black' ? '#4a4e58' : '#2c5a28'
 
   return (
     <svg width={W} height={H} style={{ flexShrink: 0, display: 'block' }} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id={`shield-${uid}`} x1="0" y1="0" x2="0.15" y2="1">
-          <stop offset="0%"   stopColor="#b0bcc8" />
-          <stop offset="25%"  stopColor="#8a9aaa" />
-          <stop offset="70%"  stopColor="#6a7a8a" />
-          <stop offset="100%" stopColor="#546070" />
+        <linearGradient id={`shield-${uid}`} x1="0" y1="0" x2="0.18" y2="1">
+          <stop offset="0%"   stopColor="#c2cdd8" />
+          <stop offset="22%"  stopColor="#9aa9b8" />
+          <stop offset="68%"  stopColor="#71808f" />
+          <stop offset="100%" stopColor="#586572" />
         </linearGradient>
         <linearGradient id={`pcb-${uid}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%"   stopColor="#183018" />
-          <stop offset="100%" stopColor="#0e1e0e" />
+          <stop offset="0%"   stopColor={pcb.a} />
+          <stop offset="100%" stopColor={pcb.b} />
         </linearGradient>
         <linearGradient id={`pad-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#d8a838" />
+          <stop offset="0%"   stopColor="#e3bd49" />
           <stop offset="100%" stopColor="#9a6e18" />
         </linearGradient>
-        {/* Subtle brushed-metal texture on shield */}
-        <pattern id={`brush-${uid}`} x="0" y="0" width="1" height="4" patternUnits="userSpaceOnUse">
-          <rect width="1" height="4" fill="none" />
-          <line x1="0" y1="0" x2="1" y2="0" stroke="#ffffff" strokeWidth="0.15" opacity="0.12" />
-          <line x1="0" y1="2" x2="1" y2="2" stroke="#000000" strokeWidth="0.15" opacity="0.08" />
+        {/* Subtle brushed-metal texture on the shield */}
+        <pattern id={`brush-${uid}`} x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="1" y2="0" stroke="#ffffff" strokeWidth="0.13" opacity="0.10" />
+          <line x1="0" y1="1.5" x2="1" y2="1.5" stroke="#000000" strokeWidth="0.13" opacity="0.07" />
         </pattern>
       </defs>
 
-      {/* ── Green PCB substrate ── */}
-      <rect width={W} height={H} fill={`url(#pcb-${uid})`} />
-      {/* PCB edge highlight */}
-      <rect x="1" y="1" width={W-2} height={H-2} fill="none" stroke="#2a5a2c" strokeWidth="1.5" />
-      {/* PCB inner silkscreen border */}
+      {/* ── PCB substrate ── */}
+      <rect width={W} height={H} fill={`url(#pcb-${uid})`} rx="3" />
+      <rect x="1" y="1" width={W-2} height={H-2} fill="none" stroke={pcb.edge} strokeWidth="1.5" rx="3" />
       <rect x={pcbBorder-2} y={pcbBorder-2} width={W-pcbBorder*2+4} height={H-pcbBorder*2+4}
-        fill="none" stroke="#3a6a3c" strokeWidth="0.5" opacity="0.6" />
+        fill="none" stroke={pcb.silk} strokeWidth="0.5" opacity="0.55" rx="2" />
 
-      {/* ── Antenna area (bare PCB, no shield) ── */}
-      <rect x={shieldL} y={4} width={shieldW} height={antennaH-6} fill="#122012" rx="1" />
-      {/* Antenna trace — U-shape loop typical of PCB trace antennas */}
-      <path
-        d={`M ${cx-24},${antennaH-8} L ${cx-24},${10} L ${cx+24},${10} L ${cx+24},${antennaH-8}`}
-        fill="none" stroke="#3a6830" strokeWidth="1.5" strokeLinecap="round"
-      />
-      <path
-        d={`M ${cx-18},${antennaH-8} L ${cx-18},${16} L ${cx+18},${16} L ${cx+18},${antennaH-8}`}
-        fill="none" stroke="#2a5828" strokeWidth="1" strokeLinecap="round" opacity="0.6"
-      />
-      <text x={cx} y={antennaH/2 + 4} textAnchor="middle" fontSize="6.5" fontFamily="monospace"
-        fill="#4a7a4c" letterSpacing="1.5" fontWeight="600">
-        PCB ANTENNA
-      </text>
-
-      {/* ── RF Shield shadow ── */}
-      <rect x={shieldL+2} y={shieldTop+3} width={shieldW} height={shieldH}
-        fill="#000" rx="2" opacity="0.35" />
-
-      {/* ── RF Shield body ── */}
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH}
-        fill={`url(#shield-${uid})`} rx="2" />
-      {/* Brushed metal texture overlay */}
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH}
-        fill={`url(#brush-${uid})`} rx="2" opacity="0.6" />
-
-      {/* Shield top bevel (bright edge) */}
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={3}
-        fill="#d0dde8" rx="1" opacity="0.45" />
-      {/* Shield left edge highlight */}
-      <rect x={shieldL} y={shieldTop+3} width={2} height={shieldH-3}
-        fill="#c0d0da" opacity="0.2" />
-      {/* Shield right/bottom edges (darker) */}
-      <rect x={shieldL+shieldW-2} y={shieldTop} width={2} height={shieldH}
-        fill="#20303a" opacity="0.3" rx="0" />
-      <rect x={shieldL} y={shieldTop+shieldH-2} width={shieldW} height={2}
-        fill="#20303a" opacity="0.3" />
-
-      {/* Shield outer border */}
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH}
-        fill="none" stroke="#9aaab8" strokeWidth="1" rx="2" />
-
-      {/* Shield pressed-in detail frame */}
-      <rect x={shieldL+5} y={shieldTop+5} width={shieldW-10} height={shieldH-10}
-        fill="none" stroke="#6a7a88" strokeWidth="0.5" rx="1" opacity="0.5" />
-
-      {/* ── Corner mounting screws (4 corners of shield) ── */}
-      {([
-        [shieldL+10, shieldTop+10],
-        [shieldL+shieldW-10, shieldTop+10],
-        [shieldL+10, shieldTop+shieldH-10],
-        [shieldL+shieldW-10, shieldTop+shieldH-10],
-      ] as [number,number][]).map(([x, y], i) => (
-        <g key={i}>
-          <circle cx={x} cy={y} r={5} fill="#485868" stroke="#8a9aaa" strokeWidth="0.75" />
-          <circle cx={x} cy={y} r={3.5} fill="none" stroke="#3a4858" strokeWidth="0.5" />
-          <line x1={x-2.8} y1={y} x2={x+2.8} y2={y} stroke="#aabbc8" strokeWidth="1" />
-          <line x1={x} y1={y-2.8} x2={x} y2={y+2.8} stroke="#aabbc8" strokeWidth="1" />
-        </g>
-      ))}
-
-      {/* ── Wi-Fi signal arcs ── */}
-      {[9, 16, 23].map((r, i) => (
-        <path key={i}
-          d={`M ${cx-r},${wcy} A ${r} ${r} 0 0 1 ${cx+r},${wcy}`}
-          fill="none"
-          stroke={['#78889a', '#607080', '#485868'][i]}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      ))}
-      <circle cx={cx} cy={wcy} r={2.5} fill="#586878" />
-
-      {/* ── Branding text (dark ink on silver — realistic silkscreen look) ── */}
-      <text x={cx} y={wcy+20} textAnchor="middle" fontSize="8" fontFamily="'Courier New',monospace"
-        fontWeight="700" fill="#283848" letterSpacing="2.5">
-        ESPRESSIF
-      </text>
-      <text x={cx} y={wcy+36} textAnchor="middle" fontSize="13" fontFamily="'Courier New',monospace"
-        fontWeight="800" fill="#1c2c3c" letterSpacing="1">
-        {moduleName}
-      </text>
-      {radioLabel && (
-        <text x={cx} y={wcy+50} textAnchor="middle" fontSize="7" fontFamily="'Courier New',monospace"
-          fill="#405060" letterSpacing="0.5">
-          {radioLabel}
-        </text>
+      {/* ── Antenna zone ── */}
+      {isMini ? (
+        // MINI: antenna lives in a dashed keep-out tab offset to one corner
+        <>
+          <rect x={shieldL} y={5} width={shieldW * 0.6} height={antennaH-9}
+            fill="none" stroke={m.accent} strokeWidth="0.9" strokeDasharray="3 2" opacity="0.65" rx="2" />
+          <path d={meanderPath(shieldL+7, shieldL + shieldW*0.6 - 7, 11, antennaH-12)}
+            fill="none" stroke={traceMain} strokeWidth="1.4" strokeLinecap="square" />
+          <text x={shieldL + shieldW*0.6 + 6} y={antennaH/2 - 2} fontSize="6" fontFamily="monospace"
+            fill={m.accent} letterSpacing="0.5" fontWeight="700" opacity="0.85">ANT</text>
+          <text x={shieldL + shieldW*0.6 + 6} y={antennaH/2 + 7} fontSize="4.6" fontFamily="monospace"
+            fill={pcb.silk} letterSpacing="0.3">KEEP-OUT</text>
+        </>
+      ) : (
+        // WROOM / WROVER: full-width meander trace etched on bare PCB
+        <>
+          <path d={meanderPath(shieldL+10, shieldW+shieldL-10, 9, antennaH-11)}
+            fill="none" stroke={traceMain} strokeWidth="1.6" strokeLinecap="square" />
+          <path d={meanderPath(shieldL+10, shieldW+shieldL-10, 14, antennaH-11)}
+            fill="none" stroke={traceDim} strokeWidth="1" strokeLinecap="square" opacity="0.55" />
+          <text x={cx} y={antennaH-3} textAnchor="middle" fontSize="6" fontFamily="monospace"
+            fill={pcb.silk} letterSpacing="1.5" fontWeight="600">PCB ANTENNA</text>
+        </>
       )}
 
-      {/* CE / FCC marks */}
-      <text x={cx-24} y={shieldTop+shieldH-14} textAnchor="middle" fontSize="9"
-        fontFamily="serif" fontWeight="700" fill="#506070">CE</text>
-      <text x={cx+24} y={shieldTop+shieldH-14} textAnchor="middle" fontSize="7"
-        fontFamily="'Courier New',monospace" fontWeight="700" fill="#506070">FCC</text>
-      <text x={cx} y={shieldTop+shieldH-5} textAnchor="middle" fontSize="5.5"
-        fontFamily="'Courier New',monospace" fill="#3a4a5a" letterSpacing="0.3">
-        ID: 2AC7Z-{moduleName.replace('ESP-','')}
-      </text>
+      {/* ── RF shield can ── */}
+      <rect x={shieldL+1.5} y={shieldTop+2.5} width={shieldW} height={shieldH} fill="#000" rx="2.5" opacity="0.4" />
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#shield-${uid})`} rx="2.5" />
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#brush-${uid})`} rx="2.5" />
+      {/* bevels */}
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={2.5} fill="#dde7f0" opacity="0.5" rx="1" />
+      <rect x={shieldL} y={shieldTop+2.5} width={1.8} height={shieldH-2.5} fill="#cdd9e2" opacity="0.22" />
+      <rect x={shieldL+shieldW-1.8} y={shieldTop} width={1.8} height={shieldH} fill="#1d2b34" opacity="0.32" />
+      <rect x={shieldL} y={shieldTop+shieldH-2} width={shieldW} height={2} fill="#1d2b34" opacity="0.32" />
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill="none" stroke="#a6b4c0" strokeWidth="1" rx="2.5" />
+      {/* family accent hairline just inside the top edge */}
+      <rect x={shieldL+5} y={shieldTop+6} width={shieldW-10} height={1.4} fill={m.accent} opacity="0.5" rx="0.7" />
 
-      {/* ── Gold castellated pads strip ── */}
+      {/* ── Stamped branding ── */}
+      <text x={cx} y={my-26} textAnchor="middle" fontSize="7.5" fontFamily="'Arial Narrow',sans-serif"
+        fontWeight="700" fill="#2a3a4a" letterSpacing="3">ESPRESSIF</text>
+      <text x={cx} y={my-8} textAnchor="middle"
+        fontSize={m.name.length > 15 ? 11 : 13} fontFamily="'Arial Narrow','Courier New',monospace"
+        fontWeight="800" fill="#1a2a3a" letterSpacing="0.5">{m.name}</text>
+      <text x={cx} y={my+8} textAnchor="middle" fontSize="6.8" fontFamily="monospace"
+        fill={m.accent} letterSpacing="0.4" fontWeight="700" opacity="0.92">{m.radios}</text>
+      <text x={cx} y={my+21} textAnchor="middle" fontSize="6" fontFamily="monospace"
+        fill="#46566a" letterSpacing="0.3">{m.arch}</text>
+
+      {/* data-matrix code + regulatory marks near the bottom of the can */}
+      {dataMatrix(uid, shieldL+8, shieldBot-26, 2.1)}
+      <text x={cx+6} y={shieldBot-15} textAnchor="middle" fontSize="8.5" fontFamily="serif"
+        fontWeight="700" fill="#516070">CE</text>
+      <text x={cx+26} y={shieldBot-15} textAnchor="middle" fontSize="6.5" fontFamily="monospace"
+        fontWeight="700" fill="#516070">FCC</text>
+      <text x={cx+10} y={shieldBot-6} textAnchor="middle" fontSize="5" fontFamily="monospace"
+        fill="#3c4c5c" letterSpacing="0.2">2AC7Z-{m.name.replace(/^ESP32-?/,'')}</text>
+
+      {/* ── Gold castellated pad strip ── */}
       <rect x={shieldL} y={H-padH} width={shieldW} height={padH} fill={`url(#pad-${uid})`} />
-      {/* Top highlight line on pads */}
-      <rect x={shieldL} y={H-padH} width={shieldW} height={3} fill="#e0b840" />
-      {/* Individual pad separators */}
+      <rect x={shieldL} y={H-padH} width={shieldW} height={2.5} fill="#e6c659" />
       {Array.from({ length: bottomCount+1 }, (_, i) => {
         const colW = shieldW / bottomCount
-        return (
-          <rect key={i} x={shieldL + i*colW - 0.75} y={H-padH} width={1.5} height={padH}
-            fill="#0e2010" />
-        )
+        return <rect key={i} x={shieldL + i*colW - 0.6} y={H-padH} width={1.2} height={padH} fill={pcb.b} />
       })}
     </svg>
   )

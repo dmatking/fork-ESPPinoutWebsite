@@ -24,6 +24,14 @@ export const esp32c3: Chip = {
     'GPIO11 is connected to VDD_SPI on some modules — avoid.',
     'No touch sensor, no DAC.',
   ],
+  module: {
+    name: 'ESP32-C3-MINI-1',
+    form: 'mini',
+    arch: 'Single-core RISC-V',
+    pcb: 'black',
+    accent: '#eab308',
+    radios: 'Wi-Fi 4 · BLE 5',
+  },
   pins: [
     ...[0,1,2,3,4,5].map(n => ({
       gpio: n, names: [`GPIO${n}`, `ADC1_CH${n}`], capabilities: ['gpio','adc1','pwm'] as ('gpio'|'adc1'|'pwm')[],

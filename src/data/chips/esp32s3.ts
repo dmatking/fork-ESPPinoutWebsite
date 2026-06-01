@@ -24,6 +24,14 @@ export const esp32s3: Chip = {
     'GPIO3, 4, 5, 6 are strapping-related on some modules.',
     'No DAC on S3.',
   ],
+  module: {
+    name: 'ESP32-S3-WROOM-1',
+    form: 'wroom',
+    arch: 'Dual-core Xtensa LX7',
+    pcb: 'black',
+    accent: '#22c55e',
+    radios: 'Wi-Fi 4 · BLE 5',
+  },
   pins: [
     { gpio: 0, names: ['GPIO0'], capabilities: ['gpio','pwm'],
       constraints: [{ id: 'strapping_pin', severity: 'warning', title: 'Strapping pin', description: 'HIGH = boot from flash, LOW = download mode.' }], isUsable: true },

@@ -24,6 +24,14 @@ export const esp32s2: Chip = {
     'ADC2 has same WiFi conflict as classic ESP32.',
     'GPIO0 is strapping pin — must be HIGH for normal boot.',
   ],
+  module: {
+    name: 'ESP32-S2-WROOM',
+    form: 'wroom',
+    arch: 'Single-core Xtensa LX7',
+    pcb: 'green',
+    accent: '#a855f7',
+    radios: 'Wi-Fi 4 · no Bluetooth',
+  },
   pins: [
     { gpio: 0, names: ['GPIO0'], capabilities: ['gpio', 'pwm'],
       constraints: [{ id: 'strapping_pin', severity: 'warning', title: 'Strapping pin', description: 'Must be HIGH at boot for normal operation. LOW = download mode.' }],

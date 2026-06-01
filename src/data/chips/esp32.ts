@@ -316,5 +316,13 @@ export const esp32: Chip = {
     'GPIO15 (MTDO) must be HIGH at boot to suppress startup log on UART0.',
   ],
   packageLayout: WROOM32_LAYOUT,
+  module: {
+    name: 'ESP32-WROOM-32',
+    form: 'wroom',
+    arch: 'Dual-core Xtensa LX6',
+    pcb: 'green',
+    accent: '#3b82f6',
+    radios: 'Wi-Fi 4 · BT · BLE',
+  },
   pins: ESP32_BASE_PINS,
 }
