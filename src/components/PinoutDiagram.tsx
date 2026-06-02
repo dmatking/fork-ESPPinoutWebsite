@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useApp } from '../context/AppContext'
 import { filterPins } from '../utils/filterPins'
-import type { Pin, Chip, LayoutPin, ModuleInfo } from '../types/chip'
+import type { Pin, Chip, LayoutPin, ModuleInfo, ConstraintId, Severity } from '../types/chip'
 
 const ROW_H = 30
 
@@ -64,6 +64,61 @@ function SpecialBadge({ label }: { label: string }) {
   )
 }
 
+// ─── Constraint → "what's affected" in one word ───────────────────────────────
+
+// One-word summary of what each constraint affects.
+const AFFECTED_WORD: Record<ConstraintId, string> = {
+  adc2_no_wifi:    'ADC2',
+  input_only:      'Output',
+  strapping_pin:   'Boot',
+  flash_reserved:  'Flash',
+  psram_reserved:  'PSRAM',
+  boot_must_float: 'Boot',
+  boot_must_high:  'Boot',
+  boot_must_low:   'Boot',
+  usb_jtag:        'USB',
+  limited_current: 'Current',
+  no_pullup:       'Pull-up',
+}
+
+// Constraints whose ⚠ is pinned onto the specific function badge it concerns
+// (e.g. the ADC2/USB badge) rather than shown as a separate word chip.
+const ATTACHED_IDS = new Set<ConstraintId>(['adc2_no_wifi', 'usb_jtag'])
+
+function sevStyle(sev: Severity) {
+  return sev === 'danger'
+    ? { bg: '#7f1d1d', fg: '#fca5a5', bd: '#ef4444', icon: '✕' }
+    : { bg: '#78350f', fg: '#fde68a', bd: '#f59e0b', icon: '⚠' }
+}
+
+// If a constraint attaches to this badge name, return its severity (else null).
+function attachedSeverity(pin: Pin, name: string): Severity | null {
+  for (const c of pin.constraints) {
+    if (c.id === 'adc2_no_wifi' && /^ADC2/.test(name)) return c.severity
+    if (c.id === 'usb_jtag' && /USB/i.test(name)) return c.severity
+  }
+  return null
+}
+
+// Word chips for constraints not tied to a specific badge, deduped by word.
+function constraintWords(pin: Pin): { word: string; sev: Severity }[] {
+  const m = new Map<string, Severity>()
+  for (const c of pin.constraints) {
+    if (ATTACHED_IDS.has(c.id)) continue
+    const word = AFFECTED_WORD[c.id] ?? 'Note'
+    if (m.get(word) !== 'danger') m.set(word, c.severity)
+  }
+  return [...m].map(([word, sev]) => ({ word, sev }))
+}
+
+// Highest-priority single constraint word for the compact top/bottom columns.
+function primaryWord(pin: Pin): { word: string; sev: Severity } | null {
+  if (!pin.constraints.length) return null
+  const danger = pin.constraints.find(c => c.severity === 'danger')
+  const c = danger ?? pin.constraints[0]
+  return { word: AFFECTED_WORD[c.id] ?? 'Note', sev: c.severity }
+}
+
 // ─── Left / right pin row ─────────────────────────────────────────────────────
 
 interface PinRowProps {
@@ -83,25 +138,19 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
   const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
   const hasWarning = !hasDanger && !!pin?.constraints.length
 
-  // Large, prominent constraint badge
-  const constraintBadge = hasDanger ? (
-    <span
-      className="font-mono font-bold rounded flex-shrink-0 flex items-center justify-center"
-      style={{
-        background: '#7f1d1d', color: '#fca5a5',
-        fontSize: 14, width: 26, height: 26,
-        border: '1px solid #ef4444',
-      }}
-    >✕</span>
-  ) : hasWarning ? (
-    <span
-      className="font-mono font-bold rounded flex-shrink-0 flex items-center justify-center"
-      style={{
-        background: '#78350f', color: '#fde68a',
-        fontSize: 14, width: 26, height: 26,
-        border: '1px solid #f59e0b',
-      }}
-    >⚠</span>
+  // One-word warning chips for constraints not tied to a specific badge.
+  const constraintChips = pin ? (
+    <>
+      {constraintWords(pin).map(({ word, sev }) => {
+        const s = sevStyle(sev)
+        return (
+          <span key={word} className="font-mono font-bold rounded-sm flex-shrink-0 flex items-center"
+            style={{ background: s.bg, color: s.fg, border: `1px solid ${s.bd}`, fontSize: 10, lineHeight: '15px', height: 17, padding: '0 5px', gap: 3 }}>
+            <span style={{ fontSize: 11 }}>{s.icon}</span>{word}
+          </span>
+        )
+      })}
+    </>
   ) : null
 
   const functionBadges = pin ? (
@@ -114,10 +163,27 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
       )}
       {names.map(name => {
         const { bg, text } = getBadge(name)
+        const sev = attachedSeverity(pin, name)
+        if (!sev) {
+          return (
+            <span key={name} className="font-mono font-bold rounded-sm flex-shrink-0"
+              style={{ background: bg, color: text, fontSize: 10, lineHeight: '17px', height: 17, padding: '0 5px' }}>
+              {name}
+            </span>
+          )
+        }
+        // ⚠ fused onto the affected badge (e.g. ADC2 / USB) so it's clear what's at issue.
+        const s = sevStyle(sev)
         return (
-          <span key={name} className="font-mono font-bold rounded-sm flex-shrink-0"
-            style={{ background: bg, color: text, fontSize: 10, lineHeight: '17px', height: 17, padding: '0 5px' }}>
-            {name}
+          <span key={name} className="flex-shrink-0 flex items-stretch" style={{ height: 17 }}>
+            <span className="font-mono font-bold flex items-center"
+              style={{ background: bg, color: text, fontSize: 10, padding: '0 5px', borderRadius: '2px 0 0 2px' }}>
+              {name}
+            </span>
+            <span className="font-mono font-bold flex items-center justify-center"
+              style={{ background: s.bg, color: s.fg, fontSize: 11, padding: '0 4px', borderRadius: '0 2px 2px 0', borderLeft: `1px solid ${s.bd}` }}>
+              {s.icon}
+            </span>
           </span>
         )
       })}
@@ -167,7 +233,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
       {side === 'left' ? (
         <>
           <div className="flex-1 flex items-center justify-end gap-[3px] min-w-0 overflow-hidden pr-1.5">
-            {constraintBadge}
+            {constraintChips}
             {functionBadges}
           </div>
           {connLine}
@@ -183,7 +249,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
           {connLine}
           <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
             {functionBadges}
-            {constraintBadge}
+            {constraintChips}
           </div>
         </>
       )}
@@ -210,8 +276,7 @@ function BottomPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClic
 
   const { bg, text } = getBadge(pin ? shortLabel : (layoutPin.label ?? 'NC'))
 
-  const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
-  const hasWarning = !hasDanger && !!pin?.constraints.length
+  const warn = pin ? primaryWord(pin) : null
 
   const isActive = isFiltered || !pin
 
@@ -229,20 +294,14 @@ function BottomPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClic
       <div className="font-mono" style={{ fontSize: 7, fontWeight: 700, color: '#3d5068', marginTop: 2 }}>
         {layoutPin.pinNumber}
       </div>
-      {/* Prominent constraint indicator */}
-      {hasDanger && (
-        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
-          style={{ background: '#7f1d1d', color: '#fca5a5', fontSize: 11, width: 18, height: 18, border: '1px solid #ef4444', marginTop: 2 }}>
-          ✕
-        </div>
-      )}
-      {hasWarning && (
-        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
-          style={{ background: '#78350f', color: '#fde68a', fontSize: 11, width: 18, height: 18, border: '1px solid #f59e0b', marginTop: 2 }}>
-          ⚠
-        </div>
-      )}
-      {!hasDanger && !hasWarning && <div style={{ height: 20 }} />}
+      {/* Constraint indicator: icon + one-word affected function (vertical) */}
+      {warn ? (
+        <span className="font-mono font-bold rounded-sm flex-shrink-0"
+          style={{ background: sevStyle(warn.sev).bg, color: sevStyle(warn.sev).fg, border: `1px solid ${sevStyle(warn.sev).bd}`,
+            fontSize: 7.5, padding: '3px 2px', marginTop: 3, writingMode: 'vertical-rl', transform: 'rotate(180deg)', lineHeight: 1.1, overflow: 'hidden' }}>
+          {sevStyle(warn.sev).icon} {warn.word}
+        </span>
+      ) : <div style={{ height: 20 }} />}
       <span
         className="font-mono font-bold rounded-sm"
         style={{
@@ -273,8 +332,7 @@ function TopPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClick }
 
   const { bg, text } = getBadge(pin ? shortLabel : (layoutPin.label ?? 'NC'))
 
-  const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
-  const hasWarning = !hasDanger && !!pin?.constraints.length
+  const warn = pin ? primaryWord(pin) : null
 
   const isActive = isFiltered || !pin
 
@@ -297,15 +355,13 @@ function TopPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClick }
       >
         {shortLabel}
       </span>
-      {hasDanger && (
-        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
-          style={{ background: '#7f1d1d', color: '#fca5a5', fontSize: 11, width: 18, height: 18, border: '1px solid #ef4444', marginBottom: 2 }}>✕</div>
-      )}
-      {hasWarning && (
-        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
-          style={{ background: '#78350f', color: '#fde68a', fontSize: 11, width: 18, height: 18, border: '1px solid #f59e0b', marginBottom: 2 }}>⚠</div>
-      )}
-      {!hasDanger && !hasWarning && <div style={{ height: 20 }} />}
+      {warn ? (
+        <span className="font-mono font-bold rounded-sm flex-shrink-0"
+          style={{ background: sevStyle(warn.sev).bg, color: sevStyle(warn.sev).fg, border: `1px solid ${sevStyle(warn.sev).bd}`,
+            fontSize: 7.5, padding: '3px 2px', marginBottom: 3, writingMode: 'vertical-rl', lineHeight: 1.1, overflow: 'hidden' }}>
+          {sevStyle(warn.sev).icon} {warn.word}
+        </span>
+      ) : <div style={{ height: 20 }} />}
       <div className="font-mono" style={{ fontSize: 7, fontWeight: 700, color: '#3d5068', marginBottom: 2 }}>
         {layoutPin.pinNumber}
       </div>
