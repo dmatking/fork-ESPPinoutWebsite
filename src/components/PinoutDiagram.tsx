@@ -69,7 +69,7 @@ function SpecialBadge({ label }: { label: string }) {
 // One-word summary of what each constraint affects.
 const AFFECTED_WORD: Record<ConstraintId, string> = {
   adc2_no_wifi:    'ADC2',
-  input_only:      'Output',
+  input_only:      'In-only',
   strapping_pin:   'Boot',
   flash_reserved:  'Flash',
   psram_reserved:  'PSRAM',
@@ -687,8 +687,16 @@ export function PinoutDiagram() {
   }
 
   const isBoard    = chip.module?.form === 'board'
+
+  // A "top" row that is entirely GND/NC isn't a real top edge of signals — it's the
+  // module's exposed thermal pad (EPAD), which is ground. Render it as one compact
+  // bar rather than a row of identical floating GND columns.
+  const topIsThermal = topLayout.length > 0 &&
+    topLayout.every(lp => { const l = (lp.label ?? '').toUpperCase(); return l === 'GND' || l === 'NC' })
+  const thermalGnd = topIsThermal ? topLayout.filter(lp => (lp.label ?? '').toUpperCase() === 'GND').length : 0
+
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
-  const padCount   = Math.max(bottomLayout.length, topLayout.length, 1)
+  const padCount   = Math.max(bottomLayout.length, topIsThermal ? 0 : topLayout.length, 1)
   const chipWidth  = isBoard ? 150 : Math.max(220, padCount * 26)
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 26
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 26
@@ -698,8 +706,24 @@ export function PinoutDiagram() {
       <div className="p-4 pb-2 overflow-x-auto">
         <div className="flex flex-col items-center min-w-fit mx-auto">
 
-          {/* ── Top pin row (MINI modules: GND ring along the top edge) ── */}
-          {topLayout.length > 0 && (
+          {/* ── Exposed thermal pad (EPAD) — a ground paddle on the back, not an edge ── */}
+          {topIsThermal && (
+            <div className="flex justify-center" style={{ width: chipWidth, marginBottom: 4 }}>
+              <div className="flex items-center gap-2 rounded-md"
+                style={{ padding: '4px 10px', background: '#0d1520', border: '1px solid #1e2d40' }}>
+                <span className="font-mono font-bold rounded-sm"
+                  style={{ background: '#111827', color: '#9ca3af', fontSize: 9, lineHeight: '15px', padding: '0 6px' }}>
+                  GND ×{thermalGnd}
+                </span>
+                <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3 }}>
+                  exposed thermal pad
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Top pin row (only when the top edge carries real signals) ── */}
+          {topLayout.length > 0 && !topIsThermal && (
             <div className="flex" style={{ width: chipWidth }}>
               {topLayout.map(lp => {
                 const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
