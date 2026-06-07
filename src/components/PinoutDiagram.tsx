@@ -435,7 +435,6 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
   const shieldTop = antennaH
   const shieldBot = H - padH
   const shieldH   = shieldBot - shieldTop
-  const my        = shieldTop + shieldH / 2   // shield vertical centre for branding
 
   // PCB substrate palette
   const pcb = m.pcb === 'black'
@@ -446,15 +445,38 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
   const traceMain = m.pcb === 'black' ? '#6a6e78' : '#3f7a36'
   const traceDim  = m.pcb === 'black' ? '#4a4e58' : '#2c5a28'
 
+  // Branding band sits in the upper third so the metal reads as a real lid below it.
+  const brandY = shieldTop + Math.min(shieldH * 0.34, 86)
+
+  // Spot-weld dimple ring — the signature detail of a real RF shield can lid.
+  const dimples: ReactNode[] = []
+  {
+    const inset = 6
+    const x0 = shieldL + inset, x1 = shieldL + shieldW - inset
+    const y0 = shieldTop + inset, y1 = shieldBot - inset
+    const nx = Math.max(3, Math.round((x1 - x0) / 27))
+    const ny = Math.max(3, Math.round((y1 - y0) / 27))
+    const put = (x: number, y: number, k: string) =>
+      dimples.push(
+        <g key={k}>
+          <circle cx={x} cy={y} r={1.7} fill="#39444f" />
+          <circle cx={x} cy={y - 0.45} r={0.8} fill="#d4dee7" opacity="0.5" />
+        </g>,
+      )
+    for (let i = 0; i <= nx; i++) { const x = x0 + ((x1 - x0) * i) / nx; put(x, y0, `t${i}`); put(x, y1, `b${i}`) }
+    for (let j = 1; j < ny; j++) { const y = y0 + ((y1 - y0) * j) / ny; put(x0, y, `l${j}`); put(x1, y, `r${j}`) }
+  }
+
   return (
     <svg width={W} height={H} style={{ flexShrink: 0, display: 'block' }} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id={`shield-${uid}`} x1="0" y1="0" x2="0.18" y2="1">
-          <stop offset="0%"   stopColor="#c2cdd8" />
-          <stop offset="22%"  stopColor="#9aa9b8" />
-          <stop offset="68%"  stopColor="#71808f" />
-          <stop offset="100%" stopColor="#586572" />
-        </linearGradient>
+        {/* Lit-from-upper-left brushed metal */}
+        <radialGradient id={`metal-${uid}`} cx="0.4" cy="0.28" r="0.95">
+          <stop offset="0%"   stopColor="#d6e0ea" />
+          <stop offset="40%"  stopColor="#aab8c6" />
+          <stop offset="76%"  stopColor="#7a8896" />
+          <stop offset="100%" stopColor="#454f5b" />
+        </radialGradient>
         <linearGradient id={`pcb-${uid}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%"   stopColor={pcb.a} />
           <stop offset="100%" stopColor={pcb.b} />
@@ -463,10 +485,10 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
           <stop offset="0%"   stopColor="#e3bd49" />
           <stop offset="100%" stopColor="#9a6e18" />
         </linearGradient>
-        {/* Subtle brushed-metal texture on the shield */}
-        <pattern id={`brush-${uid}`} x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="1" y2="0" stroke="#ffffff" strokeWidth="0.13" opacity="0.10" />
-          <line x1="0" y1="1.5" x2="1" y2="1.5" stroke="#000000" strokeWidth="0.13" opacity="0.07" />
+        {/* Fine brushed-metal grain */}
+        <pattern id={`brush-${uid}`} x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0"   x2="2" y2="0"   stroke="#ffffff" strokeWidth="0.11" opacity="0.09" />
+          <line x1="0" y1="1"   x2="2" y2="1"   stroke="#0a0f14" strokeWidth="0.11" opacity="0.07" />
         </pattern>
       </defs>
 
@@ -476,21 +498,17 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
       <rect x={pcbBorder-2} y={pcbBorder-2} width={W-pcbBorder*2+4} height={H-pcbBorder*2+4}
         fill="none" stroke={pcb.silk} strokeWidth="0.5" opacity="0.55" rx="2" />
 
-      {/* ── Antenna zone ── */}
+      {/* ── Antenna zone (PCB meander on bare laminate above the shield) ── */}
       {isMini ? (
-        // MINI: antenna lives in a dashed keep-out tab offset to one corner
         <>
-          <rect x={shieldL} y={5} width={shieldW * 0.6} height={antennaH-9}
-            fill="none" stroke={m.accent} strokeWidth="0.9" strokeDasharray="3 2" opacity="0.65" rx="2" />
-          <path d={meanderPath(shieldL+7, shieldL + shieldW*0.6 - 7, 11, antennaH-12)}
-            fill="none" stroke={traceMain} strokeWidth="1.4" strokeLinecap="square" />
-          <text x={shieldL + shieldW*0.6 + 6} y={antennaH/2 - 2} fontSize="6" fontFamily="monospace"
-            fill={m.accent} letterSpacing="0.5" fontWeight="700" opacity="0.85">ANT</text>
-          <text x={shieldL + shieldW*0.6 + 6} y={antennaH/2 + 7} fontSize="4.6" fontFamily="monospace"
-            fill={pcb.silk} letterSpacing="0.3">KEEP-OUT</text>
+          <path d={meanderPath(shieldL+6, shieldL + shieldW*0.74, 12, antennaH-13)}
+            fill="none" stroke={traceMain} strokeWidth="1.6" strokeLinecap="square" />
+          <path d={meanderPath(shieldL+6, shieldL + shieldW*0.74, 16, antennaH-13)}
+            fill="none" stroke={traceDim} strokeWidth="1" strokeLinecap="square" opacity="0.5" />
+          <text x={shieldL + shieldW*0.74 + 7} y={antennaH/2 + 1} fontSize="6" fontFamily="monospace"
+            fill={m.accent} letterSpacing="1" fontWeight="700" opacity="0.85">ANT</text>
         </>
       ) : (
-        // WROOM / WROVER: full-width meander trace etched on bare PCB
         <>
           <path d={meanderPath(shieldL+10, shieldW+shieldL-10, 9, antennaH-11)}
             fill="none" stroke={traceMain} strokeWidth="1.6" strokeLinecap="square" />
@@ -502,37 +520,43 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
       )}
 
       {/* ── RF shield can ── */}
-      <rect x={shieldL+1.5} y={shieldTop+2.5} width={shieldW} height={shieldH} fill="#000" rx="2.5" opacity="0.4" />
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#shield-${uid})`} rx="2.5" />
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#brush-${uid})`} rx="2.5" />
-      {/* bevels */}
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={2.5} fill="#dde7f0" opacity="0.5" rx="1" />
-      <rect x={shieldL} y={shieldTop+2.5} width={1.8} height={shieldH-2.5} fill="#cdd9e2" opacity="0.22" />
-      <rect x={shieldL+shieldW-1.8} y={shieldTop} width={1.8} height={shieldH} fill="#1d2b34" opacity="0.32" />
-      <rect x={shieldL} y={shieldTop+shieldH-2} width={shieldW} height={2} fill="#1d2b34" opacity="0.32" />
-      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill="none" stroke="#a6b4c0" strokeWidth="1" rx="2.5" />
-      {/* family accent hairline just inside the top edge */}
-      <rect x={shieldL+5} y={shieldTop+6} width={shieldW-10} height={1.4} fill={m.accent} opacity="0.5" rx="0.7" />
+      {/* cast shadow */}
+      <rect x={shieldL+2} y={shieldTop+3} width={shieldW} height={shieldH} fill="#000" rx="3" opacity="0.45" />
+      {/* brushed metal lid */}
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#metal-${uid})`} rx="3" />
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill={`url(#brush-${uid})`} rx="3" />
+      {/* diagonal specular sweep */}
+      <polygon
+        points={`${shieldL},${shieldTop + shieldH*0.10} ${shieldL + shieldW*0.55},${shieldTop} ${shieldL + shieldW*0.72},${shieldTop} ${shieldL},${shieldTop + shieldH*0.40}`}
+        fill="#f2f7fb" opacity="0.07" />
+      {/* crimped lid edge: bright top/left, dark bottom/right */}
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={2.5} fill="#e6eef5" opacity="0.55" rx="1.5" />
+      <rect x={shieldL} y={shieldTop+2.5} width={2} height={shieldH-3} fill="#d3dee7" opacity="0.28" />
+      <rect x={shieldL+shieldW-2} y={shieldTop} width={2} height={shieldH} fill="#16222b" opacity="0.38" />
+      <rect x={shieldL} y={shieldTop+shieldH-2.5} width={shieldW} height={2.5} fill="#16222b" opacity="0.38" />
+      {/* inner crimp seam */}
+      <rect x={shieldL+3.5} y={shieldTop+3.5} width={shieldW-7} height={shieldH-7}
+        fill="none" stroke="#36424d" strokeWidth="0.6" opacity="0.5" rx="2" />
+      <rect x={shieldL} y={shieldTop} width={shieldW} height={shieldH} fill="none" stroke="#9fadb9" strokeWidth="1" rx="3" />
+      {/* spot-weld dimple ring */}
+      {dimples}
 
-      {/* ── Stamped branding ── */}
-      <text x={cx} y={my-26} textAnchor="middle" fontSize="7.5" fontFamily="'Arial Narrow',sans-serif"
-        fontWeight="700" fill="#2a3a4a" letterSpacing="3">ESPRESSIF</text>
-      <text x={cx} y={my-8} textAnchor="middle"
-        fontSize={m.name.length > 15 ? 11 : 13} fontFamily="'Arial Narrow','Courier New',monospace"
-        fontWeight="800" fill="#1a2a3a" letterSpacing="0.5">{m.name}</text>
-      <text x={cx} y={my+8} textAnchor="middle" fontSize="6.8" fontFamily="monospace"
-        fill={m.accent} letterSpacing="0.4" fontWeight="700" opacity="0.92">{m.radios}</text>
-      <text x={cx} y={my+21} textAnchor="middle" fontSize="6" fontFamily="monospace"
-        fill="#46566a" letterSpacing="0.3">{m.arch}</text>
+      {/* ── Laser-etched branding ── */}
+      <text x={cx} y={brandY-16} textAnchor="middle" fontSize="7.5" fontFamily="'Arial Narrow',sans-serif"
+        fontWeight="700" fill="#33424f" letterSpacing="3.5" opacity="0.9">ESPRESSIF</text>
+      <text x={cx} y={brandY+1} textAnchor="middle"
+        fontSize={m.name.length > 15 ? 11 : 13.5} fontFamily="'Arial Narrow','Courier New',monospace"
+        fontWeight="800" fill="#1b2933" letterSpacing="0.5">{m.name}</text>
+      <text x={cx} y={brandY+15} textAnchor="middle" fontSize="6.8" fontFamily="monospace"
+        fill={m.accent} letterSpacing="0.6" fontWeight="700" opacity="0.95">{m.radios}</text>
+      <text x={cx} y={brandY+27} textAnchor="middle" fontSize="6" fontFamily="monospace"
+        fill="#4a5a6a" letterSpacing="0.3">{m.arch}</text>
 
-      {/* data-matrix code + regulatory marks near the bottom of the can */}
-      {dataMatrix(uid, shieldL+8, shieldBot-26, 2.1)}
-      <text x={cx+6} y={shieldBot-15} textAnchor="middle" fontSize="8.5" fontFamily="serif"
-        fontWeight="700" fill="#516070">CE</text>
-      <text x={cx+26} y={shieldBot-15} textAnchor="middle" fontSize="6.5" fontFamily="monospace"
-        fontWeight="700" fill="#516070">FCC</text>
-      <text x={cx+10} y={shieldBot-6} textAnchor="middle" fontSize="5" fontFamily="monospace"
-        fill="#3c4c5c" letterSpacing="0.2">2AC7Z-{m.name.replace(/^ESP32-?/,'')}</text>
+      {/* ── QR/data-matrix + regulatory marks near the lid bottom ── */}
+      {dataMatrix(uid, shieldL+9, shieldBot-25, 2.1)}
+      <text x={shieldL+30} y={shieldBot-17} fontSize="8.5" fontFamily="serif" fontWeight="700" fill="#465564">CE</text>
+      <text x={shieldL+46} y={shieldBot-17} fontSize="6.5" fontFamily="monospace" fontWeight="700" fill="#465564">FCC</text>
+      <text x={shieldL+30} y={shieldBot-7} fontSize="5" fontFamily="monospace" fill="#3a4a59" letterSpacing="0.2">2AC7Z-{m.name.replace(/^ESP32-?/,'')}</text>
 
       {/* ── Gold castellated pad strip ── */}
       <rect x={shieldL} y={H-padH} width={shieldW} height={padH} fill={`url(#pad-${uid})`} />
