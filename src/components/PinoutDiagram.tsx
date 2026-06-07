@@ -712,9 +712,9 @@ export function PinoutDiagram() {
 
   const isBoard    = chip.module?.form === 'board'
 
-  // A "top" row that is entirely GND/NC isn't a real top edge of signals — it's the
-  // module's exposed thermal pad (EPAD), which is ground. Render it as one compact
-  // bar rather than a row of identical floating GND columns.
+  // A "top" row that is entirely GND/NC isn't a real top edge of signals — these are
+  // the module's underside ground lands (plus the separate thermal/EPAD), all GND.
+  // Render them as one compact bar rather than a row of identical floating columns.
   const topIsThermal = topLayout.length > 0 &&
     topLayout.every(lp => { const l = (lp.label ?? '').toUpperCase(); return l === 'GND' || l === 'NC' })
   const thermalGnd = topIsThermal ? topLayout.filter(lp => (lp.label ?? '').toUpperCase() === 'GND').length : 0
@@ -740,7 +740,7 @@ export function PinoutDiagram() {
                   GND ×{thermalGnd}
                 </span>
                 <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3 }}>
-                  exposed thermal pad
+                  underside ground + thermal pad
                 </span>
               </div>
             </div>
