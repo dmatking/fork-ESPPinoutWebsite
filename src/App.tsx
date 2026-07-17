@@ -77,7 +77,7 @@ export default function App() {
       <footer className="border-t border-gray-800 mt-4">
         <div className="max-w-screen-2xl mx-auto w-full px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <a
-            href="https://kunzengineering.ch"
+            href="https://kunzengineering.ch/en"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-3"
