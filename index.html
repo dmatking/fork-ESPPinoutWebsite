@@ -99,7 +99,8 @@
     </script>
   </head>
   <body>
-    <div id="root">
+    <div id="root"></div>
+    <noscript>
       <main style="max-width:820px;margin:0 auto;padding:2rem 1.25rem;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;color:#111">
         <h1>ESP32 Pinout Studio</h1>
         <p>Free interactive pinout reference for the whole ESP32 family. Every pin carries its real-world constraints - strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, and USB/JTAG lines - so you don't pick a pin that stops your project from booting. Pin names, physical pad layouts, and schematic symbols are generated from Espressif's official KiCad libraries.</p>
@@ -129,9 +130,8 @@
         <h3>Which ESP32 pins are safe to use?</h3>
         <p>Avoid GPIO6-11 (wired to internal SPI flash - using them crashes the chip), treat GPIO0, 2, 12 and 15 as strapping pins, and remember GPIO34, 35, 36 and 39 are input-only. The generally safe output pins are GPIO4, 5, 13, 14, 16-19, 21-23, 25-27, 32 and 33.</p>
 
-        <p style="margin-top:2rem;color:#555">Loading the interactive diagram... if it does not appear, enable JavaScript.</p>
       </main>
-    </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
