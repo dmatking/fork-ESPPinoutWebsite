@@ -43,7 +43,7 @@ export default function App() {
             {chip.notes.length > 0 && (
               <div className="rounded-xl bg-yellow-950/30 border border-yellow-700/50 px-4 py-3">
                 <p className="text-xs font-semibold text-yellow-400 mb-1">⚠️ {chip.name} - Known Gotchas</p>
-                <ul className="text-xs text-yellow-300/80 space-y-0.5 list-disc list-inside">
+                <ul className="text-xs text-yellow-300/80 space-y-0.5 list-disc pl-4">
                   {chip.notes.map((n, i) => <li key={i}>{n}</li>)}
                 </ul>
               </div>

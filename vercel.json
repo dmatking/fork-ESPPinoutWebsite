@@ -3,6 +3,6 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/:path((?!assets/|.*\\..*).*)", "destination": "/index.html" }
+    { "source": "/:path((?!assets/|_vercel/|.*\\..*).*)", "destination": "/index.html" }
   ]
 }

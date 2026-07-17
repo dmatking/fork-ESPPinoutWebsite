@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
@@ -129,7 +129,7 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
       text: `${c.severity === 'danger' ? '✕' : '⚠'} ${word}`,
       color: '#fff',
       bold: true,
-      chipFill: c.severity === 'danger' ? '#dc2626' : '#d97706',
+      chipFill: c.severity === 'danger' ? '#7f1d1d' : '#dc2626',
     })
   }
   // Everything already shown inside the body is not repeated as an annotation.
@@ -210,6 +210,17 @@ export function SchematicDiagram() {
     if (!pin) return
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
   }
+
+  // Fit the whole sheet to narrow screens by default; at 1:1, start the
+  // scroll position centered on the symbol body instead of the sheet margin.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(() => typeof window !== 'undefined' && window.innerWidth < 760)
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || fit) return
+    el.scrollLeft = Math.max(0, bodyX + BW / 2 + 16 - el.clientWidth / 2)
+  }, [chip.id, fit, bodyX, BW])
 
   const rowTitle = (row: SchemRow): string | null => {
     if (row.pin) {
@@ -345,8 +356,22 @@ export function SchematicDiagram() {
   const valueY = TOPY + bodyH + (hasBottom ? VPL + 12 : 0)
 
   return (
-    <div className="p-4 pb-3 overflow-x-auto">
-      <svg width={svgW} height={svgH} className="mx-auto block rounded-sm" style={{ minWidth: svgW }}
+    <div ref={scrollRef} className="p-4 pb-3 overflow-x-auto">
+      <div className="flex justify-end" style={{ marginBottom: 6 }}>
+        <button
+          onClick={() => setFit(f => !f)}
+          className="font-mono rounded"
+          style={{ fontSize: 10, padding: '3px 9px', color: '#7c8ba1', border: '1px solid #2a3a52', background: 'transparent' }}
+        >
+          {fit ? 'View 1:1' : 'Fit width'}
+        </button>
+      </div>
+      <svg
+        width={fit ? '100%' : svgW}
+        height={fit ? undefined : svgH}
+        viewBox={`0 0 ${svgW} ${svgH}`}
+        className="mx-auto block rounded-sm"
+        style={fit ? { maxWidth: svgW, height: 'auto' } : { minWidth: svgW }}
         xmlns="http://www.w3.org/2000/svg">
         <style>{`.sch-row{cursor:pointer}.sch-row:hover .sch-hit{fill:rgba(37,99,235,0.07)}`}</style>
         <defs>

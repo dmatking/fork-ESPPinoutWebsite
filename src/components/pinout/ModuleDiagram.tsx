@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin } from '../../types/chip'
@@ -490,8 +490,16 @@ export function ModuleDiagram() {
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
 
+  // On narrow screens, start the scroll centered on the module instead of
+  // the left label bank.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2)
+  }, [chip.id])
+
   return (
-    <div className="p-4 pb-2 overflow-x-auto">
+    <div ref={scrollRef} className="p-4 pb-2 overflow-x-auto">
       <div className="flex flex-col items-center min-w-fit mx-auto">
 
         {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}

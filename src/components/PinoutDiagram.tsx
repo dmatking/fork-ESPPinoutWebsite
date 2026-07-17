@@ -15,7 +15,7 @@ export function PinoutDiagram() {
   return (
     <div className="rounded-xl border overflow-hidden" style={{ background: '#060b12', borderColor: '#1a2535' }}>
       {/* Header: chip context + view toggle */}
-      <div className="flex items-center justify-between gap-2 px-4 pt-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <span className="font-mono truncate" style={{ fontSize: 11, color: '#5a6b80' }}>
           {chip.name} · {view === 'schematic' ? 'logical pinout' : 'physical module, top view'}
         </span>
