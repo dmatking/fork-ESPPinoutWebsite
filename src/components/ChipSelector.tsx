@@ -77,6 +77,9 @@ export function ChipSelector() {
         })}
       </div>
 
+      {/* Separator between family tabs and module pills */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
+
       {/* Modules within the selected tab */}
       <div className="flex flex-wrap gap-1.5">
         {shown.map(c => {

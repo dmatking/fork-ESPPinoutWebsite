@@ -211,10 +211,10 @@ export function SchematicDiagram() {
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
   }
 
-  // Fit the whole sheet to narrow screens by default; at 1:1, start the
-  // scroll position centered on the symbol body instead of the sheet margin.
+  // Default is 1:1 with the scroll centered on the symbol body - a fitted
+  // sheet is unreadable on phones. Fit stays available as an overview toggle.
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [fit, setFit] = useState(() => typeof window !== 'undefined' && window.innerWidth < 760)
+  const [fit, setFit] = useState(false)
 
   useEffect(() => {
     const el = scrollRef.current
@@ -276,6 +276,12 @@ export function SchematicDiagram() {
           stroke={isSelected ? '#2563eb' : 'none'} strokeWidth="1" strokeDasharray={isSelected ? '3 2' : undefined} />
         <line x1={edgeX} y1={cy} x2={tipX} y2={cy} stroke={PIN_COLOR} strokeWidth="1.5" />
         <circle cx={tipX} cy={cy} r="1.8" fill="none" stroke={PIN_COLOR} strokeWidth="1" />
+        {/* constraint marker at the body edge - stays visible when the
+            annotation chips are scrolled out of view on narrow screens */}
+        {row.pin && row.pin.constraints.length > 0 && (
+          <circle cx={isLeft ? edgeX - 5 : edgeX + 5} cy={cy - 6} r="2.6"
+            fill={row.pin.constraints.some(c => c.severity === 'danger') ? '#7f1d1d' : '#dc2626'} />
+        )}
         <text x={(edgeX + tipX) / 2} y={cy - 4} fontSize="8.5" fontFamily={FONT} fill={PINNUM}
           textAnchor="middle">{numText(row)}</text>
         <text x={isLeft ? edgeX + 7 : edgeX - 7} y={cy + 3.5} fontSize="10.5" fontFamily={FONT}
@@ -356,8 +362,9 @@ export function SchematicDiagram() {
   const valueY = TOPY + bodyH + (hasBottom ? VPL + 12 : 0)
 
   return (
-    <div ref={scrollRef} className="p-4 pb-3 overflow-x-auto">
-      <div className="flex justify-end" style={{ marginBottom: 6 }}>
+    <div>
+      {/* zoom toggle lives outside the scroll container so it never scrolls away */}
+      <div className="flex justify-end px-4 pt-2">
         <button
           onClick={() => setFit(f => !f)}
           className="font-mono rounded"
@@ -366,6 +373,7 @@ export function SchematicDiagram() {
           {fit ? 'View 1:1' : 'Fit width'}
         </button>
       </div>
+      <div ref={scrollRef} className="px-4 pb-3 pt-2 overflow-x-auto">
       <svg
         width={fit ? '100%' : svgW}
         height={fit ? undefined : svgH}
@@ -425,7 +433,8 @@ export function SchematicDiagram() {
           </text>
         </g>
       </svg>
-      <p className="text-center font-mono" style={{ fontSize: 9, color: '#3d5068', marginTop: 8 }}>
+      </div>
+      <p className="text-center font-mono px-4 pb-1" style={{ fontSize: 9, color: '#3d5068' }}>
         {sym
           ? 'Official Espressif schematic symbol (KiCad library) - stacked GND pins merged; numbers are the physical pads.'
           : 'Logical symbol - GPIOs in ascending order. Pin numbers are the physical pads on the module.'}
