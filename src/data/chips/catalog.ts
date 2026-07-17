@@ -1,12 +1,12 @@
 // Full module catalog. One Chip entry per distinct module pinout.
 // Pin data + physical layouts come from ./generated.ts (authoritative, from
 // Espressif's KiCad libraries); chip-level facts live in the FAMILIES table here.
-import type { Chip, ModuleForm, Pin, PackageLayout } from '../../types/chip'
+import type { Chip, ModuleForm, Pin, PackageLayout, SymbolLayout } from '../../types/chip'
 import * as G from './generated'
 import { esp32 } from './esp32'
 import { esp32wrover } from './esp32wrover'
 
-const GEN = G as unknown as Record<string, Pin[] | PackageLayout>
+const GEN = G as unknown as Record<string, Pin[] | PackageLayout | SymbolLayout>
 
 interface Family {
   family: string
@@ -174,6 +174,7 @@ function build(spec: ModuleSpec): Chip {
       radios: f.radios,
     },
     packageLayout: GEN[`${spec.prefix}_LAYOUT`] as PackageLayout,
+    symbolLayout: GEN[`${spec.prefix}_SYMBOL`] as SymbolLayout | undefined,
     pins: GEN[`${spec.prefix}_PINS`] as Pin[],
   }
 }

@@ -64,6 +64,7 @@ export interface Chip {
   notes: string[]            // chip-level gotchas
   pins: Pin[]
   packageLayout?: PackageLayout
+  symbolLayout?: SymbolLayout // official KiCad schematic symbol pin placement
   module?: ModuleInfo        // physical module appearance
 }
 
@@ -84,6 +85,22 @@ export interface LayoutPin {
   pinNumber: number     // physical pad number (e.g. 1–38 on WROOM-32)
   gpio?: number         // present for GPIO pads
   label?: string        // 'GND' | '3V3' | 'EN' | 'NC' for non-GPIO pads
+}
+
+// Schematic symbol geometry, extracted from Espressif's official KiCad symbol:
+// each entry is one drawn pin (stacked duplicate power pins merged into `pins`),
+// per body side, in the symbol's own top→bottom / left→right order.
+export interface SymbolPin {
+  pins: number[]        // physical pad number(s) this symbol pin carries
+  gpio?: number
+  label?: string        // 'GND' | '3V3' | 'EN' | 'NC' | ... for non-GPIO pins
+}
+
+export interface SymbolLayout {
+  left: SymbolPin[]
+  right: SymbolPin[]
+  bottom?: SymbolPin[]
+  top?: SymbolPin[]
 }
 
 export interface PackageLayout {

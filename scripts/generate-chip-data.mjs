@@ -19,10 +19,48 @@ function symbolPins(n) {
   const re = /\n\t\(symbol "/g; re.lastIndex = s + 1
   let m, e = SYM.length; if (m = re.exec(SYM)) e = m.index
   const r = SYM.slice(s, e)
-  const p = /\(pin\b[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
+  const p = /\(pin\b[\s\S]*?\(at ([-0-9.]+) ([-0-9.]+) ([0-9]+)\)[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
   const o = {}; let x
-  while (x = p.exec(r)) o[x[2]] = x[1]
+  while (x = p.exec(r)) o[x[5]] = x[4]
   return o
+}
+
+// The symbol's own pin geometry: which body side each pin sits on, in drawn
+// order. angle 0 = points right (LEFT side), 180 = RIGHT, 90 = BOTTOM, 270 = TOP.
+// Pins stacked at the same coordinate (hidden duplicate power pins) are merged.
+function symbolGeometry(n) {
+  const s = SYM.indexOf(`(symbol "${n}"`)
+  if (s < 0) throw new Error('no sym ' + n)
+  const re = /\n\t\(symbol "/g; re.lastIndex = s + 1
+  let m, e = SYM.length; if (m = re.exec(SYM)) e = m.index
+  const r = SYM.slice(s, e)
+  const p = /\(pin\b[\s\S]*?\(at ([-0-9.]+) ([-0-9.]+) ([0-9]+)\)[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
+  const byPos = new Map()
+  let x
+  while (x = p.exec(r)) {
+    const [, xs, ys, as_, name, num] = x
+    const key = `${xs},${ys}`
+    const numN = +num
+    if (!Number.isFinite(numN)) continue
+    if (byPos.has(key)) { byPos.get(key).nums.push(numN); continue }
+    byPos.set(key, { x: +xs, y: +ys, angle: +as_, name, nums: [numN] })
+  }
+  const sides = { left: [], right: [], bottom: [], top: [] }
+  for (const pin of byPos.values()) {
+    const side = pin.angle === 0 ? 'left' : pin.angle === 180 ? 'right' : pin.angle === 90 ? 'bottom' : 'top'
+    sides[side].push(pin)
+  }
+  sides.left.sort((a, b) => b.y - a.y); sides.right.sort((a, b) => b.y - a.y)
+  sides.bottom.sort((a, b) => a.x - b.x); sides.top.sort((a, b) => a.x - b.x)
+  const sp = pin => {
+    const g = pin.name.toUpperCase().match(/GPIO(\d+)/)
+    pin.nums.sort((a, b) => a - b)
+    return g ? { pins: pin.nums, gpio: +g[1] } : { pins: pin.nums, label: specialLabel(pin.name) }
+  }
+  return {
+    left: sides.left.map(sp), right: sides.right.map(sp),
+    bottom: sides.bottom.map(sp), top: sides.top.map(sp),
+  }
 }
 function fpPads(f) {
   const t = fs.readFileSync(`${FP_DIR}/${f}.kicad_mod`, 'utf8')
@@ -121,7 +159,10 @@ const FAM = {
 }
 
 // One entry per distinct module pinout. prefix → exported const names.
+// symOnly: emit only the schematic SymbolLayout (pins/pads stay hand-authored).
 const MODULES = [
+  { prefix: 'ESP32_WROOM_32', name: 'ESP32-WROOM-32', sym: 'ESP32-WROOM-E', symOnly: true },
+  { prefix: 'ESP32_WROVER_E', name: 'ESP32-WROVER-E', sym: 'ESP32-WROVER-E', symOnly: true },
   { prefix: 'ESP32_WROOM_DA', name: 'ESP32-WROOM-DA', sym: 'ESP32-WROOM-DA', fp: 'ESP32-WROOM-DA', fam: 'esp32' },
   { prefix: 'ESP32_MINI_1', name: 'ESP32-MINI-1', sym: 'ESP32-MINI-1', fp: 'ESP32-MINI-1', fam: 'esp32' },
   { prefix: 'ESP32_PICO_MINI_02', name: 'ESP32-PICO-MINI-02', sym: 'ESP32-PICO-MINI-02', fp: 'ESP32-PICO-MINI-02', fam: 'esp32' },
@@ -146,6 +187,16 @@ const MODULES = [
   { prefix: 'C6_DEVKITC', name: 'ESP32-C6-DevKitC-1', sym: 'ESP32-C6-DevKitC-1', fp: 'ESP32-C6-DevKitC-1', fam: 'c6' },
 ]
 
+function fmtSymPin(p) {
+  const nums = `[${p.pins.join(',')}]`
+  return p.gpio !== undefined ? `{ pins: ${nums}, gpio: ${p.gpio} }` : `{ pins: ${nums}, label: '${p.label}' }`
+}
+function fmtSym(sym) {
+  let s = `{\n  left: [${sym.left.map(fmtSymPin).join(', ')}],\n  right: [${sym.right.map(fmtSymPin).join(', ')}],\n`
+  if (sym.bottom.length) s += `  bottom: [${sym.bottom.map(fmtSymPin).join(', ')}],\n`
+  if (sym.top.length) s += `  top: [${sym.top.map(fmtSymPin).join(', ')}],\n`
+  return s + '}'
+}
 function fmtPin(p) {
   return `  { gpio: ${p.gpio}, names: ${JSON.stringify(p.names)}, capabilities: ${JSON.stringify(p.capabilities)} as Capability[], constraints: [${p.constraints.join(', ')}], isUsable: true }`
 }
@@ -153,7 +204,7 @@ function fmtArr(a) {
   return '[' + a.map(p => p.gpio !== undefined ? `{ pinNumber: ${p.pinNumber}, gpio: ${p.gpio} }` : `{ pinNumber: ${p.pinNumber}, label: '${p.label}' }`).join(', ') + ']'
 }
 
-let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).\n// Do NOT edit by hand — run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout } from '../../types/chip'\n\n`
+let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).\n// Do NOT edit by hand — run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
 out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as const, title: 'Input only', description: 'This pin has no output driver or internal pull resistors. Use only as a digital/analog input.' }\n`
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`
@@ -161,13 +212,19 @@ out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, tit
 
 const keys = []
 for (const mod of MODULES) {
-  const { pins, layout } = buildModule(mod, FAM[mod.fam])
-  out += `export const ${mod.prefix}_PINS: Pin[] = [\n${pins.map(fmtPin).join(',\n')},\n]\n\n`
-  out += `export const ${mod.prefix}_LAYOUT: PackageLayout = {\n  name: '${layout.name}',\n  left: ${fmtArr(layout.left)},\n  bottom: ${fmtArr(layout.bottom)},\n  right: ${fmtArr(layout.right)},\n`
-  if (layout.top.length) out += `  top: ${fmtArr(layout.top)},\n`
-  out += `}\n\n`
+  const sym = symbolGeometry(mod.sym)
+  if (!mod.symOnly) {
+    const { pins, layout } = buildModule(mod, FAM[mod.fam])
+    out += `export const ${mod.prefix}_PINS: Pin[] = [\n${pins.map(fmtPin).join(',\n')},\n]\n\n`
+    out += `export const ${mod.prefix}_LAYOUT: PackageLayout = {\n  name: '${layout.name}',\n  left: ${fmtArr(layout.left)},\n  bottom: ${fmtArr(layout.bottom)},\n  right: ${fmtArr(layout.right)},\n`
+    if (layout.top.length) out += `  top: ${fmtArr(layout.top)},\n`
+    out += `}\n\n`
+    console.error(`${mod.name}: ${pins.length} pins | pads L${layout.left.length} B${layout.bottom.length} R${layout.right.length} T${layout.top.length} | sym L${sym.left.length} R${sym.right.length} B${sym.bottom.length} T${sym.top.length}`)
+  } else {
+    console.error(`${mod.name}: symbol only | sym L${sym.left.length} R${sym.right.length} B${sym.bottom.length} T${sym.top.length}`)
+  }
+  out += `export const ${mod.prefix}_SYMBOL: SymbolLayout = ${fmtSym(sym)}\n\n`
   keys.push(mod.prefix)
-  console.error(`${mod.name}: ${pins.length} pins | L${layout.left.length} B${layout.bottom.length} R${layout.right.length} T${layout.top.length}`)
 }
 fs.writeFileSync(OUT, out)
 console.error(`\nWROTE ${keys.length} modules → generated.ts`)

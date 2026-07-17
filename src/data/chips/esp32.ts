@@ -1,4 +1,5 @@
 import type { Chip, Pin } from '../../types/chip'
+import { ESP32_WROOM_32_SYMBOL } from './generated'
 
 // Pre-built constraint objects reused across pins
 const ADC2_NO_WIFI = {
@@ -316,6 +317,7 @@ export const esp32: Chip = {
     'GPIO15 (MTDO) must be HIGH at boot to suppress startup log on UART0.',
   ],
   packageLayout: WROOM32_LAYOUT,
+  symbolLayout: ESP32_WROOM_32_SYMBOL,
   module: {
     name: 'ESP32-WROOM-32',
     form: 'wroom',

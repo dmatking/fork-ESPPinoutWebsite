@@ -1,5 +1,6 @@
 import type { Chip } from '../../types/chip'
 import { WROOM32_LAYOUT, ESP32_BASE_PINS } from './esp32'
+import { ESP32_WROVER_E_SYMBOL } from './generated'
 
 const PSRAM_RESERVED = {
   id: 'psram_reserved' as const,
@@ -32,6 +33,7 @@ export const esp32wrover: Chip = {
     'GPIO12 must be LOW at boot for 3.3 V flash.',
   ],
   packageLayout: WROVER_LAYOUT,
+  symbolLayout: ESP32_WROVER_E_SYMBOL,
   module: {
     name: 'ESP32-WROVER-E',
     form: 'wrover',

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
-import type { Pin, Chip, LayoutPin } from '../../types/chip'
+import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
 import { AFFECTED_WORD, resolveModule } from './shared'
 
 // ─── EDA sheet palette (KiCad Eeschema classic) ───────────────────────────────
@@ -17,10 +17,11 @@ const NAME_TEAL   = '#0e7476'
 const TEXT_DARK   = '#3a362e'
 const DIM         = '#a09a8a'
 
-const PITCH = 26          // pin pitch on the symbol
-const PL    = 46          // pin (stub) length
-const BW    = 216         // symbol body width
-const FONT  = "'Segoe UI','Helvetica Neue',Arial,sans-serif"
+const PITCH  = 26         // horizontal-pin pitch
+const HPITCH = 30         // vertical-pin pitch along top/bottom edges
+const PL     = 46         // pin (stub) length
+const VPL    = 36         // vertical pin length
+const FONT   = "'Segoe UI','Helvetica Neue',Arial,sans-serif"
 
 // Function-name → annotation text color on the light sheet.
 function fnColor(name: string): string {
@@ -49,19 +50,24 @@ function pinNameColor(label: string): string {
   return NAME_TEAL
 }
 
-// ─── Bank building (logical ordering, all four physical edges folded in) ──────
+// ─── Rows ─────────────────────────────────────────────────────────────────────
 
 interface SchemRow {
   key: string
-  pinNumber?: number
+  pinNums: number[]
   pin?: Pin
   label?: string
-  pads?: number[]      // collapsed group: every physical pad number in it
 }
 
-function buildBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[] } {
-  const pinByGpio = new Map(chip.pins.map(p => [p.gpio, p]))
+function toRow(sp: SymbolPin, pinByGpio: Map<number, Pin>, i: number): SchemRow {
+  return sp.gpio !== undefined
+    ? { key: `g${sp.gpio}-${i}`, pinNums: sp.pins, pin: pinByGpio.get(sp.gpio), label: sp.gpio !== undefined && !pinByGpio.get(sp.gpio) ? `GPIO${sp.gpio}` : undefined }
+    : { key: `s${sp.pins[0]}-${i}`, pinNums: sp.pins, label: sp.label ?? 'NC' }
+}
 
+// Fallback for chips without an official symbol: power/EN left-top, GPIOs ascending.
+function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: SchemRow[]; bottom: SchemRow[] } {
+  const pinByGpio = new Map(chip.pins.map(p => [p.gpio, p]))
   let pads: LayoutPin[]
   if (chip.packageLayout) {
     const L = chip.packageLayout
@@ -69,84 +75,79 @@ function buildBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[] } {
   } else {
     pads = [...chip.pins].sort((a, b) => a.gpio - b.gpio).map((p, i) => ({ pinNumber: i + 1, gpio: p.gpio }))
   }
-
   const gpioRows: SchemRow[] = []
-  const powerRows: SchemRow[] = []
-  const ctrlRows: SchemRow[] = []
-  const otherRows: SchemRow[] = []
-  const gndPads: number[] = []
-  const ncPads: number[] = []
+  const extras: SchemRow[] = []
+  const gnd: number[] = []
+  const nc: number[] = []
   const seen = new Set<number>()
-
   for (const lp of pads) {
     if (lp.gpio !== undefined) {
       if (seen.has(lp.gpio)) continue
       seen.add(lp.gpio)
-      gpioRows.push({ key: `g${lp.gpio}`, pinNumber: lp.pinNumber, pin: pinByGpio.get(lp.gpio) })
+      gpioRows.push({ key: `g${lp.gpio}`, pinNums: [lp.pinNumber], pin: pinByGpio.get(lp.gpio) })
       continue
     }
     const l = (lp.label ?? 'NC').toUpperCase()
-    if (l === 'GND')                                     gndPads.push(lp.pinNumber)
-    else if (l === 'NC')                                 ncPads.push(lp.pinNumber)
-    else if (/^3V3$|^VCC|^5V$|^VIN|^VBUS|^3\.3V$/.test(l)) powerRows.push({ key: `s${lp.pinNumber}`, pinNumber: lp.pinNumber, label: lp.label })
-    else if (/^EN$|^RST|^RESET|^CHIP_PU/.test(l))        ctrlRows.push({ key: `s${lp.pinNumber}`, pinNumber: lp.pinNumber, label: lp.label })
-    else                                                 otherRows.push({ key: `s${lp.pinNumber}`, pinNumber: lp.pinNumber, label: lp.label })
+    if (l === 'GND') gnd.push(lp.pinNumber)
+    else if (l === 'NC') nc.push(lp.pinNumber)
+    else extras.push({ key: `s${lp.pinNumber}`, pinNums: [lp.pinNumber], label: lp.label })
   }
-
   gpioRows.sort((a, b) => (a.pin?.gpio ?? 999) - (b.pin?.gpio ?? 999))
-
-  const leftExtras = [...powerRows, ...ctrlRows]
-  const rightExtras: SchemRow[] = [...otherRows]
-  if (gndPads.length) rightExtras.push({ key: 'gnd', label: 'GND', pads: gndPads.sort((a, b) => a - b) })
-  if (ncPads.length)  rightExtras.push({ key: 'nc',  label: 'NC',  pads: ncPads.sort((a, b) => a - b) })
-
+  const tail: SchemRow[] = []
+  if (gnd.length) tail.push({ key: 'gnd', pinNums: gnd.sort((a, b) => a - b), label: 'GND' })
+  if (nc.length)  tail.push({ key: 'nc',  pinNums: nc.sort((a, b) => a - b),  label: 'NC' })
   const G = gpioRows.length
-  let leftG = Math.ceil((G + rightExtras.length - leftExtras.length) / 2)
-  leftG = Math.max(0, Math.min(G, leftG))
-
+  const leftG = Math.max(0, Math.min(G, Math.ceil((G + tail.length - extras.length) / 2)))
   return {
-    left:  [...leftExtras, ...gpioRows.slice(0, leftG)],
-    right: [...gpioRows.slice(leftG), ...rightExtras],
+    left: [...extras, ...gpioRows.slice(0, leftG)],
+    right: [...gpioRows.slice(leftG), ...tail],
+    top: [], bottom: [],
   }
 }
 
 // ─── Annotation segments (net-label style text outside the pin) ───────────────
 
-interface Seg { text: string; color: string; bold?: boolean }
+interface Seg {
+  text: string
+  color: string
+  bold?: boolean
+  chipFill?: string    // filled warning-chip background (drawn as a rect)
+}
 
 function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
   const segs: Seg[] = []
-  if (mappingLabel) segs.push({ text: mappingLabel, color: '#15803d', bold: true })
+  if (mappingLabel) segs.push({ text: mappingLabel, color: '#fff', bold: true, chipFill: '#15803d' })
   const { pin } = row
-  if (pin) {
-    // Constraint markers first (closest to the outside), deduped by word.
-    const seenWords = new Set<string>()
-    for (const c of pin.constraints) {
-      const word = AFFECTED_WORD[c.id] ?? 'Note'
-      if (seenWords.has(word)) continue
-      seenWords.add(word)
-      segs.push({
-        text: `${c.severity === 'danger' ? '✕' : '⚠'}${word}`,
-        color: c.severity === 'danger' ? '#b91c1c' : '#b45309',
-        bold: true,
-      })
-    }
-    // Alternate functions (the GPIO name itself lives inside the body).
-    const primary = pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]
-    for (const n of pin.names) {
-      if (n === primary) continue
-      segs.push({ text: n, color: fnColor(n) })
-    }
-  } else if (row.pads) {
-    const shown = row.pads.slice(0, 6)
-    const rest = row.pads.length - shown.length
-    segs.push({ text: `×${row.pads.length} · pads ${shown.join(',')}${rest > 0 ? ` +${rest}` : ''}`, color: DIM })
+  if (!pin) return segs
+  const seenWords = new Set<string>()
+  for (const c of pin.constraints) {
+    const word = AFFECTED_WORD[c.id] ?? 'Note'
+    if (seenWords.has(word)) continue
+    seenWords.add(word)
+    segs.push({
+      text: `${c.severity === 'danger' ? '✕' : '⚠'} ${word}`,
+      color: '#fff',
+      bold: true,
+      chipFill: c.severity === 'danger' ? '#dc2626' : '#d97706',
+    })
+  }
+  const primary = pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]
+  for (const n of pin.names) {
+    if (n === primary) continue
+    segs.push({ text: n, color: fnColor(n) })
   }
   return segs
 }
 
-const segW = (s: Seg) => s.text.length * 6.1 + 9
+const segW = (s: Seg) => s.text.length * 6.1 + (s.chipFill ? 16 : 9)
 const segsW = (segs: Seg[]) => segs.reduce((a, s) => a + segW(s), 0)
+
+const rowName = (row: SchemRow) =>
+  row.pin
+    ? (row.pin.names.find(n => /^GPIO\d/.test(n)) ?? row.pin.names[0] ?? `IO${row.pin.gpio}`)
+    : (row.label ?? 'NC')
+
+const numText = (row: SchemRow) => (row.pinNums.length > 3 ? `×${row.pinNums.length}` : row.pinNums.join(','))
 
 // ─── Diagram ──────────────────────────────────────────────────────────────────
 
@@ -154,55 +155,82 @@ export function SchematicDiagram() {
   const { chip, selectedPin, setSelectedPin, filter, mapping } = useApp()
   const filteredSet = new Set(filterPins(chip.pins, filter).map(p => p.gpio))
   const m = resolveModule(chip)
-  const { left, right } = buildBanks(chip)
+  const pinByGpio = new Map(chip.pins.map(p => [p.gpio, p]))
+
+  const sym = chip.symbolLayout
+  const banks = sym
+    ? {
+        left:   sym.left.map((p, i) => toRow(p, pinByGpio, i)),
+        right:  sym.right.map((p, i) => toRow(p, pinByGpio, i)),
+        top:    (sym.top ?? []).map((p, i) => toRow(p, pinByGpio, i)),
+        bottom: (sym.bottom ?? []).map((p, i) => toRow(p, pinByGpio, i)),
+      }
+    : fallbackBanks(chip)
 
   const mapLabel = (row: SchemRow) => (row.pin ? mapping.find(a => a.gpio === row.pin!.gpio)?.label : undefined)
 
-  const leftAW  = Math.min(320, Math.max(150, ...left.map(r => segsW(rowSegments(r, mapLabel(r))))))
-  const rightAW = Math.min(320, Math.max(150, ...right.map(r => segsW(rowSegments(r, mapLabel(r))))))
+  const leftAW  = Math.min(330, Math.max(140, ...banks.left.map(r => segsW(rowSegments(r, mapLabel(r))))))
+  const rightAW = Math.min(330, Math.max(140, ...banks.right.map(r => segsW(rowSegments(r, mapLabel(r))))))
 
   const FRAME_I = 22
-  const CX0  = FRAME_I + 24
-  const TOPY = FRAME_I + 46
+  const CX0 = FRAME_I + 24
 
-  const maxRows = Math.max(left.length, right.length)
+  const hasTop = banks.top.length > 0
+  const hasBottom = banks.bottom.length > 0
+  const TOPY = FRAME_I + 40 + (hasTop ? VPL + 14 : 8)
+
+  const maxRows = Math.max(banks.left.length, banks.right.length)
   const bodyH = maxRows * PITCH + 26
+  const BW = Math.max(216, (Math.max(banks.top.length, banks.bottom.length) + 1) * HPITCH)
   const bodyX = CX0 + leftAW + PL
   const rowCY = (i: number) => TOPY + 20 + i * PITCH
+  const colCX = (i: number, count: number) => bodyX + BW / 2 + (i - (count - 1) / 2) * HPITCH
 
   const TB_W = 292, TB_H = 66
   const svgW = bodyX + BW + PL + rightAW + 24 + FRAME_I
-  const svgH = TOPY + bodyH + 44 + TB_H + 18 + FRAME_I
+  const svgH = TOPY + bodyH + (hasBottom ? VPL + 12 : 0) + 44 + TB_H + 18 + FRAME_I
 
   const toggle = (pin: Pin | undefined) => {
     if (!pin) return
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
   }
 
-  // ── One symbol pin + its annotations ──
+  const rowTitle = (row: SchemRow): string | null => {
+    if (row.pin) {
+      return row.pin.names.join(' / ')
+        + (row.pinNums.length > 1 ? ` — pads ${row.pinNums.join(', ')}` : '')
+        + (row.pin.constraints.length ? ' — ' + row.pin.constraints.map(c => c.title).join(' · ') : '')
+    }
+    if (row.pinNums.length > 1) return `${row.label} — pads ${row.pinNums.join(', ')}`
+    return null
+  }
+
+  // ── Horizontal pin (left/right banks) ──
   const renderRow = (row: SchemRow, i: number, side: 'left' | 'right'): ReactNode => {
     const cy = rowCY(i)
     const isLeft = side === 'left'
     const edgeX = isLeft ? bodyX : bodyX + BW
     const tipX  = isLeft ? edgeX - PL : edgeX + PL
     const segs = rowSegments(row, mapLabel(row))
-
-    const name = row.pin
-      ? (row.pin.names.find(n => /^GPIO\d/.test(n)) ?? row.pin.names[0] ?? `IO${row.pin.gpio}`)
-      : (row.label ?? 'NC')
-
+    const name = rowName(row)
     const isSelected = !!row.pin && selectedPin?.gpio === row.pin.gpio
     const isActive = !row.pin || filteredSet.has(row.pin.gpio)
+    const title = rowTitle(row)
 
-    // annotations run outward from the pin tip
     let ax = isLeft ? tipX - 8 : tipX + 8
     const annots = segs.map((s, k) => {
+      const w = segW(s)
+      const x0 = isLeft ? ax - w : ax
       const el = (
-        <text key={k} x={ax} y={cy + 3.5} fontSize="10" fontFamily={FONT}
-          fontWeight={s.bold ? 700 : 400} fill={s.color}
-          textAnchor={isLeft ? 'end' : 'start'}>{s.text}</text>
+        <g key={k}>
+          {s.chipFill && (
+            <rect x={x0 + 1} y={cy - 8} width={w - 5} height={16} rx="3" fill={s.chipFill} />
+          )}
+          <text x={x0 + (w - 4) / 2} y={cy + 3.5} fontSize="10" fontFamily={FONT}
+            fontWeight={s.bold ? 700 : 400} fill={s.color} textAnchor="middle">{s.text}</text>
+        </g>
       )
-      ax += (isLeft ? -1 : 1) * segW(s)
+      ax += (isLeft ? -1 : 1) * w
       return el
     })
 
@@ -213,29 +241,50 @@ export function SchematicDiagram() {
       <g key={row.key} className={row.pin ? 'sch-row' : undefined}
         opacity={isActive ? 1 : 0.13}
         onClick={() => toggle(row.pin)}>
-        {row.pin ? (
-          <title>
-            {row.pin.names.join(' / ')}
-            {row.pin.constraints.length ? ' — ' + row.pin.constraints.map(c => c.title).join(' · ') : ''}
-          </title>
-        ) : row.pads ? (
-          <title>{`${row.label} pads: ${row.pads.join(', ')}`}</title>
-        ) : null}
-        {/* hover / selection background */}
+        {title && <title>{title}</title>}
         <rect className="sch-hit" x={hitX} y={cy - PITCH / 2} width={hitW} height={PITCH}
           fill={isSelected ? 'rgba(37,99,235,0.14)' : 'transparent'}
           stroke={isSelected ? '#2563eb' : 'none'} strokeWidth="1" strokeDasharray={isSelected ? '3 2' : undefined} />
-        {/* pin stub */}
         <line x1={edgeX} y1={cy} x2={tipX} y2={cy} stroke={PIN_COLOR} strokeWidth="1.5" />
         <circle cx={tipX} cy={cy} r="1.8" fill="none" stroke={PIN_COLOR} strokeWidth="1" />
-        {/* pin number above the stub */}
         <text x={(edgeX + tipX) / 2} y={cy - 4} fontSize="8.5" fontFamily={FONT} fill={PINNUM}
-          textAnchor="middle">{row.pads ? `×${row.pads.length}` : row.pinNumber}</text>
-        {/* pin name inside the body */}
+          textAnchor="middle">{numText(row)}</text>
         <text x={isLeft ? edgeX + 7 : edgeX - 7} y={cy + 3.5} fontSize="10.5" fontFamily={FONT}
           fontWeight={600} fill={pinNameColor(name)}
           textAnchor={isLeft ? 'start' : 'end'}>{name}</text>
         {annots}
+      </g>
+    )
+  }
+
+  // ── Vertical pin (top/bottom edges — power/GND/NC in the official symbols) ──
+  const renderVRow = (row: SchemRow, i: number, edge: 'top' | 'bottom'): ReactNode => {
+    const count = edge === 'top' ? banks.top.length : banks.bottom.length
+    const cx = colCX(i, count)
+    const isTop = edge === 'top'
+    const edgeY = isTop ? TOPY : TOPY + bodyH
+    const tipY  = isTop ? edgeY - VPL : edgeY + VPL
+    const name = rowName(row)
+    const isSelected = !!row.pin && selectedPin?.gpio === row.pin.gpio
+    const isActive = !row.pin || filteredSet.has(row.pin.gpio)
+    const title = rowTitle(row)
+
+    return (
+      <g key={row.key} className={row.pin ? 'sch-row' : undefined}
+        opacity={isActive ? 1 : 0.13}
+        onClick={() => toggle(row.pin)}>
+        {title && <title>{title}</title>}
+        <rect className="sch-hit" x={cx - HPITCH / 2} y={Math.min(edgeY, tipY) - 4} width={HPITCH} height={VPL + 8}
+          fill={isSelected ? 'rgba(37,99,235,0.14)' : 'transparent'} />
+        <line x1={cx} y1={edgeY} x2={cx} y2={tipY} stroke={PIN_COLOR} strokeWidth="1.5" />
+        <circle cx={cx} cy={tipY} r="1.8" fill="none" stroke={PIN_COLOR} strokeWidth="1" />
+        <text x={cx + 4} y={isTop ? edgeY - VPL / 2 + 3 : edgeY + VPL / 2 + 3} fontSize="8.5"
+          fontFamily={FONT} fill={PINNUM}>{numText(row)}</text>
+        {/* pin name inside the body, rotated (KiCad-style vertical pin) */}
+        <text transform={`rotate(-90 ${cx} ${isTop ? edgeY + 8 : edgeY - 8})`}
+          x={cx} y={isTop ? edgeY + 8 : edgeY - 8} dy="3.5" fontSize="10.5" fontFamily={FONT}
+          fontWeight={600} fill={pinNameColor(name)}
+          textAnchor={isTop ? 'end' : 'start'}>{name}</text>
       </g>
     )
   }
@@ -273,6 +322,7 @@ export function SchematicDiagram() {
   const tbX = svgW - FRAME_I - TB_W
   const tbY = svgH - FRAME_I - TB_H
   const today = new Date().toISOString().slice(0, 10)
+  const valueY = TOPY + bodyH + (hasBottom ? VPL + 12 : 0)
 
   return (
     <div className="p-4 pb-3 overflow-x-auto">
@@ -295,18 +345,20 @@ export function SchematicDiagram() {
         {frameRefs}
 
         {/* reference designator + symbol body */}
-        <text x={bodyX} y={TOPY - 10} fontSize="12" fontFamily={FONT} fontWeight={600} fill={NAME_TEAL}>U1</text>
+        <text x={bodyX - 4} y={TOPY - (hasTop ? VPL + 8 : 10)} fontSize="12" fontFamily={FONT} fontWeight={600} fill={NAME_TEAL}>U1</text>
         <rect x={bodyX} y={TOPY} width={BW} height={bodyH} fill={BODY_FILL} stroke={BODY_STROKE} strokeWidth="2" />
 
         {/* value (module name) under the body */}
-        <text x={bodyX + BW / 2} y={TOPY + bodyH + 18} fontSize="12" fontFamily={FONT} fontWeight={600}
+        <text x={bodyX + BW / 2} y={valueY + 22} fontSize="12" fontFamily={FONT} fontWeight={600}
           fill={NAME_TEAL} textAnchor="middle">{m.name}</text>
-        <text x={bodyX + BW / 2} y={TOPY + bodyH + 33} fontSize="9" fontFamily={FONT}
+        <text x={bodyX + BW / 2} y={valueY + 37} fontSize="9" fontFamily={FONT}
           fill={FRAME} textAnchor="middle">{m.arch} · {m.radios}</text>
 
         {/* pins */}
-        {left.map((row, i) => renderRow(row, i, 'left'))}
-        {right.map((row, i) => renderRow(row, i, 'right'))}
+        {banks.left.map((row, i) => renderRow(row, i, 'left'))}
+        {banks.right.map((row, i) => renderRow(row, i, 'right'))}
+        {banks.top.map((row, i) => renderVRow(row, i, 'top'))}
+        {banks.bottom.map((row, i) => renderVRow(row, i, 'bottom'))}
 
         {/* title block */}
         <g>
@@ -329,7 +381,9 @@ export function SchematicDiagram() {
         </g>
       </svg>
       <p className="text-center font-mono" style={{ fontSize: 9, color: '#3d5068', marginTop: 8 }}>
-        Logical symbol — GPIOs in ascending order, GND/NC pads collapsed. Pin numbers are the physical pads on the module.
+        {sym
+          ? 'Official Espressif schematic symbol (KiCad library) — stacked GND pins merged; numbers are the physical pads.'
+          : 'Logical symbol — GPIOs in ascending order. Pin numbers are the physical pads on the module.'}
       </p>
     </div>
   )
