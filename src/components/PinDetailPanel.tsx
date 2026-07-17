@@ -3,7 +3,7 @@ import { ConstraintBadge } from './ConstraintBadge'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
   adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, channel 1. Safe to use while WiFi is active.' },
-  adc2:  { label: 'ADC2',  desc: 'Analog-to-digital converter, channel 2. Shared with WiFi driver — readings fail while WiFi is on.' },
+  adc2:  { label: 'ADC2',  desc: 'Analog-to-digital converter, channel 2. Shared with WiFi driver - readings fail while WiFi is on.' },
   dac:   { label: 'DAC',   desc: 'Digital-to-analog converter. True analog output (not PWM).' },
   touch: { label: 'Touch', desc: 'Capacitive touch sensor input.' },
   pwm:   { label: 'PWM',   desc: 'Pulse-width modulation via LEDC or MCPWM. Can drive LEDs, servos, buzzers.' },
@@ -11,7 +11,7 @@ const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
   spi:   { label: 'SPI',   desc: 'SPI bus. Can be remapped to any GPIO.' },
   uart:  { label: 'UART',  desc: 'Serial/UART. Multiple UARTs available, pins can be remapped.' },
   i2s:   { label: 'I2S',   desc: 'I2S audio bus.' },
-  rtc:   { label: 'RTC',   desc: 'RTC GPIO — usable during deep sleep for wakeup.' },
+  rtc:   { label: 'RTC',   desc: 'RTC GPIO - usable during deep sleep for wakeup.' },
   usb:   { label: 'USB',   desc: 'Native USB data line. Tied to internal USB controller.' },
   jtag:  { label: 'JTAG',  desc: 'JTAG debug interface.' },
 }

@@ -53,9 +53,11 @@ function symbolGeometry(n) {
   sides.left.sort((a, b) => b.y - a.y); sides.right.sort((a, b) => b.y - a.y)
   sides.bottom.sort((a, b) => a.x - b.x); sides.top.sort((a, b) => a.x - b.x)
   const sp = pin => {
-    const g = pin.name.toUpperCase().match(/GPIO(\d+)/)
+    const g = pin.name.toUpperCase().match(/GPIO(\d+)|(?:^|\/)IO(\d+)/)
     pin.nums.sort((a, b) => a - b)
-    return g ? { pins: pin.nums, gpio: +g[1] } : { pins: pin.nums, label: specialLabel(pin.name) }
+    return g
+      ? { pins: pin.nums, gpio: +(g[1] ?? g[2]), name: pin.name }
+      : { pins: pin.nums, label: specialLabel(pin.name), name: pin.name }
   }
   return {
     left: sides.left.map(sp), right: sides.right.map(sp),
@@ -189,7 +191,10 @@ const MODULES = [
 
 function fmtSymPin(p) {
   const nums = `[${p.pins.join(',')}]`
-  return p.gpio !== undefined ? `{ pins: ${nums}, gpio: ${p.gpio} }` : `{ pins: ${nums}, label: '${p.label}' }`
+  const nm = JSON.stringify(p.name)
+  return p.gpio !== undefined
+    ? `{ pins: ${nums}, gpio: ${p.gpio}, name: ${nm} }`
+    : `{ pins: ${nums}, label: '${p.label}', name: ${nm} }`
 }
 function fmtSym(sym) {
   let s = `{\n  left: [${sym.left.map(fmtSymPin).join(', ')}],\n  right: [${sym.right.map(fmtSymPin).join(', ')}],\n`
@@ -204,7 +209,7 @@ function fmtArr(a) {
   return '[' + a.map(p => p.gpio !== undefined ? `{ pinNumber: ${p.pinNumber}, gpio: ${p.gpio} }` : `{ pinNumber: ${p.pinNumber}, label: '${p.label}' }`).join(', ') + ']'
 }
 
-let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).\n// Do NOT edit by hand — run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
+let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).\n// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
 out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as const, title: 'Input only', description: 'This pin has no output driver or internal pull resistors. Use only as a digital/analog input.' }\n`
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`

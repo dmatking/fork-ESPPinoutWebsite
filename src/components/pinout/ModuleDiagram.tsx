@@ -123,7 +123,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
       {layoutPin.pinNumber}
     </div>
   )
-  // Compact icon-only constraint marker — the vertical word chips were unreadable
+  // Compact icon-only constraint marker - the vertical word chips were unreadable
   // at this size; the full detail lives in the pin panel and the side rows.
   const warnIcon = warn ? (
     <span title={warn.title} className="font-mono font-bold rounded-sm flex items-center justify-center flex-shrink-0"
@@ -170,7 +170,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
 
 // ─── SVG Chip body ────────────────────────────────────────────────────────────
 
-// Square-wave serpentine — reads as an etched meander PCB antenna trace.
+// Square-wave serpentine - reads as an etched meander PCB antenna trace.
 function meanderPath(x0: number, x1: number, yTop: number, yBot: number): string {
   const teeth = Math.max(5, Math.round((x1 - x0) / 11))
   const w = (x1 - x0) / teeth
@@ -232,7 +232,7 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
   // Branding band sits in the upper third so the metal reads as a real lid below it.
   const brandY = shieldTop + Math.min(shieldH * 0.34, 86)
 
-  // Spot-weld dimple ring — the signature detail of a real RF shield can lid.
+  // Spot-weld dimple ring - the signature detail of a real RF shield can lid.
   const dimples: ReactNode[] = []
   {
     const inset = 6
@@ -477,7 +477,7 @@ export function ModuleDiagram() {
 
   const isBoard    = chip.module?.form === 'board'
 
-  // A "top" row that is entirely GND/NC isn't a real top edge of signals — these are
+  // A "top" row that is entirely GND/NC isn't a real top edge of signals - these are
   // the module's underside ground lands (plus the separate thermal/EPAD), all GND.
   // Render them as one compact bar rather than a row of identical floating columns.
   const topIsThermal = topLayout.length > 0 &&
@@ -494,7 +494,7 @@ export function ModuleDiagram() {
     <div className="p-4 pb-2 overflow-x-auto">
       <div className="flex flex-col items-center min-w-fit mx-auto">
 
-        {/* ── Exposed thermal pad (EPAD) — a ground paddle on the back, not an edge ── */}
+        {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}
         {topIsThermal && (
           <div className="flex justify-center" style={{ width: chipWidth, marginBottom: 4 }}>
             <div className="flex items-center gap-2 rounded-md"

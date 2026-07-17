@@ -1,5 +1,5 @@
 // AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).
-// Do NOT edit by hand — run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
+// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 // Pin names and physical pad layout are authoritative (datasheet-equivalent).
 import type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'
 
@@ -9,17 +9,17 @@ const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, t
 const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }
 
 export const ESP32_WROOM_32_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 32 }, { pins: [9], gpio: 33 }, { pins: [14], gpio: 12 }, { pins: [16], gpio: 13 }, { pins: [13], gpio: 14 }, { pins: [23], gpio: 15 }, { pins: [6], gpio: 34 }, { pins: [7], gpio: 35 }, { pins: [4], gpio: 36 }, { pins: [5], gpio: 39 }],
-  right: [{ pins: [35], gpio: 1 }, { pins: [34], gpio: 3 }, { pins: [25], gpio: 0 }, { pins: [24], gpio: 2 }, { pins: [26], gpio: 4 }, { pins: [29], gpio: 5 }, { pins: [27], gpio: 16 }, { pins: [28], gpio: 17 }, { pins: [30], gpio: 18 }, { pins: [31], gpio: 19 }, { pins: [33], gpio: 21 }, { pins: [36], gpio: 22 }, { pins: [37], gpio: 23 }, { pins: [10], gpio: 25 }, { pins: [11], gpio: 26 }, { pins: [12], gpio: 27 }],
-  bottom: [{ pins: [1,15,38], label: 'GND' }, { pins: [39], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [9], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [14], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [16], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [13], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [23], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [6], gpio: 34, name: "GPIO34/ADC1_CH6" }, { pins: [7], gpio: 35, name: "GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
+  right: [{ pins: [35], gpio: 1, name: "U0TXD/GPIO1" }, { pins: [34], gpio: 3, name: "U0RXD/GPIO3" }, { pins: [25], gpio: 0, name: "GPIO0/BOOT/ADC2_CH1" }, { pins: [24], gpio: 2, name: "ADC2_CH2/GPIO2" }, { pins: [26], gpio: 4, name: "ADC2_CH0/GPIO4" }, { pins: [29], gpio: 5, name: "GPIO5" }, { pins: [27], gpio: 16, name: "GPIO16" }, { pins: [28], gpio: 17, name: "GPIO17" }, { pins: [30], gpio: 18, name: "GPIO18" }, { pins: [31], gpio: 19, name: "GPIO19" }, { pins: [33], gpio: 21, name: "GPIO21" }, { pins: [36], gpio: 22, name: "GPIO22" }, { pins: [37], gpio: 23, name: "GPIO23" }, { pins: [10], gpio: 25, name: "DAC_1/ADC2_CH8/GPIO25" }, { pins: [11], gpio: 26, name: "DAC_2/ADC2_CH9/GPIO26" }, { pins: [12], gpio: 27, name: "ADC2_CH7/GPIO27" }],
+  bottom: [{ pins: [1,15,38], label: 'GND', name: "GND" }, { pins: [39], label: 'GND', name: "GND_THERMAL" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const ESP32_WROVER_E_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 32 }, { pins: [9], gpio: 33 }, { pins: [14], gpio: 12 }, { pins: [16], gpio: 13 }, { pins: [13], gpio: 14 }, { pins: [23], gpio: 15 }, { pins: [6], gpio: 34 }, { pins: [7], gpio: 35 }, { pins: [4], gpio: 36 }, { pins: [5], gpio: 39 }],
-  right: [{ pins: [35], gpio: 1 }, { pins: [34], gpio: 3 }, { pins: [25], gpio: 0 }, { pins: [24], gpio: 2 }, { pins: [26], gpio: 4 }, { pins: [29], gpio: 5 }, { pins: [30], gpio: 18 }, { pins: [31], gpio: 19 }, { pins: [33], gpio: 21 }, { pins: [36], gpio: 22 }, { pins: [37], gpio: 23 }, { pins: [10], gpio: 25 }, { pins: [11], gpio: 26 }, { pins: [12], gpio: 27 }],
-  bottom: [{ pins: [1,15,38], label: 'GND' }, { pins: [39], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [9], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [14], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [16], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [13], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [23], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [6], gpio: 34, name: "GPIO34/ADC1_CH6" }, { pins: [7], gpio: 35, name: "GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
+  right: [{ pins: [35], gpio: 1, name: "U0TXD/GPIO1" }, { pins: [34], gpio: 3, name: "U0RXD/GPIO3" }, { pins: [25], gpio: 0, name: "GPIO0/BOOT/ADC2_CH1" }, { pins: [24], gpio: 2, name: "ADC2_CH2/GPIO2" }, { pins: [26], gpio: 4, name: "ADC2_CH0/GPIO4" }, { pins: [29], gpio: 5, name: "GPIO5" }, { pins: [30], gpio: 18, name: "GPIO18" }, { pins: [31], gpio: 19, name: "GPIO19" }, { pins: [33], gpio: 21, name: "GPIO21" }, { pins: [36], gpio: 22, name: "GPIO22" }, { pins: [37], gpio: 23, name: "GPIO23" }, { pins: [10], gpio: 25, name: "DAC_1/ADC2_CH8/GPIO25" }, { pins: [11], gpio: 26, name: "DAC_2/ADC2_CH9/GPIO26" }, { pins: [12], gpio: 27, name: "ADC2_CH7/GPIO27" }],
+  bottom: [{ pins: [1,15,38], label: 'GND', name: "GND" }, { pins: [39], label: 'GND', name: "GND_THERMAL" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const ESP32_WROOM_DA_PINS: Pin[] = [
@@ -57,10 +57,10 @@ export const ESP32_WROOM_DA_LAYOUT: PackageLayout = {
 }
 
 export const ESP32_WROOM_DA_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 32 }, { pins: [9], gpio: 33 }, { pins: [14], gpio: 12 }, { pins: [17], gpio: 13 }, { pins: [13], gpio: 14 }, { pins: [24], gpio: 15 }, { pins: [6], gpio: 34 }, { pins: [7], gpio: 35 }, { pins: [4], gpio: 36 }, { pins: [5], gpio: 39 }],
-  right: [{ pins: [37], gpio: 1 }, { pins: [36], gpio: 3 }, { pins: [27], gpio: 0 }, { pins: [28], gpio: 4 }, { pins: [31], gpio: 5 }, { pins: [29], gpio: 16 }, { pins: [30], gpio: 17 }, { pins: [32], gpio: 18 }, { pins: [33], gpio: 19 }, { pins: [35], gpio: 21 }, { pins: [38], gpio: 22 }, { pins: [39], gpio: 23 }, { pins: [11], gpio: 26 }, { pins: [12], gpio: 27 }],
-  bottom: [{ pins: [1,16,40,43], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [9], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [14], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [17], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4/TOUCH4" }, { pins: [13], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [24], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3/TOUCH3" }, { pins: [6], gpio: 34, name: "GPIO34/ADC1_CH6" }, { pins: [7], gpio: 35, name: "GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
+  right: [{ pins: [37], gpio: 1, name: "GPIO1/U0TXD" }, { pins: [36], gpio: 3, name: "GPIO3/U0RXD" }, { pins: [27], gpio: 0, name: "GPIO0/ADC2_CH1" }, { pins: [28], gpio: 4, name: "GPIO4/ADC2_CH0" }, { pins: [31], gpio: 5, name: "GPIO5" }, { pins: [29], gpio: 16, name: "GPIO16" }, { pins: [30], gpio: 17, name: "GPIO17" }, { pins: [32], gpio: 18, name: "GPIO18" }, { pins: [33], gpio: 19, name: "GPIO19" }, { pins: [35], gpio: 21, name: "GPIO21" }, { pins: [38], gpio: 22, name: "GPIO22" }, { pins: [39], gpio: 23, name: "GPIO23" }, { pins: [11], gpio: 26, name: "DAC_2/ADC2_CH9/GPIO26" }, { pins: [12], gpio: 27, name: "ADC2_CH7/GPIO27" }],
+  bottom: [{ pins: [1,16,40,43], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const ESP32_MINI_1_PINS: Pin[] = [
@@ -103,10 +103,10 @@ export const ESP32_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const ESP32_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [8], label: 'EN' }, { pins: [11], gpio: 32 }, { pins: [12], gpio: 33 }, { pins: [17], gpio: 12 }, { pins: [18], gpio: 13 }, { pins: [16], gpio: 14 }, { pins: [19], gpio: 15 }, { pins: [9], gpio: 34 }, { pins: [10], gpio: 35 }, { pins: [4], gpio: 36 }, { pins: [5], gpio: 37 }, { pins: [6], gpio: 38 }, { pins: [7], gpio: 39 }, { pins: [23], label: 'NC' }, { pins: [24], label: 'NC' }, { pins: [28], label: 'NC' }, { pins: [37], label: 'NC' }],
-  right: [{ pins: [36], gpio: 1 }, { pins: [35], gpio: 3 }, { pins: [21], gpio: 0 }, { pins: [20], gpio: 2 }, { pins: [22], gpio: 4 }, { pins: [29], gpio: 5 }, { pins: [30], gpio: 18 }, { pins: [32], gpio: 19 }, { pins: [34], gpio: 21 }, { pins: [33], gpio: 22 }, { pins: [31], gpio: 23 }, { pins: [13], gpio: 25 }, { pins: [14], gpio: 26 }, { pins: [15], gpio: 27 }, { pins: [26], gpio: 10 }, { pins: [25], gpio: 9 }],
-  bottom: [{ pins: [1,2,27,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [8], label: 'EN', name: "EN/CHIP_PU" }, { pins: [11], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [12], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [17], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [18], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [16], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [19], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [9], gpio: 34, name: "VDET_1/GPIO34/ADC1_CH6" }, { pins: [10], gpio: 35, name: "VDET_2/GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 37, name: "SENSOR_CAPP/GPIO37/ADC1_CH1" }, { pins: [6], gpio: 38, name: "SENSOR_CAPN/GPIO38/ADC1_CH2" }, { pins: [7], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }, { pins: [23], label: 'NC', name: "NC" }, { pins: [24], label: 'NC', name: "NC" }, { pins: [28], label: 'NC', name: "NC" }, { pins: [37], label: 'NC', name: "NC" }],
+  right: [{ pins: [36], gpio: 1, name: "U0TXD/GPIO1" }, { pins: [35], gpio: 3, name: "U0RXD/GPIO3" }, { pins: [21], gpio: 0, name: "GPIO0/BOOT/ADC2_CH1" }, { pins: [20], gpio: 2, name: "GPIO2/ADC2_CH2" }, { pins: [22], gpio: 4, name: "GPIO4/ADC2_CH0" }, { pins: [29], gpio: 5, name: "GPIO5" }, { pins: [30], gpio: 18, name: "GPIO18" }, { pins: [32], gpio: 19, name: "GPIO19" }, { pins: [34], gpio: 21, name: "GPIO21" }, { pins: [33], gpio: 22, name: "GPIO22" }, { pins: [31], gpio: 23, name: "GPIO23" }, { pins: [13], gpio: 25, name: "GPIO25/ADC2_CH8/DAC_1" }, { pins: [14], gpio: 26, name: "GPIO26/ADC2_CH9/DAC_2" }, { pins: [15], gpio: 27, name: "GPIO27/ADC2_CH7" }, { pins: [26], gpio: 10, name: "SD_DATA3/GPIO10" }, { pins: [25], gpio: 9, name: "SD_DATA2/GPIO9" }],
+  bottom: [{ pins: [1,2,27,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const ESP32_PICO_MINI_02_PINS: Pin[] = [
@@ -148,10 +148,10 @@ export const ESP32_PICO_MINI_02_LAYOUT: PackageLayout = {
 }
 
 export const ESP32_PICO_MINI_02_SYMBOL: SymbolLayout = {
-  left: [{ pins: [8], label: 'EN' }, { pins: [12], gpio: 32 }, { pins: [13], gpio: 33 }, { pins: [19], gpio: 12 }, { pins: [20], gpio: 13 }, { pins: [18], gpio: 14 }, { pins: [21], gpio: 15 }, { pins: [9], gpio: 34 }, { pins: [10], gpio: 35 }, { pins: [4], gpio: 36 }, { pins: [5], gpio: 37 }, { pins: [6], gpio: 38 }, { pins: [7], gpio: 39 }, { pins: [25], label: 'NC' }, { pins: [32], label: 'NC' }],
-  right: [{ pins: [31], gpio: 1 }, { pins: [30], gpio: 3 }, { pins: [23], gpio: 0 }, { pins: [22], gpio: 2 }, { pins: [24], gpio: 4 }, { pins: [29], gpio: 5 }, { pins: [33], gpio: 19 }, { pins: [26], gpio: 20 }, { pins: [35], gpio: 21 }, { pins: [34], gpio: 22 }, { pins: [15], gpio: 25 }, { pins: [16], gpio: 26 }, { pins: [17], gpio: 27 }, { pins: [28], gpio: 8 }, { pins: [27], gpio: 7 }],
-  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [8], label: 'EN', name: "EN/CHIP_PU" }, { pins: [12], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [13], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [19], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [20], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [18], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [21], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [9], gpio: 34, name: "VDET_1/GPIO34/ADC1_CH6" }, { pins: [10], gpio: 35, name: "VDET_2/GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 37, name: "SENSOR_CAPP/GPIO37/ADC1_CH1" }, { pins: [6], gpio: 38, name: "SENSOR_CAPN/GPIO38/ADC1_CH2" }, { pins: [7], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }, { pins: [25], label: 'NC', name: "NC" }, { pins: [32], label: 'NC', name: "NC" }],
+  right: [{ pins: [31], gpio: 1, name: "U0TXD/GPIO1" }, { pins: [30], gpio: 3, name: "U0RXD/GPIO3" }, { pins: [23], gpio: 0, name: "GPIO0/BOOT/ADC2_CH1" }, { pins: [22], gpio: 2, name: "GPIO2/ADC2_CH2" }, { pins: [24], gpio: 4, name: "GPIO4/ADC2_CH0" }, { pins: [29], gpio: 5, name: "GPIO5" }, { pins: [33], gpio: 19, name: "GPIO19" }, { pins: [26], gpio: 20, name: "GPIO20" }, { pins: [35], gpio: 21, name: "GPIO21" }, { pins: [34], gpio: 22, name: "GPIO22" }, { pins: [15], gpio: 25, name: "GPIO25/ADC2_CH8/DAC_1" }, { pins: [16], gpio: 26, name: "GPIO26/ADC2_CH9/DAC_2" }, { pins: [17], gpio: 27, name: "GPIO27/ADC2_CH7" }, { pins: [28], gpio: 8, name: "SD_DATA_1/GPIO8" }, { pins: [27], gpio: 7, name: "SD_DATA_0/GPIO7" }],
+  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const S2_WROOM_PINS: Pin[] = [
@@ -202,10 +202,10 @@ export const S2_WROOM_LAYOUT: PackageLayout = {
 }
 
 export const S2_WROOM_SYMBOL: SymbolLayout = {
-  left: [{ pins: [41], label: 'EN' }, { pins: [18], gpio: 15 }, { pins: [19], gpio: 16 }, { pins: [33], gpio: 39 }, { pins: [34], gpio: 40 }, { pins: [35], gpio: 41 }, { pins: [36], gpio: 42 }, { pins: [40], gpio: 46 }, { pins: [25], gpio: 26 }],
-  right: [{ pins: [38], gpio: 44 }, { pins: [37], gpio: 43 }, { pins: [23], gpio: 20 }, { pins: [22], gpio: 19 }, { pins: [3], gpio: 0 }, { pins: [4], gpio: 1 }, { pins: [5], gpio: 2 }, { pins: [6], gpio: 3 }, { pins: [7], gpio: 4 }, { pins: [8], gpio: 5 }, { pins: [9], gpio: 6 }, { pins: [10], gpio: 7 }, { pins: [11], gpio: 8 }, { pins: [12], gpio: 9 }, { pins: [13], gpio: 10 }, { pins: [14], gpio: 11 }, { pins: [15], gpio: 12 }, { pins: [16], gpio: 13 }, { pins: [17], gpio: 14 }, { pins: [20], gpio: 17 }, { pins: [21], gpio: 18 }, { pins: [24], gpio: 21 }, { pins: [27], gpio: 33 }, { pins: [28], gpio: 34 }, { pins: [29], gpio: 35 }, { pins: [30], gpio: 36 }, { pins: [31], gpio: 37 }, { pins: [32], gpio: 38 }, { pins: [39], gpio: 45 }],
-  bottom: [{ pins: [1,26,42,43], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [41], label: 'EN', name: "CHIP/PU/RESET" }, { pins: [18], gpio: 15, name: "GPIO15/ADC2_CH4/XTAL_32K_P" }, { pins: [19], gpio: 16, name: "GPIO16/ADC2_CH5/XTAL_32K_N" }, { pins: [33], gpio: 39, name: "MTCK/JTAG/GPIO39" }, { pins: [34], gpio: 40, name: "MTDO/JTAG/GPIO40" }, { pins: [35], gpio: 41, name: "MTDI/JTAG/GPIO41" }, { pins: [36], gpio: 42, name: "MTMS/JTAG/GPIO42" }, { pins: [40], gpio: 46, name: "GPIO46" }, { pins: [25], gpio: 26, name: "SPI_CS1/GPIO26" }],
+  right: [{ pins: [38], gpio: 44, name: "GPIO44/U0RXD/PROG" }, { pins: [37], gpio: 43, name: "GPIO43/U0TXD/PROG" }, { pins: [23], gpio: 20, name: "USB_D+/ADC2_CH9/GPIO20" }, { pins: [22], gpio: 19, name: "USB_D-/ADC2_CH8/GPIO19" }, { pins: [3], gpio: 0, name: "GPIO0/BOOT" }, { pins: [4], gpio: 1, name: "GPIO1/ADC1_CH0" }, { pins: [5], gpio: 2, name: "GPIO2/ADC1_CH1" }, { pins: [6], gpio: 3, name: "GPIO3/ADC1_CH2" }, { pins: [7], gpio: 4, name: "GPIO4/ADC1_CH3" }, { pins: [8], gpio: 5, name: "GPIO5/ADC1_CH4" }, { pins: [9], gpio: 6, name: "GPIO6/ADC1_CH5" }, { pins: [10], gpio: 7, name: "GPIO7/ADC1_CH6" }, { pins: [11], gpio: 8, name: "GPIO8/ADC1_CH7" }, { pins: [12], gpio: 9, name: "GPIO9/ADC1_CH8" }, { pins: [13], gpio: 10, name: "GPIO10/ADC1_CH9" }, { pins: [14], gpio: 11, name: "GPIO11/ADC2_CH0" }, { pins: [15], gpio: 12, name: "GPIO12/ADC2_CH1" }, { pins: [16], gpio: 13, name: "GPIO13/ADC2_CH2" }, { pins: [17], gpio: 14, name: "GPIO14/ADC2_CH3" }, { pins: [20], gpio: 17, name: "ADC2_CH6/DAC_1/GPIO17" }, { pins: [21], gpio: 18, name: "ADC2_CH7/DAC_2/GPIO18" }, { pins: [24], gpio: 21, name: "GPIO21" }, { pins: [27], gpio: 33, name: "GPIO33" }, { pins: [28], gpio: 34, name: "GPIO34" }, { pins: [29], gpio: 35, name: "GPIO35" }, { pins: [30], gpio: 36, name: "GPIO36" }, { pins: [31], gpio: 37, name: "GPIO37" }, { pins: [32], gpio: 38, name: "GPIO38" }, { pins: [39], gpio: 45, name: "GPIO45" }],
+  bottom: [{ pins: [1,26,42,43], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const S2_MINI_1_PINS: Pin[] = [
@@ -257,10 +257,10 @@ export const S2_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const S2_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [45], label: 'EN' }, { pins: [19], gpio: 15 }, { pins: [20], gpio: 16 }, { pins: [35], gpio: 39 }, { pins: [36], gpio: 40 }, { pins: [37], gpio: 41 }, { pins: [38], gpio: 42 }, { pins: [44], gpio: 46 }, { pins: [26], gpio: 26 }, { pins: [27], label: 'NC' }],
-  right: [{ pins: [39], gpio: 43 }, { pins: [40], gpio: 44 }, { pins: [24], gpio: 20 }, { pins: [23], gpio: 19 }, { pins: [4], gpio: 0 }, { pins: [5], gpio: 1 }, { pins: [6], gpio: 2 }, { pins: [7], gpio: 3 }, { pins: [8], gpio: 4 }, { pins: [9], gpio: 5 }, { pins: [10], gpio: 6 }, { pins: [11], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [13], gpio: 9 }, { pins: [14], gpio: 10 }, { pins: [15], gpio: 11 }, { pins: [16], gpio: 12 }, { pins: [17], gpio: 13 }, { pins: [18], gpio: 14 }, { pins: [21], gpio: 17 }, { pins: [22], gpio: 18 }, { pins: [25], gpio: 21 }, { pins: [28], gpio: 33 }, { pins: [29], gpio: 34 }, { pins: [31], gpio: 35 }, { pins: [32], gpio: 36 }, { pins: [33], gpio: 37 }, { pins: [34], gpio: 38 }, { pins: [41], gpio: 45 }],
-  bottom: [{ pins: [1,2,30,42,43,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [45], label: 'EN', name: "CHIP/PU/RESET" }, { pins: [19], gpio: 15, name: "GPIO15/ADC2_CH4/XTAL_32K_P" }, { pins: [20], gpio: 16, name: "GPIO16/ADC2_CH5/XTAL_32K_N" }, { pins: [35], gpio: 39, name: "MTCK/JTAG/GPIO39" }, { pins: [36], gpio: 40, name: "MTDO/JTAG/GPIO40" }, { pins: [37], gpio: 41, name: "MTDI/JTAG/GPIO41" }, { pins: [38], gpio: 42, name: "MTMS/JTAG/GPIO42" }, { pins: [44], gpio: 46, name: "GPIO46" }, { pins: [26], gpio: 26, name: "SPI_CS1/GPIO26" }, { pins: [27], label: 'NC', name: "NC" }],
+  right: [{ pins: [39], gpio: 43, name: "GPIO43/U0TXD/PROG" }, { pins: [40], gpio: 44, name: "GPIO44/U0RXD/PROG" }, { pins: [24], gpio: 20, name: "USB_D+/ADC2_CH9/GPIO20" }, { pins: [23], gpio: 19, name: "USB_D-/ADC2_CH8/GPIO19" }, { pins: [4], gpio: 0, name: "GPIO0/BOOT" }, { pins: [5], gpio: 1, name: "GPIO1/ADC1_CH0" }, { pins: [6], gpio: 2, name: "GPIO2/ADC1_CH1" }, { pins: [7], gpio: 3, name: "GPIO3/ADC1_CH2" }, { pins: [8], gpio: 4, name: "GPIO4/ADC1_CH3" }, { pins: [9], gpio: 5, name: "GPIO5/ADC1_CH4" }, { pins: [10], gpio: 6, name: "GPIO6/ADC1_CH5" }, { pins: [11], gpio: 7, name: "GPIO7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/ADC1_CH7" }, { pins: [13], gpio: 9, name: "GPIO9/ADC1_CH8" }, { pins: [14], gpio: 10, name: "GPIO10/ADC1_CH9" }, { pins: [15], gpio: 11, name: "GPIO11/ADC2_CH0" }, { pins: [16], gpio: 12, name: "GPIO12/ADC2_CH1" }, { pins: [17], gpio: 13, name: "GPIO13/ADC2_CH2" }, { pins: [18], gpio: 14, name: "GPIO14/ADC2_CH3" }, { pins: [21], gpio: 17, name: "ADC2_CH6/DAC_1/GPIO17" }, { pins: [22], gpio: 18, name: "ADC2_CH7/DAC_2/GPIO18" }, { pins: [25], gpio: 21, name: "GPIO21" }, { pins: [28], gpio: 33, name: "GPIO33" }, { pins: [29], gpio: 34, name: "GPIO34" }, { pins: [31], gpio: 35, name: "GPIO35" }, { pins: [32], gpio: 36, name: "GPIO36" }, { pins: [33], gpio: 37, name: "GPIO37" }, { pins: [34], gpio: 38, name: "GPIO38" }, { pins: [41], gpio: 45, name: "GPIO45" }],
+  bottom: [{ pins: [1,2,30,42,43,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const S2_SOLO_PINS: Pin[] = [
@@ -310,10 +310,10 @@ export const S2_SOLO_LAYOUT: PackageLayout = {
 }
 
 export const S2_SOLO_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 15 }, { pins: [9], gpio: 16 }, { pins: [32], gpio: 39 }, { pins: [33], gpio: 40 }, { pins: [34], gpio: 41 }, { pins: [35], gpio: 42 }, { pins: [16], gpio: 46 }],
-  right: [{ pins: [36], gpio: 44 }, { pins: [37], gpio: 43 }, { pins: [14], gpio: 20 }, { pins: [13], gpio: 19 }, { pins: [27], gpio: 0 }, { pins: [39], gpio: 1 }, { pins: [38], gpio: 2 }, { pins: [15], gpio: 3 }, { pins: [4], gpio: 4 }, { pins: [5], gpio: 5 }, { pins: [6], gpio: 6 }, { pins: [7], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [17], gpio: 9 }, { pins: [18], gpio: 10 }, { pins: [19], gpio: 11 }, { pins: [20], gpio: 12 }, { pins: [21], gpio: 13 }, { pins: [22], gpio: 14 }, { pins: [10], gpio: 17 }, { pins: [11], gpio: 18 }, { pins: [23], gpio: 21 }, { pins: [24], gpio: 33 }, { pins: [25], gpio: 34 }, { pins: [28], gpio: 35 }, { pins: [29], gpio: 36 }, { pins: [30], gpio: 37 }, { pins: [31], gpio: 38 }, { pins: [26], gpio: 45 }],
-  bottom: [{ pins: [1,40,41], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN" }, { pins: [8], gpio: 15, name: "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P" }, { pins: [9], gpio: 16, name: "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N" }, { pins: [32], gpio: 39, name: "MTCK/GPIO39/CLK_OUT3" }, { pins: [33], gpio: 40, name: "MTDO/GPIO40/CLK_OUT2" }, { pins: [34], gpio: 41, name: "MTDI/GPIO41/CLK_OUT1" }, { pins: [35], gpio: 42, name: "MTMS/GPIO42" }, { pins: [16], gpio: 46, name: "GPIO46" }],
+  right: [{ pins: [36], gpio: 44, name: "U0RXD/GPIO44/CLK_OUT2" }, { pins: [37], gpio: 43, name: "U0TXD/GPIO43/CLK_OUT1" }, { pins: [14], gpio: 20, name: "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+" }, { pins: [13], gpio: 19, name: "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-" }, { pins: [27], gpio: 0, name: "GPIO0" }, { pins: [39], gpio: 1, name: "GPIO1/TOUCH1/ADC1_CH0" }, { pins: [38], gpio: 2, name: "GPIO2/TOUCH2/ADC1_CH1" }, { pins: [15], gpio: 3, name: "GPIO3/TOUCH3/ADC1_CH2" }, { pins: [4], gpio: 4, name: "GPIO4/TOUCH4/ADC1_CH3" }, { pins: [5], gpio: 5, name: "GPIO5/TOUCH5/ADC1_CH4" }, { pins: [6], gpio: 6, name: "GPIO6/TOUCH6/ADC1_CH5" }, { pins: [7], gpio: 7, name: "GPIO7/TOUCH7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/TOUCH8/ADC1_CH7" }, { pins: [17], gpio: 9, name: "GPIO9/TOUCH9/ADC1_CH8/FSPIHD" }, { pins: [18], gpio: 10, name: "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4" }, { pins: [19], gpio: 11, name: "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5" }, { pins: [20], gpio: 12, name: "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6" }, { pins: [21], gpio: 13, name: "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7" }, { pins: [22], gpio: 14, name: "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS" }, { pins: [10], gpio: 17, name: "GPIO17/U1TXD/ADC2_CH6/DAC_1" }, { pins: [11], gpio: 18, name: "GPIO18/U1RXD/ADC2_CH7/DAC_2/CLK_OUT3" }, { pins: [23], gpio: 21, name: "GPIO21" }, { pins: [24], gpio: 33, name: "SPIIO4/GPIO33/FSPIHD" }, { pins: [25], gpio: 34, name: "SPIIO5/GPIO34/FSPICS0" }, { pins: [28], gpio: 35, name: "SPIIO6/GPIO35/FSPID" }, { pins: [29], gpio: 36, name: "SPIIO7/GPIO36/FSPICLK" }, { pins: [30], gpio: 37, name: "SPIDQS/GPIO37/FSPIQ" }, { pins: [31], gpio: 38, name: "GPIO38/FSPIWP" }, { pins: [26], gpio: 45, name: "GPIO45" }],
+  bottom: [{ pins: [1,40,41], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const S2_WROVER_PINS: Pin[] = [
@@ -364,10 +364,10 @@ export const S2_WROVER_LAYOUT: PackageLayout = {
 }
 
 export const S2_WROVER_SYMBOL: SymbolLayout = {
-  left: [{ pins: [41], label: 'EN' }, { pins: [18], gpio: 15 }, { pins: [19], gpio: 16 }, { pins: [33], gpio: 39 }, { pins: [34], gpio: 40 }, { pins: [35], gpio: 41 }, { pins: [36], gpio: 42 }, { pins: [40], gpio: 46 }, { pins: [25], gpio: 26 }],
-  right: [{ pins: [38], gpio: 44 }, { pins: [37], gpio: 43 }, { pins: [23], gpio: 20 }, { pins: [22], gpio: 19 }, { pins: [3], gpio: 0 }, { pins: [4], gpio: 1 }, { pins: [5], gpio: 2 }, { pins: [6], gpio: 3 }, { pins: [7], gpio: 4 }, { pins: [8], gpio: 5 }, { pins: [9], gpio: 6 }, { pins: [10], gpio: 7 }, { pins: [11], gpio: 8 }, { pins: [12], gpio: 9 }, { pins: [13], gpio: 10 }, { pins: [14], gpio: 11 }, { pins: [15], gpio: 12 }, { pins: [16], gpio: 13 }, { pins: [17], gpio: 14 }, { pins: [20], gpio: 17 }, { pins: [21], gpio: 18 }, { pins: [24], gpio: 21 }, { pins: [27], gpio: 33 }, { pins: [28], gpio: 34 }, { pins: [29], gpio: 35 }, { pins: [30], gpio: 36 }, { pins: [31], gpio: 37 }, { pins: [32], gpio: 38 }, { pins: [39], gpio: 45 }],
-  bottom: [{ pins: [1,26,42,43], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [41], label: 'EN', name: "CHIP/PU/RESET" }, { pins: [18], gpio: 15, name: "GPIO15/ADC2_CH4/XTAL_32K_P" }, { pins: [19], gpio: 16, name: "GPIO16/ADC2_CH5/XTAL_32K_N" }, { pins: [33], gpio: 39, name: "MTCK/JTAG/GPIO39" }, { pins: [34], gpio: 40, name: "MTDO/JTAG/GPIO40" }, { pins: [35], gpio: 41, name: "MTDI/JTAG/GPIO41" }, { pins: [36], gpio: 42, name: "MTMS/JTAG/GPIO42" }, { pins: [40], gpio: 46, name: "GPIO46" }, { pins: [25], gpio: 26, name: "SPI_CS1/GPIO26" }],
+  right: [{ pins: [38], gpio: 44, name: "GPIO44/U0RXD/PROG" }, { pins: [37], gpio: 43, name: "GPIO43/U0TXD/PROG" }, { pins: [23], gpio: 20, name: "USB_D+/ADC2_CH9/GPIO20" }, { pins: [22], gpio: 19, name: "USB_D-/ADC2_CH8/GPIO19" }, { pins: [3], gpio: 0, name: "GPIO0/BOOT" }, { pins: [4], gpio: 1, name: "GPIO1/ADC1_CH0" }, { pins: [5], gpio: 2, name: "GPIO2/ADC1_CH1" }, { pins: [6], gpio: 3, name: "GPIO3/ADC1_CH2" }, { pins: [7], gpio: 4, name: "GPIO4/ADC1_CH3" }, { pins: [8], gpio: 5, name: "GPIO5/ADC1_CH4" }, { pins: [9], gpio: 6, name: "GPIO6/ADC1_CH5" }, { pins: [10], gpio: 7, name: "GPIO7/ADC1_CH6" }, { pins: [11], gpio: 8, name: "GPIO8/ADC1_CH7" }, { pins: [12], gpio: 9, name: "GPIO9/ADC1_CH8" }, { pins: [13], gpio: 10, name: "GPIO10/ADC1_CH9" }, { pins: [14], gpio: 11, name: "GPIO11/ADC2_CH0" }, { pins: [15], gpio: 12, name: "GPIO12/ADC2_CH1" }, { pins: [16], gpio: 13, name: "GPIO13/ADC2_CH2" }, { pins: [17], gpio: 14, name: "GPIO14/ADC2_CH3" }, { pins: [20], gpio: 17, name: "ADC2_CH6/DAC_1/GPIO17" }, { pins: [21], gpio: 18, name: "ADC2_CH7/DAC_2/GPIO18" }, { pins: [24], gpio: 21, name: "GPIO21" }, { pins: [27], gpio: 33, name: "GPIO33" }, { pins: [28], gpio: 34, name: "GPIO34" }, { pins: [29], gpio: 35, name: "GPIO35" }, { pins: [30], gpio: 36, name: "GPIO36" }, { pins: [31], gpio: 37, name: "GPIO37" }, { pins: [32], gpio: 38, name: "GPIO38" }, { pins: [39], gpio: 45, name: "GPIO45" }],
+  bottom: [{ pins: [1,26,42,43], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const S3_WROOM_1_PINS: Pin[] = [
@@ -417,10 +417,10 @@ export const S3_WROOM_1_LAYOUT: PackageLayout = {
 }
 
 export const S3_WROOM_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 15 }, { pins: [9], gpio: 16 }, { pins: [32], gpio: 39 }, { pins: [33], gpio: 40 }, { pins: [34], gpio: 41 }, { pins: [35], gpio: 42 }, { pins: [28], gpio: 35 }, { pins: [29], gpio: 36 }, { pins: [30], gpio: 37 }],
-  right: [{ pins: [37], gpio: 43 }, { pins: [36], gpio: 44 }, { pins: [14], gpio: 20 }, { pins: [13], gpio: 19 }, { pins: [27], gpio: 0 }, { pins: [39], gpio: 1 }, { pins: [38], gpio: 2 }, { pins: [15], gpio: 3 }, { pins: [4], gpio: 4 }, { pins: [5], gpio: 5 }, { pins: [6], gpio: 6 }, { pins: [7], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [17], gpio: 9 }, { pins: [18], gpio: 10 }, { pins: [19], gpio: 11 }, { pins: [20], gpio: 12 }, { pins: [21], gpio: 13 }, { pins: [22], gpio: 14 }, { pins: [10], gpio: 17 }, { pins: [11], gpio: 18 }, { pins: [23], gpio: 21 }, { pins: [31], gpio: 38 }, { pins: [26], gpio: 45 }, { pins: [16], gpio: 46 }, { pins: [24], gpio: 47 }, { pins: [25], gpio: 48 }],
-  bottom: [{ pins: [1,40,41], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN" }, { pins: [8], gpio: 15, name: "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P" }, { pins: [9], gpio: 16, name: "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N" }, { pins: [32], gpio: 39, name: "MTCK/GPIO39/CLK_OUT3/SUBSPICS1" }, { pins: [33], gpio: 40, name: "MTDO/GPIO40/CLK_OUT2" }, { pins: [34], gpio: 41, name: "MTDI/GPIO41/CLK_OUT1" }, { pins: [35], gpio: 42, name: "MTMS/GPIO42" }, { pins: [28], gpio: 35, name: "SPIIO6/GPIO35/FSPID/SUBSPID" }, { pins: [29], gpio: 36, name: "SPIIO7/GPIO36/FSPICLK/SUBSPICLK" }, { pins: [30], gpio: 37, name: "SPIDQS/GPIO37/FSPIQ/SUBSPIQ" }],
+  right: [{ pins: [37], gpio: 43, name: "U0TXD/GPIO43/CLK_OUT1" }, { pins: [36], gpio: 44, name: "U0RXD/GPIO44/CLK_OUT2" }, { pins: [14], gpio: 20, name: "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+" }, { pins: [13], gpio: 19, name: "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-" }, { pins: [27], gpio: 0, name: "GPIO0/BOOT" }, { pins: [39], gpio: 1, name: "GPIO1/TOUCH1/ADC1_CH0" }, { pins: [38], gpio: 2, name: "GPIO2/TOUCH2/ADC1_CH1" }, { pins: [15], gpio: 3, name: "GPIO3/TOUCH3/ADC1_CH2" }, { pins: [4], gpio: 4, name: "GPIO4/TOUCH4/ADC1_CH3" }, { pins: [5], gpio: 5, name: "GPIO5/TOUCH5/ADC1_CH4" }, { pins: [6], gpio: 6, name: "GPIO6/TOUCH6/ADC1_CH5" }, { pins: [7], gpio: 7, name: "GPIO7/TOUCH7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1" }, { pins: [17], gpio: 9, name: "GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD" }, { pins: [18], gpio: 10, name: "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0" }, { pins: [19], gpio: 11, name: "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID" }, { pins: [20], gpio: 12, name: "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK" }, { pins: [21], gpio: 13, name: "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ" }, { pins: [22], gpio: 14, name: "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP" }, { pins: [10], gpio: 17, name: "GPIO17/U1TXD/ADC2_CH6" }, { pins: [11], gpio: 18, name: "GPIO18/U1RXD/ADC2_CH7/CLK_OUT3" }, { pins: [23], gpio: 21, name: "GPIO21" }, { pins: [31], gpio: 38, name: "GPIO38/FSPIWP/SUBSPIWP" }, { pins: [26], gpio: 45, name: "GPIO45" }, { pins: [16], gpio: 46, name: "GPIO46" }, { pins: [24], gpio: 47, name: "GPIO47/SPICLK_P/SUBSPICLK_P_DIFF" }, { pins: [25], gpio: 48, name: "GPIO48/SPICLK_N/SUBSPICLK_N_DIFF" }],
+  bottom: [{ pins: [1,40,41], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const S3_WROOM_2_PINS: Pin[] = [
@@ -467,10 +467,10 @@ export const S3_WROOM_2_LAYOUT: PackageLayout = {
 }
 
 export const S3_WROOM_2_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 15 }, { pins: [9], gpio: 16 }, { pins: [32], gpio: 39 }, { pins: [33], gpio: 40 }, { pins: [34], gpio: 41 }, { pins: [35], gpio: 42 }, { pins: [30], label: 'NC' }, { pins: [29], label: 'NC' }, { pins: [28], label: 'NC' }],
-  right: [{ pins: [37], gpio: 43 }, { pins: [36], gpio: 44 }, { pins: [14], gpio: 20 }, { pins: [13], gpio: 19 }, { pins: [27], gpio: 0 }, { pins: [39], gpio: 1 }, { pins: [38], gpio: 2 }, { pins: [15], gpio: 3 }, { pins: [4], gpio: 4 }, { pins: [5], gpio: 5 }, { pins: [6], gpio: 6 }, { pins: [7], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [17], gpio: 9 }, { pins: [18], gpio: 10 }, { pins: [19], gpio: 11 }, { pins: [20], gpio: 12 }, { pins: [21], gpio: 13 }, { pins: [22], gpio: 14 }, { pins: [10], gpio: 17 }, { pins: [11], gpio: 18 }, { pins: [23], gpio: 21 }, { pins: [31], gpio: 38 }, { pins: [26], gpio: 45 }, { pins: [16], gpio: 46 }, { pins: [24], gpio: 47 }, { pins: [25], gpio: 48 }],
-  bottom: [{ pins: [1,40,41], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN" }, { pins: [8], gpio: 15, name: "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P" }, { pins: [9], gpio: 16, name: "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N" }, { pins: [32], gpio: 39, name: "MTCK/GPIO39/CLK_OUT3/SUBSPICS1" }, { pins: [33], gpio: 40, name: "MTDO/GPIO40/CLK_OUT2" }, { pins: [34], gpio: 41, name: "MTDI/GPIO41/CLK_OUT1" }, { pins: [35], gpio: 42, name: "MTMS/GPIO42" }, { pins: [30], label: 'NC', name: "NC" }, { pins: [29], label: 'NC', name: "NC" }, { pins: [28], label: 'NC', name: "NC" }],
+  right: [{ pins: [37], gpio: 43, name: "U0TXD/GPIO43/CLK_OUT1" }, { pins: [36], gpio: 44, name: "U0RXD/GPIO44/CLK_OUT2" }, { pins: [14], gpio: 20, name: "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+" }, { pins: [13], gpio: 19, name: "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-" }, { pins: [27], gpio: 0, name: "GPIO0/BOOT" }, { pins: [39], gpio: 1, name: "GPIO1/TOUCH1/ADC1_CH0" }, { pins: [38], gpio: 2, name: "GPIO2/TOUCH2/ADC1_CH1" }, { pins: [15], gpio: 3, name: "GPIO3/TOUCH3/ADC1_CH2" }, { pins: [4], gpio: 4, name: "GPIO4/TOUCH4/ADC1_CH3" }, { pins: [5], gpio: 5, name: "GPIO5/TOUCH5/ADC1_CH4" }, { pins: [6], gpio: 6, name: "GPIO6/TOUCH6/ADC1_CH5" }, { pins: [7], gpio: 7, name: "GPIO7/TOUCH7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1" }, { pins: [17], gpio: 9, name: "GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD" }, { pins: [18], gpio: 10, name: "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0" }, { pins: [19], gpio: 11, name: "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID" }, { pins: [20], gpio: 12, name: "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK" }, { pins: [21], gpio: 13, name: "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ" }, { pins: [22], gpio: 14, name: "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP" }, { pins: [10], gpio: 17, name: "GPIO17/U1TXD/ADC2_CH6" }, { pins: [11], gpio: 18, name: "GPIO18/U1RXD/ADC2_CH7/CLK_OUT3" }, { pins: [23], gpio: 21, name: "GPIO21" }, { pins: [31], gpio: 38, name: "GPIO38/FSPIWP/SUBSPIWP" }, { pins: [26], gpio: 45, name: "GPIO45" }, { pins: [16], gpio: 46, name: "GPIO46" }, { pins: [24], gpio: 47, name: "GPIO47/SPICLK_P/SUBSPICLK_P_DIFF" }, { pins: [25], gpio: 48, name: "GPIO48/SPICLK_N/SUBSPICLK_N_DIFF" }],
+  bottom: [{ pins: [1,40,41], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const S3_MINI_1_PINS: Pin[] = [
@@ -524,10 +524,10 @@ export const S3_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const S3_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [45], label: 'EN' }, { pins: [19], gpio: 15 }, { pins: [20], gpio: 16 }, { pins: [35], gpio: 39 }, { pins: [36], gpio: 40 }, { pins: [37], gpio: 41 }, { pins: [38], gpio: 42 }, { pins: [26], gpio: 26 }, { pins: [28], gpio: 33 }, { pins: [29], gpio: 34 }, { pins: [31], gpio: 35 }, { pins: [32], gpio: 36 }, { pins: [33], gpio: 37 }],
-  right: [{ pins: [39], gpio: 43 }, { pins: [40], gpio: 44 }, { pins: [24], gpio: 20 }, { pins: [23], gpio: 19 }, { pins: [4], gpio: 0 }, { pins: [5], gpio: 1 }, { pins: [6], gpio: 2 }, { pins: [7], gpio: 3 }, { pins: [8], gpio: 4 }, { pins: [9], gpio: 5 }, { pins: [10], gpio: 6 }, { pins: [11], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [13], gpio: 9 }, { pins: [14], gpio: 10 }, { pins: [15], gpio: 11 }, { pins: [16], gpio: 12 }, { pins: [17], gpio: 13 }, { pins: [18], gpio: 14 }, { pins: [21], gpio: 17 }, { pins: [22], gpio: 18 }, { pins: [25], gpio: 21 }, { pins: [34], gpio: 38 }, { pins: [41], gpio: 45 }, { pins: [44], gpio: 46 }, { pins: [27], gpio: 47 }, { pins: [30], gpio: 48 }],
-  bottom: [{ pins: [1,2,42,43,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [45], label: 'EN', name: "EN" }, { pins: [19], gpio: 15, name: "GPIO15/U0RTS/ADC2_CH4/XTAL_32K_P" }, { pins: [20], gpio: 16, name: "GPIO16/U0CTS/ADC2_CH5/XTAL_32K_N" }, { pins: [35], gpio: 39, name: "MTCK/GPIO39/CLK_OUT3/SUBSPICS1" }, { pins: [36], gpio: 40, name: "MTDO/GPIO40/CLK_OUT2" }, { pins: [37], gpio: 41, name: "MTDI/GPIO41/CLK_OUT1" }, { pins: [38], gpio: 42, name: "MTMS/GPIO42" }, { pins: [26], gpio: 26, name: "GPIO26" }, { pins: [28], gpio: 33, name: "SPIIO4/GPIO33/FSPIHD/SUBSPIHD" }, { pins: [29], gpio: 34, name: "SPIIO5/GPIO34/FSPICS0/SUBSPICS0" }, { pins: [31], gpio: 35, name: "SPIIO6/GPIO35/FSPID/SUBSPID" }, { pins: [32], gpio: 36, name: "SPIIO7/GPIO36/FSPICLK/SUBSPICLK" }, { pins: [33], gpio: 37, name: "SPIDQS/GPIO37/FSPIQ/SUBSPIQ" }],
+  right: [{ pins: [39], gpio: 43, name: "U0TXD/GPIO43/CLK_OUT1" }, { pins: [40], gpio: 44, name: "U0RXD/GPIO44/CLK_OUT2" }, { pins: [24], gpio: 20, name: "GPIO20/U1CTS/ADC2_CH9/CLK_OUT1/USB_D+" }, { pins: [23], gpio: 19, name: "GPIO19/U1RTS/ADC2_CH8/CLK_OUT2/USB_D-" }, { pins: [4], gpio: 0, name: "GPIO0/BOOT" }, { pins: [5], gpio: 1, name: "GPIO1/TOUCH1/ADC1_CH0" }, { pins: [6], gpio: 2, name: "GPIO2/TOUCH2/ADC1_CH1" }, { pins: [7], gpio: 3, name: "GPIO3/TOUCH3/ADC1_CH2" }, { pins: [8], gpio: 4, name: "GPIO4/TOUCH4/ADC1_CH3" }, { pins: [9], gpio: 5, name: "GPIO5/TOUCH5/ADC1_CH4" }, { pins: [10], gpio: 6, name: "GPIO6/TOUCH6/ADC1_CH5" }, { pins: [11], gpio: 7, name: "GPIO7/TOUCH7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/TOUCH8/ADC1_CH7/SUBSPICS1" }, { pins: [13], gpio: 9, name: "GPIO9/TOUCH9/ADC1_CH8/FSPIHD/SUBSPIHD" }, { pins: [14], gpio: 10, name: "GPIO10/TOUCH10/ADC1_CH9/FSPICS0/FSPIIO4/SUBSPICS0" }, { pins: [15], gpio: 11, name: "GPIO11/TOUCH11/ADC2_CH0/FSPID/FSPIIO5/SUBSPID" }, { pins: [16], gpio: 12, name: "GPIO12/TOUCH12/ADC2_CH1/FSPICLK/FSPIIO6/SUBSPICLK" }, { pins: [17], gpio: 13, name: "GPIO13/TOUCH13/ADC2_CH2/FSPIQ/FSPIIO7/SUBSPIQ" }, { pins: [18], gpio: 14, name: "GPIO14/TOUCH14/ADC2_CH3/FSPIWP/FSPIDQS/SUBSPIWP" }, { pins: [21], gpio: 17, name: "GPIO17/U1TXD/ADC2_CH6" }, { pins: [22], gpio: 18, name: "GPIO18/U1RXD/ADC2_CH7/CLK_OUT3" }, { pins: [25], gpio: 21, name: "GPIO21" }, { pins: [34], gpio: 38, name: "GPIO38/FSPIWP/SUBSPIWP" }, { pins: [41], gpio: 45, name: "GPIO45" }, { pins: [44], gpio: 46, name: "GPIO46" }, { pins: [27], gpio: 47, name: "GPIO47/SPICLK_P/SUBSPICLK_P_DIFF" }, { pins: [30], gpio: 48, name: "GPIO48/SPICLK_N/SUBSPICLK_N_DIFF" }],
+  bottom: [{ pins: [1,2,42,43,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const C3_MINI_1_PINS: Pin[] = [
@@ -557,10 +557,10 @@ export const C3_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const C3_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [8], label: 'EN' }, { pins: [12], gpio: 0 }, { pins: [13], gpio: 1 }, { pins: [4], label: 'NC' }, { pins: [7], label: 'NC' }, { pins: [9], label: 'NC' }, { pins: [10], label: 'NC' }, { pins: [15], label: 'NC' }, { pins: [17], label: 'NC' }, { pins: [24], label: 'NC' }, { pins: [25], label: 'NC' }, { pins: [28], label: 'NC' }, { pins: [29], label: 'NC' }, { pins: [32], label: 'NC' }, { pins: [33], label: 'NC' }, { pins: [34], label: 'NC' }, { pins: [35], label: 'NC' }],
-  right: [{ pins: [31], gpio: 21 }, { pins: [30], gpio: 20 }, { pins: [27], gpio: 19 }, { pins: [26], gpio: 18 }, { pins: [5], gpio: 2 }, { pins: [6], gpio: 3 }, { pins: [18], gpio: 4 }, { pins: [19], gpio: 5 }, { pins: [20], gpio: 6 }, { pins: [21], gpio: 7 }, { pins: [22], gpio: 8 }, { pins: [23], gpio: 9 }, { pins: [16], gpio: 10 }],
-  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [8], label: 'EN', name: "EN/CHIP_PU" }, { pins: [12], gpio: 0, name: "GPIO0/ADC1_CH0/XTAL_32K_P" }, { pins: [13], gpio: 1, name: "GPIO1/ADC1_CH1/XTAL_32K_N" }, { pins: [4], label: 'NC', name: "NC" }, { pins: [7], label: 'NC', name: "NC" }, { pins: [9], label: 'NC', name: "NC" }, { pins: [10], label: 'NC', name: "NC" }, { pins: [15], label: 'NC', name: "NC" }, { pins: [17], label: 'NC', name: "NC" }, { pins: [24], label: 'NC', name: "NC" }, { pins: [25], label: 'NC', name: "NC" }, { pins: [28], label: 'NC', name: "NC" }, { pins: [29], label: 'NC', name: "NC" }, { pins: [32], label: 'NC', name: "NC" }, { pins: [33], label: 'NC', name: "NC" }, { pins: [34], label: 'NC', name: "NC" }, { pins: [35], label: 'NC', name: "NC" }],
+  right: [{ pins: [31], gpio: 21, name: "GPIO21/U0TXD" }, { pins: [30], gpio: 20, name: "GPIO20/U0RXD" }, { pins: [27], gpio: 19, name: "GPIO19/USB_D+" }, { pins: [26], gpio: 18, name: "GPIO18/USB_D-" }, { pins: [5], gpio: 2, name: "GPIO2/ADC1_CH2" }, { pins: [6], gpio: 3, name: "GPIO3/ADC1_CH3" }, { pins: [18], gpio: 4, name: "GPIO4/ADC1_CH4" }, { pins: [19], gpio: 5, name: "GPIO5/ADC2_CH0" }, { pins: [20], gpio: 6, name: "GPIO6" }, { pins: [21], gpio: 7, name: "GPIO7" }, { pins: [22], gpio: 8, name: "GPIO8" }, { pins: [23], gpio: 9, name: "GPIO9" }, { pins: [16], gpio: 10, name: "GPIO10" }],
+  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const C3_WROOM_02_PINS: Pin[] = [
@@ -589,10 +589,10 @@ export const C3_WROOM_02_LAYOUT: PackageLayout = {
 }
 
 export const C3_WROOM_02_SYMBOL: SymbolLayout = {
-  left: [{ pins: [2], label: 'EN' }, { pins: [18], gpio: 0 }, { pins: [17], gpio: 1 }],
-  right: [{ pins: [11], gpio: 20 }, { pins: [12], gpio: 21 }, { pins: [13], gpio: 18 }, { pins: [14], gpio: 19 }, { pins: [16], gpio: 2 }, { pins: [15], gpio: 3 }, { pins: [3], gpio: 4 }, { pins: [4], gpio: 5 }, { pins: [5], gpio: 6 }, { pins: [6], gpio: 7 }, { pins: [7], gpio: 8 }, { pins: [8], gpio: 9 }, { pins: [10], gpio: 10 }],
-  bottom: [{ pins: [9,19], label: 'GND' }],
-  top: [{ pins: [1], label: '3V3' }],
+  left: [{ pins: [2], label: 'EN', name: "EN/CHIP_PU" }, { pins: [18], gpio: 0, name: "GPIO0/ADC1_CH0/XTAL_32K_P" }, { pins: [17], gpio: 1, name: "GPIO1/ADC1_CH1/XTAL_32K_N" }],
+  right: [{ pins: [11], gpio: 20, name: "GPIO20/U0RXD" }, { pins: [12], gpio: 21, name: "GPIO21/U0TXD" }, { pins: [13], gpio: 18, name: "GPIO18/USB_D-" }, { pins: [14], gpio: 19, name: "GPIO19/USB_D+" }, { pins: [16], gpio: 2, name: "GPIO2/ADC1_CH2" }, { pins: [15], gpio: 3, name: "GPIO3/ADC1_CH3" }, { pins: [3], gpio: 4, name: "GPIO4/ADC1_CH4" }, { pins: [4], gpio: 5, name: "GPIO5/ADC2_CH0" }, { pins: [5], gpio: 6, name: "GPIO6" }, { pins: [6], gpio: 7, name: "GPIO7" }, { pins: [7], gpio: 8, name: "GPIO8" }, { pins: [8], gpio: 9, name: "GPIO9" }, { pins: [10], gpio: 10, name: "GPIO10" }],
+  bottom: [{ pins: [9,19], label: 'GND', name: "GND" }],
+  top: [{ pins: [1], label: '3V3', name: "3V3" }],
 }
 
 export const C6_MINI_1_PINS: Pin[] = [
@@ -629,10 +629,10 @@ export const C6_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const C6_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [8], label: 'EN' }, { pins: [12], gpio: 0 }, { pins: [13], gpio: 1 }, { pins: [5], gpio: 2 }, { pins: [6], gpio: 3 }, { pins: [9], gpio: 4 }, { pins: [10], gpio: 5 }, { pins: [15], gpio: 6 }, { pins: [16], gpio: 7 }, { pins: [4], label: 'NC' }, { pins: [7], label: 'NC' }, { pins: [21], label: 'NC' }, { pins: [32], label: 'NC' }, { pins: [33], label: 'NC' }, { pins: [34], label: 'NC' }, { pins: [35], label: 'NC' }],
-  right: [{ pins: [31], gpio: 16 }, { pins: [30], gpio: 17 }, { pins: [18], gpio: 13 }, { pins: [17], gpio: 12 }, { pins: [22], gpio: 8 }, { pins: [23], gpio: 9 }, { pins: [19], gpio: 14 }, { pins: [20], gpio: 15 }, { pins: [24], gpio: 18 }, { pins: [25], gpio: 19 }, { pins: [26], gpio: 20 }, { pins: [27], gpio: 21 }, { pins: [28], gpio: 22 }, { pins: [29], gpio: 23 }],
-  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }],
+  left: [{ pins: [8], label: 'EN', name: "EN/CHIP_PU" }, { pins: [12], gpio: 0, name: "GPIO0/ADC1_CH0/XTAL_32K_P" }, { pins: [13], gpio: 1, name: "GPIO1/ADC1_CH1/XTAL_32K_N" }, { pins: [5], gpio: 2, name: "GPIO2/ADC1_CH2" }, { pins: [6], gpio: 3, name: "GPIO3/ADC1_CH3" }, { pins: [9], gpio: 4, name: "MTMS/GPIO4/ADC1_CH4" }, { pins: [10], gpio: 5, name: "MTDI/GPIO5/ADC1_CH5" }, { pins: [15], gpio: 6, name: "MTCK/GPIO6/ADC1_CH6" }, { pins: [16], gpio: 7, name: "MTDO/GPIO7" }, { pins: [4], label: 'NC', name: "NC" }, { pins: [7], label: 'NC', name: "NC" }, { pins: [21], label: 'NC', name: "NC" }, { pins: [32], label: 'NC', name: "NC" }, { pins: [33], label: 'NC', name: "NC" }, { pins: [34], label: 'NC', name: "NC" }, { pins: [35], label: 'NC', name: "NC" }],
+  right: [{ pins: [31], gpio: 16, name: "U0TXD/GPIO16" }, { pins: [30], gpio: 17, name: "U0RXD/GPIO17" }, { pins: [18], gpio: 13, name: "GPIO13/USB_D+" }, { pins: [17], gpio: 12, name: "GPIO12/USB_D-" }, { pins: [22], gpio: 8, name: "GPIO8" }, { pins: [23], gpio: 9, name: "GPIO9" }, { pins: [19], gpio: 14, name: "GPIO14" }, { pins: [20], gpio: 15, name: "GPIO15" }, { pins: [24], gpio: 18, name: "GPIO18" }, { pins: [25], gpio: 19, name: "GPIO19" }, { pins: [26], gpio: 20, name: "GPIO20" }, { pins: [27], gpio: 21, name: "GPIO21" }, { pins: [28], gpio: 22, name: "GPIO22" }, { pins: [29], gpio: 23, name: "GPIO23" }],
+  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }],
 }
 
 export const C6_WROOM_1_PINS: Pin[] = [
@@ -669,10 +669,10 @@ export const C6_WROOM_1_LAYOUT: PackageLayout = {
 }
 
 export const C6_WROOM_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 0 }, { pins: [9], gpio: 1 }, { pins: [27], gpio: 2 }, { pins: [26], gpio: 3 }, { pins: [4], gpio: 4 }, { pins: [5], gpio: 5 }, { pins: [6], gpio: 6 }, { pins: [7], gpio: 7 }, { pins: [22], label: 'NC' }],
-  right: [{ pins: [25], gpio: 16 }, { pins: [24], gpio: 17 }, { pins: [14], gpio: 13 }, { pins: [13], gpio: 12 }, { pins: [10], gpio: 8 }, { pins: [15], gpio: 9 }, { pins: [11], gpio: 10 }, { pins: [12], gpio: 11 }, { pins: [23], gpio: 15 }, { pins: [16], gpio: 18 }, { pins: [17], gpio: 19 }, { pins: [18], gpio: 20 }, { pins: [19], gpio: 21 }, { pins: [20], gpio: 22 }, { pins: [21], gpio: 23 }],
-  bottom: [{ pins: [1,28,29], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 0, name: "GPIO0/ADC1_CH0/XTAL_32K_P" }, { pins: [9], gpio: 1, name: "GPIO1/ADC1_CH1/XTAL_32K_N" }, { pins: [27], gpio: 2, name: "GPIO2/ADC1_CH2" }, { pins: [26], gpio: 3, name: "GPIO3/ADC1_CH3" }, { pins: [4], gpio: 4, name: "MTMS/GPIO4/ADC1_CH4" }, { pins: [5], gpio: 5, name: "MTDI/GPIO5/ADC1_CH5" }, { pins: [6], gpio: 6, name: "MTCK/GPIO6/ADC1_CH6" }, { pins: [7], gpio: 7, name: "MTDO/GPIO7" }, { pins: [22], label: 'NC', name: "NC" }],
+  right: [{ pins: [25], gpio: 16, name: "U0TXD/GPIO16" }, { pins: [24], gpio: 17, name: "U0RXD/GPIO17" }, { pins: [14], gpio: 13, name: "GPIO13/USB_D+" }, { pins: [13], gpio: 12, name: "GPIO12/USB_D-" }, { pins: [10], gpio: 8, name: "GPIO8" }, { pins: [15], gpio: 9, name: "GPIO9" }, { pins: [11], gpio: 10, name: "GPIO10" }, { pins: [12], gpio: 11, name: "GPIO11" }, { pins: [23], gpio: 15, name: "GPIO15" }, { pins: [16], gpio: 18, name: "GPIO18" }, { pins: [17], gpio: 19, name: "GPIO19" }, { pins: [18], gpio: 20, name: "GPIO20" }, { pins: [19], gpio: 21, name: "GPIO21" }, { pins: [20], gpio: 22, name: "GPIO22" }, { pins: [21], gpio: 23, name: "GPIO23" }],
+  bottom: [{ pins: [1,28,29], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const C5_WROOM_1_PINS: Pin[] = [
@@ -708,10 +708,10 @@ export const C5_WROOM_1_LAYOUT: PackageLayout = {
 }
 
 export const C5_WROOM_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [4], gpio: 2 }, { pins: [5], gpio: 3 }, { pins: [16], gpio: 5 }, { pins: [17], gpio: 4 }, { pins: [6], gpio: 0 }, { pins: [7], gpio: 1 }, { pins: [8], gpio: 6 }, { pins: [9], gpio: 7 }, { pins: [10], gpio: 8 }, { pins: [11], gpio: 9 }, { pins: [12], gpio: 10 }],
-  right: [{ pins: [24], gpio: 12 }, { pins: [25], gpio: 11 }, { pins: [13], gpio: 13 }, { pins: [14], gpio: 14 }, { pins: [15], gpio: 28 }, { pins: [18], gpio: 27 }, { pins: [19], gpio: 15 }, { pins: [21], gpio: 23 }, { pins: [23], gpio: 24 }, { pins: [26], gpio: 25 }, { pins: [27], gpio: 26 }, { pins: [20], label: 'NC' }, { pins: [22], label: 'NC' }],
-  bottom: [{ pins: [1,28,29], label: 'GND' }],
-  top: [{ pins: [2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [4], gpio: 2, name: "GPIO2" }, { pins: [5], gpio: 3, name: "GPIO3" }, { pins: [16], gpio: 5, name: "GPIO5" }, { pins: [17], gpio: 4, name: "GPIO4" }, { pins: [6], gpio: 0, name: "GPIO0" }, { pins: [7], gpio: 1, name: "GPIO1" }, { pins: [8], gpio: 6, name: "GPIO6" }, { pins: [9], gpio: 7, name: "GPIO7" }, { pins: [10], gpio: 8, name: "GPIO8" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }],
+  right: [{ pins: [24], gpio: 12, name: "U0RXD/GPIO12" }, { pins: [25], gpio: 11, name: "U0TXD/GPIO11" }, { pins: [13], gpio: 13, name: "GPIO13/USB_D-" }, { pins: [14], gpio: 14, name: "GPIO14/USB_D+" }, { pins: [15], gpio: 28, name: "GPIO28" }, { pins: [18], gpio: 27, name: "GPIO27" }, { pins: [19], gpio: 15, name: "GPIO15" }, { pins: [21], gpio: 23, name: "GPIO23" }, { pins: [23], gpio: 24, name: "GPIO24" }, { pins: [26], gpio: 25, name: "GPIO25" }, { pins: [27], gpio: 26, name: "GPIO26" }, { pins: [20], label: 'NC', name: "NC" }, { pins: [22], label: 'NC', name: "NC" }],
+  bottom: [{ pins: [1,28,29], label: 'GND', name: "GND" }],
+  top: [{ pins: [2], label: '3V3', name: "3V3" }],
 }
 
 export const C5_MINI_1_PINS: Pin[] = [
@@ -748,10 +748,10 @@ export const C5_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const C5_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [45], label: 'EN' }, { pins: [5], label: 'NC' }, { pins: [6], gpio: 2 }, { pins: [7], gpio: 3 }, { pins: [8], gpio: 4 }, { pins: [9], gpio: 5 }, { pins: [10], gpio: 6 }, { pins: [16], gpio: 0 }, { pins: [17], gpio: 1 }, { pins: [14], label: 'NC' }, { pins: [19], gpio: 7 }, { pins: [20], gpio: 8 }, { pins: [21], gpio: 9 }, { pins: [22], gpio: 10 }, { pins: [26], gpio: 15 }, { pins: [15], label: 'NC' }, { pins: [18], label: 'NC' }],
-  right: [{ pins: [39], gpio: 11 }, { pins: [40], gpio: 12 }, { pins: [23], gpio: 13 }, { pins: [24], gpio: 14 }, { pins: [31], gpio: 23 }, { pins: [32], gpio: 24 }, { pins: [33], gpio: 25 }, { pins: [34], gpio: 26 }, { pins: [35], gpio: 27 }, { pins: [4], gpio: 28 }, { pins: [36], label: 'NC' }, { pins: [37], label: 'NC' }, { pins: [38], label: 'NC' }, { pins: [41], label: 'NC' }, { pins: [44], label: 'NC' }],
-  bottom: [{ pins: [28], label: 'NC' }, { pins: [25], label: 'NC' }, { pins: [27], label: 'NC' }, { pins: [29], label: 'NC' }, { pins: [30], label: 'NC' }, { pins: [49], label: 'NC' }, { pins: [1,2,42,43,46,47,48,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }, { pins: [11], label: 'NC' }, { pins: [12], label: 'NC' }, { pins: [13], label: 'NC' }],
+  left: [{ pins: [45], label: 'EN', name: "EN/CHIP_PU" }, { pins: [5], label: 'NC', name: "NC" }, { pins: [6], gpio: 2, name: "GPIO2" }, { pins: [7], gpio: 3, name: "GPIO3" }, { pins: [8], gpio: 4, name: "GPIO4" }, { pins: [9], gpio: 5, name: "GPIO5" }, { pins: [10], gpio: 6, name: "GPIO6" }, { pins: [16], gpio: 0, name: "GPIO0" }, { pins: [17], gpio: 1, name: "GPIO1" }, { pins: [14], label: 'NC', name: "NC" }, { pins: [19], gpio: 7, name: "GPIO7" }, { pins: [20], gpio: 8, name: "GPIO8" }, { pins: [21], gpio: 9, name: "GPIO9" }, { pins: [22], gpio: 10, name: "GPIO10" }, { pins: [26], gpio: 15, name: "GPIO15" }, { pins: [15], label: 'NC', name: "NC" }, { pins: [18], label: 'NC', name: "NC" }],
+  right: [{ pins: [39], gpio: 11, name: "U0TXD/GPIO11" }, { pins: [40], gpio: 12, name: "U0RXD/GPIO12" }, { pins: [23], gpio: 13, name: "GPIO13/USB_D-" }, { pins: [24], gpio: 14, name: "GPIO14/USB_D+" }, { pins: [31], gpio: 23, name: "GPIO23" }, { pins: [32], gpio: 24, name: "GPIO24" }, { pins: [33], gpio: 25, name: "GPIO25" }, { pins: [34], gpio: 26, name: "GPIO26" }, { pins: [35], gpio: 27, name: "GPIO27" }, { pins: [4], gpio: 28, name: "GPIO28" }, { pins: [36], label: 'NC', name: "NC" }, { pins: [37], label: 'NC', name: "NC" }, { pins: [38], label: 'NC', name: "NC" }, { pins: [41], label: 'NC', name: "NC" }, { pins: [44], label: 'NC', name: "NC" }],
+  bottom: [{ pins: [28], label: 'NC', name: "NC" }, { pins: [25], label: 'NC', name: "NC" }, { pins: [27], label: 'NC', name: "NC" }, { pins: [29], label: 'NC', name: "NC" }, { pins: [30], label: 'NC', name: "NC" }, { pins: [49], label: 'NC', name: "NC" }, { pins: [1,2,42,43,46,47,48,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }, { pins: [11], label: 'NC', name: "NC" }, { pins: [12], label: 'NC', name: "NC" }, { pins: [13], label: 'NC', name: "NC" }],
 }
 
 export const H2_MINI_1_PINS: Pin[] = [
@@ -785,10 +785,10 @@ export const H2_MINI_1_LAYOUT: PackageLayout = {
 }
 
 export const H2_MINI_1_SYMBOL: SymbolLayout = {
-  left: [{ pins: [8], label: 'EN' }, { pins: [10], gpio: 1 }, { pins: [12], gpio: 13 }, { pins: [13], gpio: 14 }, { pins: [24], gpio: 22 }, { pins: [25], gpio: 25 }, { pins: [17], label: 'NC' }, { pins: [28], label: 'NC' }, { pins: [29], label: 'NC' }, { pins: [32], label: 'NC' }, { pins: [33], label: 'NC' }, { pins: [34], label: 'NC' }, { pins: [35], label: 'NC' }, { pins: [4], label: 'NC' }, { pins: [7], label: 'NC' }],
-  right: [{ pins: [9], gpio: 0 }, { pins: [31], gpio: 24 }, { pins: [30], gpio: 23 }, { pins: [27], gpio: 27 }, { pins: [26], gpio: 26 }, { pins: [5], gpio: 2 }, { pins: [6], gpio: 3 }, { pins: [18], gpio: 4 }, { pins: [19], gpio: 5 }, { pins: [20], gpio: 10 }, { pins: [21], gpio: 11 }, { pins: [22], gpio: 8 }, { pins: [23], gpio: 9 }, { pins: [16], gpio: 12 }],
-  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND' }],
-  top: [{ pins: [3], label: '3V3' }, { pins: [15], label: 'VBAT' }],
+  left: [{ pins: [8], label: 'EN', name: "EN" }, { pins: [10], gpio: 1, name: "GPIO1/FSPICS0/ADC1_CH0" }, { pins: [12], gpio: 13, name: "GPIO13/XTAL_32K_P" }, { pins: [13], gpio: 14, name: "GPIO14/XTAL_32K_N" }, { pins: [24], gpio: 22, name: "GPIO22" }, { pins: [25], gpio: 25, name: "GPIO25/FSPICS3" }, { pins: [17], label: 'NC', name: "NC" }, { pins: [28], label: 'NC', name: "NC" }, { pins: [29], label: 'NC', name: "NC" }, { pins: [32], label: 'NC', name: "NC" }, { pins: [33], label: 'NC', name: "NC" }, { pins: [34], label: 'NC', name: "NC" }, { pins: [35], label: 'NC', name: "NC" }, { pins: [4], label: 'NC', name: "NC" }, { pins: [7], label: 'NC', name: "NC" }],
+  right: [{ pins: [9], gpio: 0, name: "GPIO0/FSPIQ" }, { pins: [31], gpio: 24, name: "GPIO24/FSPICS2/U0TXD" }, { pins: [30], gpio: 23, name: "GPIO23/FSPICS1/U0RXD" }, { pins: [27], gpio: 27, name: "GPIO27/FSPICS5/USB_D+" }, { pins: [26], gpio: 26, name: "GPIO26/FSPICS4/USB_D-" }, { pins: [5], gpio: 2, name: "GPIO2/FSPIWP/ADC1_CH1/MTMS" }, { pins: [6], gpio: 3, name: "GPIO3/FSPIHD/ADC1_CH2/MTDO" }, { pins: [18], gpio: 4, name: "GPIO4/FSPICLK/ADC1_CH3/MTCK" }, { pins: [19], gpio: 5, name: "GPIO5/FSPID/ADC1_CH4/MTDI" }, { pins: [20], gpio: 10, name: "GPIO10/ZCD0" }, { pins: [21], gpio: 11, name: "GPIO11/ZCD1" }, { pins: [22], gpio: 8, name: "GPIO8" }, { pins: [23], gpio: 9, name: "GPIO9" }, { pins: [16], gpio: 12, name: "GPIO12" }],
+  bottom: [{ pins: [1,2,11,14,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53], label: 'GND', name: "GND" }],
+  top: [{ pins: [3], label: '3V3', name: "3V3" }, { pins: [15], label: 'VBAT', name: "VBAT" }],
 }
 
 export const ESP32_DEVKITC_PINS: Pin[] = [
@@ -833,10 +833,10 @@ export const ESP32_DEVKITC_LAYOUT: PackageLayout = {
 }
 
 export const ESP32_DEVKITC_SYMBOL: SymbolLayout = {
-  left: [{ pins: [2], label: 'EN' }, { pins: [7], gpio: 32 }, { pins: [8], gpio: 33 }, { pins: [13], gpio: 12 }, { pins: [15], gpio: 13 }, { pins: [12], gpio: 14 }, { pins: [23], gpio: 15 }, { pins: [5], gpio: 34 }, { pins: [6], gpio: 35 }, { pins: [3], gpio: 36 }, { pins: [4], gpio: 39 }],
-  right: [{ pins: [35], gpio: 1 }, { pins: [34], gpio: 3 }, { pins: [25], gpio: 0 }, { pins: [24], gpio: 2 }, { pins: [26], gpio: 4 }, { pins: [29], gpio: 5 }, { pins: [30], gpio: 18 }, { pins: [31], gpio: 19 }, { pins: [33], gpio: 21 }, { pins: [36], gpio: 22 }, { pins: [37], gpio: 23 }, { pins: [9], gpio: 25 }, { pins: [10], gpio: 26 }, { pins: [11], gpio: 27 }, { pins: [20], gpio: 6 }, { pins: [21], gpio: 7 }, { pins: [22], gpio: 8 }, { pins: [16], gpio: 9 }, { pins: [17], gpio: 10 }, { pins: [18], label: 'CMD' }, { pins: [27], gpio: 16 }, { pins: [28], gpio: 17 }],
-  bottom: [{ pins: [14,32,38], label: 'GND' }],
-  top: [{ pins: [19], label: '5V' }, { pins: [1], label: '3V3' }],
+  left: [{ pins: [2], label: 'EN', name: "CHIP_PU" }, { pins: [7], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [8], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [13], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [15], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [12], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [23], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [5], gpio: 34, name: "VDET_1/GPIO34/ADC1_CH6" }, { pins: [6], gpio: 35, name: "VDET_2/GPIO35/ADC1_CH7" }, { pins: [3], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [4], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
+  right: [{ pins: [35], gpio: 1, name: "U0TXD/GPIO1" }, { pins: [34], gpio: 3, name: "U0RXD/GPIO3" }, { pins: [25], gpio: 0, name: "GPIO0/BOOT/ADC2_CH1" }, { pins: [24], gpio: 2, name: "ADC2_CH2/GPIO2" }, { pins: [26], gpio: 4, name: "ADC2_CH0/GPIO4" }, { pins: [29], gpio: 5, name: "GPIO5" }, { pins: [30], gpio: 18, name: "GPIO18" }, { pins: [31], gpio: 19, name: "GPIO19" }, { pins: [33], gpio: 21, name: "GPIO21" }, { pins: [36], gpio: 22, name: "GPIO22" }, { pins: [37], gpio: 23, name: "GPIO23" }, { pins: [9], gpio: 25, name: "DAC_1/ADC2_CH8/GPIO25" }, { pins: [10], gpio: 26, name: "DAC_2/ADC2_CH9/GPIO26" }, { pins: [11], gpio: 27, name: "ADC2_CH7/GPIO27" }, { pins: [20], gpio: 6, name: "SD_CLK/GPIO6" }, { pins: [21], gpio: 7, name: "SD_DATA0/GPIO7" }, { pins: [22], gpio: 8, name: "SD_DATA1/GPIO8" }, { pins: [16], gpio: 9, name: "SD_DATA2/GPIO9" }, { pins: [17], gpio: 10, name: "SD_DATA3/GPIO10" }, { pins: [18], label: 'CMD', name: "CMD" }, { pins: [27], gpio: 16, name: "GPIO16" }, { pins: [28], gpio: 17, name: "GPIO17" }],
+  bottom: [{ pins: [14,32,38], label: 'GND', name: "GND" }],
+  top: [{ pins: [19], label: '5V', name: "5V" }, { pins: [1], label: '3V3', name: "3V3" }],
 }
 
 export const S3_DEVKITC_PINS: Pin[] = [
@@ -886,10 +886,10 @@ export const S3_DEVKITC_LAYOUT: PackageLayout = {
 }
 
 export const S3_DEVKITC_SYMBOL: SymbolLayout = {
-  left: [{ pins: [3], label: 'EN' }, { pins: [8], gpio: 15 }, { pins: [9], gpio: 16 }, { pins: [36], gpio: 39 }, { pins: [37], gpio: 40 }, { pins: [38], gpio: 41 }, { pins: [39], gpio: 42 }],
-  right: [{ pins: [43], gpio: 43 }, { pins: [42], gpio: 44 }, { pins: [26], gpio: 20 }, { pins: [25], gpio: 19 }, { pins: [31], gpio: 0 }, { pins: [41], gpio: 1 }, { pins: [40], gpio: 2 }, { pins: [13], gpio: 3 }, { pins: [4], gpio: 4 }, { pins: [5], gpio: 5 }, { pins: [6], gpio: 6 }, { pins: [7], gpio: 7 }, { pins: [12], gpio: 8 }, { pins: [15], gpio: 9 }, { pins: [16], gpio: 10 }, { pins: [17], gpio: 11 }, { pins: [18], gpio: 12 }, { pins: [19], gpio: 13 }, { pins: [20], gpio: 14 }, { pins: [10], gpio: 17 }, { pins: [11], gpio: 18 }, { pins: [27], gpio: 21 }, { pins: [32], gpio: 35 }, { pins: [33], gpio: 36 }, { pins: [34], gpio: 37 }, { pins: [35], gpio: 38 }, { pins: [30], gpio: 45 }, { pins: [14], gpio: 46 }, { pins: [28], gpio: 47 }, { pins: [29], gpio: 48 }],
-  bottom: [{ pins: [22,23,24,44], label: 'GND' }],
-  top: [{ pins: [21], label: '5V' }, { pins: [1,2], label: '3V3' }],
+  left: [{ pins: [3], label: 'EN', name: "CHIP_PU" }, { pins: [8], gpio: 15, name: "GPIO15/ADC2_CH4/32K_P" }, { pins: [9], gpio: 16, name: "GPIO16/ADC2_CH5/32K_N" }, { pins: [36], gpio: 39, name: "GPIO39/MTCK" }, { pins: [37], gpio: 40, name: "GPIO40/MTDO" }, { pins: [38], gpio: 41, name: "GPIO41/MTDI" }, { pins: [39], gpio: 42, name: "GPIO42/MTMS" }],
+  right: [{ pins: [43], gpio: 43, name: "GPIO43/U0TXD" }, { pins: [42], gpio: 44, name: "GPIO44/U0RXD" }, { pins: [26], gpio: 20, name: "GPIO20/USB_D+" }, { pins: [25], gpio: 19, name: "GPIO19/USB_D-" }, { pins: [31], gpio: 0, name: "GPIO0" }, { pins: [41], gpio: 1, name: "GPIO1/ADC1_CH0" }, { pins: [40], gpio: 2, name: "GPIO2/ADC1_CH1" }, { pins: [13], gpio: 3, name: "GPIO3/ADC1_CH2" }, { pins: [4], gpio: 4, name: "GPIO4/ADC1_CH3" }, { pins: [5], gpio: 5, name: "GPIO5/ADC1_CH4" }, { pins: [6], gpio: 6, name: "GPIO6/ADC1_CH5" }, { pins: [7], gpio: 7, name: "GPIO7/ADC1_CH6" }, { pins: [12], gpio: 8, name: "GPIO8/ADC1_CH7" }, { pins: [15], gpio: 9, name: "GPIO9/ADC1_CH8" }, { pins: [16], gpio: 10, name: "GPIO10/ADC1_CH9" }, { pins: [17], gpio: 11, name: "GPIO11/ADC2_CH0" }, { pins: [18], gpio: 12, name: "GPIO12/ADC2_CH1" }, { pins: [19], gpio: 13, name: "GPIO13/ADC2_CH2" }, { pins: [20], gpio: 14, name: "GPIO14/ADC2_CH3" }, { pins: [10], gpio: 17, name: "GPIO17/ADC2_CH6" }, { pins: [11], gpio: 18, name: "GPIO18/ADC2_CH7" }, { pins: [27], gpio: 21, name: "GPIO21" }, { pins: [32], gpio: 35, name: "GPIO35" }, { pins: [33], gpio: 36, name: "GPIO36" }, { pins: [34], gpio: 37, name: "GPIO37" }, { pins: [35], gpio: 38, name: "GPIO38" }, { pins: [30], gpio: 45, name: "GPIO45" }, { pins: [14], gpio: 46, name: "GPIO46" }, { pins: [28], gpio: 47, name: "GPIO47" }, { pins: [29], gpio: 48, name: "GPIO48" }],
+  bottom: [{ pins: [22,23,24,44], label: 'GND', name: "GND" }],
+  top: [{ pins: [21], label: '5V', name: "5V" }, { pins: [1,2], label: '3V3', name: "3V3" }],
 }
 
 export const C3_DEVKITM_PINS: Pin[] = [
@@ -918,10 +918,10 @@ export const C3_DEVKITM_LAYOUT: PackageLayout = {
 }
 
 export const C3_DEVKITM_SYMBOL: SymbolLayout = {
-  left: [{ pins: [7], label: 'EN' }, { pins: [9], gpio: 0 }, { pins: [10], gpio: 1 }, { pins: [4], gpio: 2 }, { pins: [5], gpio: 3 }, { pins: [20], gpio: 4 }],
-  right: [{ pins: [28], gpio: 20 }, { pins: [29], gpio: 21 }, { pins: [18], gpio: 18 }, { pins: [17], gpio: 19 }, { pins: [21], gpio: 5 }, { pins: [22], gpio: 6 }, { pins: [23], gpio: 7 }, { pins: [25], gpio: 8 }, { pins: [26], gpio: 9 }, { pins: [11], gpio: 10 }],
-  bottom: [{ pins: [1,6,8,12,15,16,19,24,27,30], label: 'GND' }],
-  top: [{ pins: [2,3], label: '3V3' }, { pins: [13,14], label: '5V' }],
+  left: [{ pins: [7], label: 'EN', name: "RST" }, { pins: [9], gpio: 0, name: "GPIO0" }, { pins: [10], gpio: 1, name: "GPIO1" }, { pins: [4], gpio: 2, name: "GPIO2" }, { pins: [5], gpio: 3, name: "GPIO3" }, { pins: [20], gpio: 4, name: "GPIO4" }],
+  right: [{ pins: [28], gpio: 20, name: "GPIO20/U0RXD" }, { pins: [29], gpio: 21, name: "GPIO21/U0TXD" }, { pins: [18], gpio: 18, name: "GPIO18/USB_D+" }, { pins: [17], gpio: 19, name: "GPIO19/USB_D-" }, { pins: [21], gpio: 5, name: "GPIO5" }, { pins: [22], gpio: 6, name: "GPIO6" }, { pins: [23], gpio: 7, name: "GPIO7" }, { pins: [25], gpio: 8, name: "GPIO8" }, { pins: [26], gpio: 9, name: "GPIO9" }, { pins: [11], gpio: 10, name: "GPIO10" }],
+  bottom: [{ pins: [1,6,8,12,15,16,19,24,27,30], label: 'GND', name: "GND" }],
+  top: [{ pins: [2,3], label: '3V3', name: "3V3" }, { pins: [13,14], label: '5V', name: "5V" }],
 }
 
 export const C6_DEVKITC_PINS: Pin[] = [
@@ -958,7 +958,7 @@ export const C6_DEVKITC_LAYOUT: PackageLayout = {
 }
 
 export const C6_DEVKITC_SYMBOL: SymbolLayout = {
-  left: [{ pins: [1], label: '3V3' }, { pins: [2], label: 'EN' }, { pins: [3], gpio: 4 }, { pins: [4], gpio: 5 }, { pins: [5], gpio: 6 }, { pins: [6], gpio: 7 }, { pins: [7], gpio: 0 }, { pins: [8], gpio: 1 }, { pins: [9], gpio: 8 }, { pins: [10], gpio: 10 }, { pins: [11], gpio: 11 }, { pins: [12], gpio: 2 }, { pins: [13], gpio: 3 }, { pins: [14], label: '5V' }, { pins: [15], label: 'GND' }, { pins: [16], label: 'NC' }],
-  right: [{ pins: [32], label: 'GND' }, { pins: [31], gpio: 16 }, { pins: [30], gpio: 17 }, { pins: [29], gpio: 15 }, { pins: [28], gpio: 23 }, { pins: [27], gpio: 22 }, { pins: [26], gpio: 21 }, { pins: [25], gpio: 20 }, { pins: [24], gpio: 19 }, { pins: [23], gpio: 18 }, { pins: [22], gpio: 9 }, { pins: [21], label: 'GND' }, { pins: [20], gpio: 13 }, { pins: [19], gpio: 12 }, { pins: [18], label: 'GND' }, { pins: [17], label: 'NC' }],
+  left: [{ pins: [1], label: '3V3', name: "3V3" }, { pins: [2], label: 'EN', name: "EN/RESET" }, { pins: [3], gpio: 4, name: "GPIO4/MTMS" }, { pins: [4], gpio: 5, name: "GPIO5/MTDI" }, { pins: [5], gpio: 6, name: "GPIO6" }, { pins: [6], gpio: 7, name: "GPIO7" }, { pins: [7], gpio: 0, name: "GPIO0" }, { pins: [8], gpio: 1, name: "GPIO1" }, { pins: [9], gpio: 8, name: "GPIO8/BOOT" }, { pins: [10], gpio: 10, name: "GPIO10" }, { pins: [11], gpio: 11, name: "GPIO11" }, { pins: [12], gpio: 2, name: "GPIO2" }, { pins: [13], gpio: 3, name: "GPIO3" }, { pins: [14], label: '5V', name: "5V" }, { pins: [15], label: 'GND', name: "GND" }, { pins: [16], label: 'NC', name: "NC" }],
+  right: [{ pins: [32], label: 'GND', name: "GND" }, { pins: [31], gpio: 16, name: "GPIO16/U0TXD" }, { pins: [30], gpio: 17, name: "GPIO17/U0RXD" }, { pins: [29], gpio: 15, name: "GPIO15/JTAG" }, { pins: [28], gpio: 23, name: "GPIO23" }, { pins: [27], gpio: 22, name: "GPIO22" }, { pins: [26], gpio: 21, name: "GPIO21" }, { pins: [25], gpio: 20, name: "GPIO20" }, { pins: [24], gpio: 19, name: "GPIO19" }, { pins: [23], gpio: 18, name: "GPIO18" }, { pins: [22], gpio: 9, name: "GPIO9/BOOT" }, { pins: [21], label: 'GND', name: "GND" }, { pins: [20], gpio: 13, name: "GPIO13/USB_D+" }, { pins: [19], gpio: 12, name: "GPIO12/USB_D-" }, { pins: [18], label: 'GND', name: "GND" }, { pins: [17], label: 'NC', name: "NC" }],
 }
 

@@ -6,7 +6,7 @@ const ADC2_NO_WIFI = {
   id: 'adc2_no_wifi' as const,
   severity: 'warning' as const,
   title: 'ADC2 unusable with WiFi',
-  description: 'ADC2 is used by the WiFi driver. Any analogRead() on an ADC2 pin returns errors while WiFi is active. Use ADC1 pins (GPIO32–39) for analog readings when WiFi is on.',
+  description: 'ADC2 is used by the WiFi driver. Any analogRead() on an ADC2 pin returns errors while WiFi is active. Use ADC1 pins (GPIO32-39) for analog readings when WiFi is on.',
 }
 
 const INPUT_ONLY = {
@@ -20,7 +20,7 @@ const FLASH_RESERVED = {
   id: 'flash_reserved' as const,
   severity: 'danger' as const,
   title: 'Reserved for flash / PSRAM',
-  description: 'GPIO6–11 are connected to the internal SPI flash. Using them for anything else will crash the ESP32.',
+  description: 'GPIO6-11 are connected to the internal SPI flash. Using them for anything else will crash the ESP32.',
 }
 
 const makeStrapping = (detail: string) => ({
@@ -111,7 +111,7 @@ export const ESP32_BASE_PINS = [
     capabilities: ['gpio', 'adc2', 'touch', 'pwm'],
     constraints: [
       ADC2_NO_WIFI,
-      makeStrapping('GPIO2 must be LOW or floating during download mode. On many DevKit boards the onboard LED is on GPIO2 — the 10 kΩ pull-down can interfere with boot if an external device drives it HIGH.'),
+      makeStrapping('GPIO2 must be LOW or floating during download mode. On many DevKit boards the onboard LED is on GPIO2 - the 10 kΩ pull-down can interfere with boot if an external device drives it HIGH.'),
     ],
     isUsable: true,
   },
@@ -151,7 +151,7 @@ export const ESP32_BASE_PINS = [
     capabilities: ['gpio', 'adc2', 'touch', 'pwm'],
     constraints: [
       ADC2_NO_WIFI,
-      makeStrapping('MTDI: if HIGH at boot, the flash voltage is set to 1.8 V. Most modules use 3.3 V flash — driving GPIO12 HIGH at boot will prevent startup. Keep LOW or floating at boot.'),
+      makeStrapping('MTDI: if HIGH at boot, the flash voltage is set to 1.8 V. Most modules use 3.3 V flash - driving GPIO12 HIGH at boot will prevent startup. Keep LOW or floating at boot.'),
     ],
     isUsable: true,
   },
@@ -309,8 +309,8 @@ export const esp32: Chip = {
   cores: 2,
   datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf',
   notes: [
-    'ADC2 (GPIO0,2,4,12–15,25–27) cannot be used while WiFi is active.',
-    'GPIO6–11 are connected to internal SPI flash — never use them.',
+    'ADC2 (GPIO0,2,4,12-15,25-27) cannot be used while WiFi is active.',
+    'GPIO6-11 are connected to internal SPI flash - never use them.',
     'GPIO34, 35, 36, 39 are input-only (no output, no pull-up/down).',
     'GPIO0 must be HIGH (or floating) at boot to boot from flash; pull LOW to enter bootloader.',
     'GPIO12 (MTDI) must be LOW at boot for 3.3 V flash; if pulled HIGH the ESP32 configures 1.8 V flash and may not start.',

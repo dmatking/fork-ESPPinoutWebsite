@@ -57,12 +57,13 @@ interface SchemRow {
   pinNums: number[]
   pin?: Pin
   label?: string
+  name?: string        // verbatim symbol pin name, e.g. 'SENSOR_VP/GPIO36/ADC1_CH0'
 }
 
 function toRow(sp: SymbolPin, pinByGpio: Map<number, Pin>, i: number): SchemRow {
   return sp.gpio !== undefined
-    ? { key: `g${sp.gpio}-${i}`, pinNums: sp.pins, pin: pinByGpio.get(sp.gpio), label: sp.gpio !== undefined && !pinByGpio.get(sp.gpio) ? `GPIO${sp.gpio}` : undefined }
-    : { key: `s${sp.pins[0]}-${i}`, pinNums: sp.pins, label: sp.label ?? 'NC' }
+    ? { key: `g${sp.gpio}-${i}`, pinNums: sp.pins, pin: pinByGpio.get(sp.gpio), name: sp.name, label: !pinByGpio.get(sp.gpio) ? `GPIO${sp.gpio}` : undefined }
+    : { key: `s${sp.pins[0]}-${i}`, pinNums: sp.pins, label: sp.label ?? 'NC', name: sp.name }
 }
 
 // Fallback for chips without an official symbol: power/EN left-top, GPIOs ascending.
@@ -131,9 +132,10 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
       chipFill: c.severity === 'danger' ? '#dc2626' : '#d97706',
     })
   }
-  const primary = pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]
+  // Everything already shown inside the body is not repeated as an annotation.
+  const shown = new Set(rowName(row).toUpperCase().split('/'))
   for (const n of pin.names) {
-    if (n === primary) continue
+    if (shown.has(n.toUpperCase())) continue
     segs.push({ text: n, color: fnColor(n) })
   }
   return segs
@@ -142,10 +144,19 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
 const segW = (s: Seg) => s.text.length * 6.1 + (s.chipFill ? 16 : 9)
 const segsW = (segs: Seg[]) => segs.reduce((a, s) => a + segW(s), 0)
 
-const rowName = (row: SchemRow) =>
-  row.pin
+// Name shown inside the body. For official symbol pins this is the verbatim
+// Espressif name up to and including the GPIO token ('SENSOR_VP/GPIO36');
+// the remaining function tokens stay outside as annotations.
+function rowName(row: SchemRow): string {
+  if (row.name) {
+    const toks = row.name.split('/')
+    const gi = toks.findIndex(t => /^(GPIO|IO)\d+$/i.test(t))
+    return gi > 0 ? toks.slice(0, gi + 1).join('/') : toks[0]
+  }
+  return row.pin
     ? (row.pin.names.find(n => /^GPIO\d/.test(n)) ?? row.pin.names[0] ?? `IO${row.pin.gpio}`)
     : (row.label ?? 'NC')
+}
 
 const numText = (row: SchemRow) => (row.pinNums.length > 3 ? `×${row.pinNums.length}` : row.pinNums.join(','))
 
@@ -181,7 +192,12 @@ export function SchematicDiagram() {
 
   const maxRows = Math.max(banks.left.length, banks.right.length)
   const bodyH = maxRows * PITCH + 26
-  const BW = Math.max(216, (Math.max(banks.top.length, banks.bottom.length) + 1) * HPITCH)
+  const nameW = (r: SchemRow) => rowName(r).length * 6.6 + 16
+  const BW = Math.max(
+    216,
+    Math.max(60, ...banks.left.map(nameW)) + Math.max(60, ...banks.right.map(nameW)) + 16,
+    (Math.max(banks.top.length, banks.bottom.length) + 1) * HPITCH,
+  )
   const bodyX = CX0 + leftAW + PL
   const rowCY = (i: number) => TOPY + 20 + i * PITCH
   const colCX = (i: number, count: number) => bodyX + BW / 2 + (i - (count - 1) / 2) * HPITCH
@@ -198,10 +214,12 @@ export function SchematicDiagram() {
   const rowTitle = (row: SchemRow): string | null => {
     if (row.pin) {
       return row.pin.names.join(' / ')
-        + (row.pinNums.length > 1 ? ` — pads ${row.pinNums.join(', ')}` : '')
-        + (row.pin.constraints.length ? ' — ' + row.pin.constraints.map(c => c.title).join(' · ') : '')
+        + (row.pinNums.length > 1 ? ` - pads ${row.pinNums.join(', ')}` : '')
+        + (row.pin.constraints.length ? ' - ' + row.pin.constraints.map(c => c.title).join(' · ') : '')
     }
-    if (row.pinNums.length > 1) return `${row.label} — pads ${row.pinNums.join(', ')}`
+    const label = row.name ?? row.label
+    if (row.pinNums.length > 1) return `${label} - pads ${row.pinNums.join(', ')}`
+    if (row.name && row.name !== row.label) return `${row.name} - pad ${row.pinNums[0]}`
     return null
   }
 
@@ -257,14 +275,16 @@ export function SchematicDiagram() {
     )
   }
 
-  // ── Vertical pin (top/bottom edges — power/GND/NC in the official symbols) ──
+  // ── Vertical pin (top/bottom edges - power/GND/NC in the official symbols) ──
   const renderVRow = (row: SchemRow, i: number, edge: 'top' | 'bottom'): ReactNode => {
     const count = edge === 'top' ? banks.top.length : banks.bottom.length
     const cx = colCX(i, count)
     const isTop = edge === 'top'
     const edgeY = isTop ? TOPY : TOPY + bodyH
     const tipY  = isTop ? edgeY - VPL : edgeY + VPL
-    const name = rowName(row)
+    // Short label only - long rotated names collide with the side banks;
+    // the verbatim symbol name stays in the tooltip.
+    const name = row.label ?? rowName(row)
     const isSelected = !!row.pin && selectedPin?.gpio === row.pin.gpio
     const isActive = !row.pin || filteredSet.has(row.pin.gpio)
     const title = rowTitle(row)
@@ -367,7 +387,7 @@ export function SchematicDiagram() {
           <line x1={tbX} y1={tbY + 44} x2={tbX + TB_W} y2={tbY + 44} stroke={FRAME} strokeWidth="0.8" />
           <line x1={tbX + TB_W - 92} y1={tbY + 44} x2={tbX + TB_W - 92} y2={tbY + TB_H} stroke={FRAME} strokeWidth="0.8" />
           <text x={tbX + 8} y={tbY + 15} fontSize="10.5" fontFamily={FONT} fontWeight={700} fill={TEXT_DARK}>
-            {m.name} — pinout
+            {m.name} - pinout
           </text>
           <text x={tbX + 8} y={tbY + 37} fontSize="9.5" fontFamily={FONT} fill={TEXT_DARK}>
             ESP32 Pinout Studio · esp32pin.com
@@ -382,8 +402,8 @@ export function SchematicDiagram() {
       </svg>
       <p className="text-center font-mono" style={{ fontSize: 9, color: '#3d5068', marginTop: 8 }}>
         {sym
-          ? 'Official Espressif schematic symbol (KiCad library) — stacked GND pins merged; numbers are the physical pads.'
-          : 'Logical symbol — GPIOs in ascending order. Pin numbers are the physical pads on the module.'}
+          ? 'Official Espressif schematic symbol (KiCad library) - stacked GND pins merged; numbers are the physical pads.'
+          : 'Logical symbol - GPIOs in ascending order. Pin numbers are the physical pads on the module.'}
       </p>
     </div>
   )

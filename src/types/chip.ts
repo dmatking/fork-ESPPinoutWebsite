@@ -35,7 +35,7 @@ export interface Pin {
   notes?: string
 }
 
-// Physical module identity — drives the realistic on-screen module rendering.
+// Physical module identity - drives the realistic on-screen module rendering.
 // Different ESP families ship in visually distinct modules:
 //   'wroom'  → rectangular metal can, full-width meander PCB antenna (WROOM-32, S2/S3-WROOM-1)
 //   'wrover' → same width but taller, black PCB, extra PSRAM (WROVER)
@@ -80,9 +80,9 @@ export interface PinAssignment {
   label: string
 }
 
-// Physical package layout — maps castellated pads to GPIO / special names
+// Physical package layout - maps castellated pads to GPIO / special names
 export interface LayoutPin {
-  pinNumber: number     // physical pad number (e.g. 1–38 on WROOM-32)
+  pinNumber: number     // physical pad number (e.g. 1-38 on WROOM-32)
   gpio?: number         // present for GPIO pads
   label?: string        // 'GND' | '3V3' | 'EN' | 'NC' for non-GPIO pads
 }
@@ -94,6 +94,7 @@ export interface SymbolPin {
   pins: number[]        // physical pad number(s) this symbol pin carries
   gpio?: number
   label?: string        // 'GND' | '3V3' | 'EN' | 'NC' | ... for non-GPIO pins
+  name?: string         // verbatim pin name from the Espressif symbol, e.g. 'SENSOR_VP/GPIO36'
 }
 
 export interface SymbolLayout {

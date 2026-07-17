@@ -25,9 +25,9 @@ export const esp32wrover: Chip = {
   cores: 2,
   datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/esp32-wrover_datasheet_en.pdf',
   notes: [
-    'GPIO16 and GPIO17 are used for PSRAM — do not use them in user code.',
-    'ADC2 (GPIO0,2,4,12–15,25–27) cannot be used while WiFi is active.',
-    'GPIO6–11 are connected to internal SPI flash — never use them.',
+    'GPIO16 and GPIO17 are used for PSRAM - do not use them in user code.',
+    'ADC2 (GPIO0,2,4,12-15,25-27) cannot be used while WiFi is active.',
+    'GPIO6-11 are connected to internal SPI flash - never use them.',
     'GPIO34, 35, 36, 39 are input-only (no output, no pull-up/down).',
     'GPIO0 must be HIGH (or floating) at boot to boot from flash.',
     'GPIO12 must be LOW at boot for 3.3 V flash.',
