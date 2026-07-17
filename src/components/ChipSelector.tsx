@@ -35,6 +35,16 @@ export function ChipSelector() {
   const accentOf = (t: string) => (t === BOARDS ? BOARD_ACCENT : FAMILY_ACCENT[t] ?? '#64748b')
   const shown = CHIPS.filter(c => tabOf(c) === tab)
 
+  // Switching family immediately loads that family's first module -
+  // a tab that only changes the second row feels like a dead click.
+  const selectTab = (t: string) => {
+    setTab(t)
+    if (tabOf(chip) !== t) {
+      const first = CHIPS.find(c => tabOf(c) === t)
+      if (first) setChip(first.id)
+    }
+  }
+
   const shortLabel = (c: Chip) => {
     if (isBoard(c)) return c.name.replace(/^ESP32-/, '')
     return (c.name.startsWith(c.family) ? c.name.slice(c.family.length).replace(/^-/, '') : c.name) || c.name
@@ -51,7 +61,7 @@ export function ChipSelector() {
           return (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => selectTab(t)}
               className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none"
               style={{
                 fontSize: 11.5, padding: '6px 10px',
