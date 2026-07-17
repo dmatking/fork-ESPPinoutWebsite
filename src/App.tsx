@@ -73,6 +73,46 @@ export default function App() {
         </div>
       </div>
 
+      {/* Footer */}
+      <footer className="border-t border-gray-800 mt-4">
+        <div className="max-w-screen-2xl mx-auto w-full px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <a
+            href="https://kunzengineering.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3"
+            title="A free tool by Kunz Engineering"
+          >
+            <span className="flex items-center justify-center rounded-md bg-white px-2.5 py-1.5 shadow-sm">
+              <img
+                src="/kunz-engineering-mark.png"
+                alt="Kunz Engineering"
+                width={34}
+                height={18}
+                style={{ height: 18, width: 'auto', display: 'block' }}
+              />
+            </span>
+            <span className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors leading-tight">
+              A free tool by<br />
+              <span className="font-semibold text-gray-300 group-hover:text-white">Kunz Engineering</span>
+              <span className="text-gray-600"> · kunzengineering.ch ↗</span>
+            </span>
+          </a>
+
+          <div className="flex items-center gap-4 text-xs text-gray-600">
+            <a
+              href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gray-300 transition-colors"
+            >
+              Open source on GitHub ↗
+            </a>
+            <span className="text-gray-700">MIT licensed</span>
+          </div>
+        </div>
+      </footer>
+
       {/* Pin detail slide-in panel */}
       <PinDetailPanel />
     </div>
