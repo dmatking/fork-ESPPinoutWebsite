@@ -114,10 +114,11 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
       chipFill: c.severity === 'danger' ? '#7f1d1d' : '#dc2626',
     })
   }
-  // Everything already shown inside the body is not repeated as an annotation.
-  const shown = new Set(rowName(row).toUpperCase().split('/'))
+  // Annotate every function name next to the pin - even ones that already
+  // appear in the body name. Only the bare GPIOxx token is skipped (it is the
+  // pin's identity, not a function).
   for (const n of pin.names) {
-    if (shown.has(n.toUpperCase())) continue
+    if (/^GPIO\d+$/i.test(n)) continue
     segs.push({ text: n, color: fnColor(n) })
   }
   // A bare pin is not a useless pin - it is a fully free one. Say so instead
