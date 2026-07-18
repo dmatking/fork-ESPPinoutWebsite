@@ -3,9 +3,9 @@ import { CHIPS } from '../data/chips/index'
 import type { Chip, Pin, PinAssignment, FilterKey } from '../types/chip'
 
 export type DiagramView = 'schematic' | 'module'
-export type Page = 'studio' | 'contribute'
+export type Page = 'studio' | 'contribute' | 'build'
 
-interface AppState {
+export interface AppState {
   chip: Chip
   setChip: (id: string) => void
   page: Page
@@ -23,7 +23,7 @@ interface AppState {
   shareUrl: string
 }
 
-const AppContext = createContext<AppState | null>(null)
+export const AppContext = createContext<AppState | null>(null)
 
 function encodeState(chipId: string, mapping: PinAssignment[]): string {
   const data = { c: chipId, m: mapping.map(a => ({ g: a.gpio, r: a.role, l: a.label })) }
@@ -65,15 +65,19 @@ function chipFromLocation(): Chip | null {
 // is the studio (a chip page).
 function pageFromLocation(): Page {
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
-  return path === 'contribute' ? 'contribute' : 'studio'
+  if (path === 'contribute') return 'contribute'
+  if (path === 'build') return 'build'
+  return 'studio'
 }
+
+const PAGE_PATH: Record<Page, string | null> = { studio: null, contribute: '/contribute', build: '/build' }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [chip, setChipState] = useState<Chip>(() => chipFromLocation() ?? CHIPS[0])
   const [page, setPage] = useState<Page>(() => pageFromLocation())
 
   const navigate = useCallback((to: Page) => {
-    const path = to === 'contribute' ? '/contribute' : `/${chip.id}`
+    const path = PAGE_PATH[to] ?? `/${chip.id}`
     if (window.location.pathname !== path) window.history.pushState({}, '', path)
     setPage(to)
     window.scrollTo(0, 0)

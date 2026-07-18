@@ -8,12 +8,14 @@ import { MappingBuilder }  from './components/MappingBuilder'
 import { ExportPanel }     from './components/ExportPanel'
 import { CommunitySubmit } from './components/CommunitySubmit'
 import { ContributePage } from './components/ContributePage'
+import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
 
 export default function App() {
   const { chip, page, navigate } = useApp()
 
   if (page === 'contribute') return <ContributePage />
+  if (page === 'build') return <BoardBuilderPage />
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">

@@ -26,6 +26,26 @@ export function reportMistakeUrl(chip: Chip, pin?: Pin | null): string {
   return `${REPO_URL}/issues/new?labels=data&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
 }
 
+// Prefilled issue carrying a BoardSpec JSON built in the Board Builder.
+export function boardDataIssueUrl(name: string, json: string): string {
+  const title = `[board data] ${name || 'new board'}`
+  const body = [
+    '**Board:** ' + (name || '(unnamed)'),
+    '',
+    'Built with the Board Builder. Please spot-check against the schematic before merging.',
+    '',
+    '```json',
+    json,
+    '```',
+    '',
+    '**Source (schematic / pinout link):**',
+    '',
+    '**Gotchas not captured above:**',
+    '',
+  ].join('\n')
+  return `${REPO_URL}/issues/new?labels=board,data&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
+}
+
 export function newChipUrl(): string {
   const title = '[new chip] '
   const body = [

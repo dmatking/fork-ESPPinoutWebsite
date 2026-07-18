@@ -89,8 +89,24 @@ export function ContributePage() {
           </p>
         </section>
 
+        <section className="rounded-xl border border-green-700/60 bg-green-950/25 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">The easiest way to add a board</h3>
+            <p className="text-sm text-green-100/75 leading-relaxed max-w-xl">
+              Use the Board Builder: pick the base chip, map the headers to GPIOs in your browser, watch the live
+              preview, and export it. No KiCad, no code, no JSON by hand. Best for dev and combo boards.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('build')}
+            className="shrink-0 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-sm font-semibold text-white transition-colors"
+          >
+            Open the Board Builder &rarr;
+          </button>
+        </section>
+
         <section className="space-y-4">
-          <h3 className="text-lg font-semibold">Three ways to help</h3>
+          <h3 className="text-lg font-semibold">Other ways to help</h3>
           <div className="grid gap-4 sm:grid-cols-3">
             {PATHS.map(p => (
               <div key={p.title} className="flex flex-col rounded-xl border border-gray-800 bg-gray-900/40 p-5">
