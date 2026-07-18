@@ -14,6 +14,17 @@ function generateArduinoDefines(chip: { name: string }, mapping: PinAssignment[]
   return lines.join('\n')
 }
 
+function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const pad = 8 * scale
+  ctx.font = `${11 * scale}px ui-monospace, SFMono-Regular, Menlo, monospace`
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'bottom'
+  ctx.fillStyle = 'rgba(156, 163, 175, 0.85)'
+  ctx.fillText('esp32pin.com', canvas.width - pad, canvas.height - pad)
+}
+
 export function ExportPanel() {
   const { chip, mapping, shareUrl } = useApp()
   const [copied, setCopied] = useState<'url' | 'code' | null>(null)
@@ -29,7 +40,9 @@ export function ExportPanel() {
   const downloadPng = async () => {
     const target = document.getElementById('pinout-diagram-export')
     if (!target) return
-    const canvas = await html2canvas(target, { backgroundColor: '#030712', scale: 2 })
+    const scale = 2
+    const canvas = await html2canvas(target, { backgroundColor: '#030712', scale })
+    drawWatermark(canvas, scale)
     const a = document.createElement('a')
     a.download = `${chip.id}-pinout-mapping.png`
     a.href = canvas.toDataURL('image/png')
