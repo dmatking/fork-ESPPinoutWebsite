@@ -8,6 +8,7 @@ const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, titl
 const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }
 const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }
 const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }
+const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }
 
 export const ESP32_WROOM_32_SYMBOL: SymbolLayout = {
   left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [9], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [14], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [16], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [13], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [23], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [6], gpio: 34, name: "GPIO34/ADC1_CH6" }, { pins: [7], gpio: 35, name: "GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
@@ -394,9 +395,9 @@ export const S3_WROOM_1_PINS: Pin[] = [
   { gpio: 19, names: ["GPIO19","U1RTS","ADC2_CH8","CLK_OUT2","USB_D-"], capabilities: ["gpio","adc2","pwm","uart","usb"] as Capability[], constraints: [USB], isUsable: true },
   { gpio: 20, names: ["GPIO20","U1CTS","ADC2_CH9","CLK_OUT1","USB_D+"], capabilities: ["gpio","adc2","pwm","uart","usb"] as Capability[], constraints: [USB], isUsable: true },
   { gpio: 21, names: ["GPIO21"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 35, names: ["GPIO35","SPIIO6","FSPID","SUBSPID"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 36, names: ["GPIO36","SPIIO7","FSPICLK","SUBSPICLK"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 37, names: ["GPIO37","SPIDQS","FSPIQ","SUBSPIQ"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 35, names: ["GPIO35","SPIIO6","FSPID","SUBSPID"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [OSPI], isUsable: true },
+  { gpio: 36, names: ["GPIO36","SPIIO7","FSPICLK","SUBSPICLK"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [OSPI], isUsable: true },
+  { gpio: 37, names: ["GPIO37","SPIDQS","FSPIQ","SUBSPIQ"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [OSPI], isUsable: true },
   { gpio: 38, names: ["GPIO38","FSPIWP","SUBSPIWP"], capabilities: ["gpio","pwm","spi"] as Capability[], constraints: [], isUsable: true },
   { gpio: 39, names: ["GPIO39","MTCK","CLK_OUT3","SUBSPICS1"], capabilities: ["gpio","pwm","spi","jtag"] as Capability[], constraints: [], isUsable: true },
   { gpio: 40, names: ["GPIO40","MTDO","CLK_OUT2"], capabilities: ["gpio","pwm","jtag"] as Capability[], constraints: [], isUsable: true },
@@ -863,9 +864,9 @@ export const S3_DEVKITC_PINS: Pin[] = [
   { gpio: 19, names: ["GPIO19","USB_D-"], capabilities: ["gpio","pwm","usb"] as Capability[], constraints: [USB], isUsable: true },
   { gpio: 20, names: ["GPIO20","USB_D+"], capabilities: ["gpio","pwm","usb"] as Capability[], constraints: [USB], isUsable: true },
   { gpio: 21, names: ["GPIO21"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 35, names: ["GPIO35"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 36, names: ["GPIO36"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
-  { gpio: 37, names: ["GPIO37"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 35, names: ["GPIO35"], capabilities: ["gpio","pwm"] as Capability[], constraints: [OSPI], isUsable: true },
+  { gpio: 36, names: ["GPIO36"], capabilities: ["gpio","pwm"] as Capability[], constraints: [OSPI], isUsable: true },
+  { gpio: 37, names: ["GPIO37"], capabilities: ["gpio","pwm"] as Capability[], constraints: [OSPI], isUsable: true },
   { gpio: 38, names: ["GPIO38"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
   { gpio: 39, names: ["GPIO39","MTCK"], capabilities: ["gpio","pwm","jtag"] as Capability[], constraints: [], isUsable: true },
   { gpio: 40, names: ["GPIO40","MTDO"], capabilities: ["gpio","pwm","jtag"] as Capability[], constraints: [], isUsable: true },

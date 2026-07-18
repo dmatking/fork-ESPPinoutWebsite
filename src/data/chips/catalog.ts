@@ -57,6 +57,7 @@ const FAMILIES: Record<string, Family> = {
       'GPIO19/20 are USB Serial/JTAG D−/D+. Do not use as GPIO while USB is connected.',
       'GPIO0 is a strapping pin (HIGH = normal boot, LOW = download mode).',
       'GPIO3/45/46 are strapping pins - avoid driving them at boot.',
+      'GPIO35/36/37 are used by the Octal SPI PSRAM on R8/R16V variants (e.g. N8R8/N16R8 modules) - not available there.',
       'No DAC on the S3.',
     ],
   },

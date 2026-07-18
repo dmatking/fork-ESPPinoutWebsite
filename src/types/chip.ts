@@ -12,6 +12,7 @@ export type ConstraintId =
   | 'strapping_pin'
   | 'flash_reserved'
   | 'psram_reserved'
+  | 'ospi_reserved'
   | 'boot_must_float'
   | 'boot_must_high'
   | 'boot_must_low'

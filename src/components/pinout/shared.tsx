@@ -115,6 +115,7 @@ export const AFFECTED_WORD: Record<ConstraintId, string> = {
   strapping_pin:   'Boot',
   flash_reserved:  'Flash',
   psram_reserved:  'PSRAM',
+  ospi_reserved:   'PSRAM',
   boot_must_float: 'Boot',
   boot_must_high:  'Boot',
   boot_must_low:   'Boot',

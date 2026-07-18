@@ -146,6 +146,7 @@ function buildModule(mod, fam) {
     const flashReserved = fam.flashBus && ([6, 7, 8, 11].includes(gpio) || (fullFlashBus && [9, 10].includes(gpio)))
     const cs = []
     if (flashReserved) cs.push('FLASH')
+    if (mod.ospi && [35, 36, 37].includes(gpio)) cs.push('OSPI')
     if (inputOnly) cs.push('INPUT_ONLY')
     if (fam.strapping?.includes(gpio)) cs.push('STRAP')
     if (fam.adc2Wifi && toks.some(t => /^ADC2/i.test(t))) cs.push('ADC2_WIFI')
@@ -178,7 +179,7 @@ const MODULES = [
   { prefix: 'S2_MINI_1', name: 'ESP32-S2-MINI-1', sym: 'ESP32-S2-MINI-1', fp: 'ESP32-S2-MINI-1', fam: 's2' },
   { prefix: 'S2_SOLO', name: 'ESP32-S2-SOLO', sym: 'ESP32-S2-SOLO', fp: 'ESP32-S2-SOLO', fam: 's2' },
   { prefix: 'S2_WROVER', name: 'ESP32-S2-WROVER', sym: 'ESP32-S2-WROVER', fp: 'ESP32-S2-WROVER', fam: 's2' },
-  { prefix: 'S3_WROOM_1', name: 'ESP32-S3-WROOM-1', sym: 'ESP32-S3-WROOM-1', fp: 'ESP32-S3-WROOM-1', fam: 's3' },
+  { prefix: 'S3_WROOM_1', name: 'ESP32-S3-WROOM-1', sym: 'ESP32-S3-WROOM-1', fp: 'ESP32-S3-WROOM-1', fam: 's3', ospi: true },
   { prefix: 'S3_WROOM_2', name: 'ESP32-S3-WROOM-2', sym: 'ESP32-S3-WROOM-2', fp: 'ESP32-S3-WROOM-2', fam: 's3' },
   { prefix: 'S3_MINI_1', name: 'ESP32-S3-MINI-1', sym: 'ESP32-S3-MINI-1', fp: 'ESP32-S3-MINI-1', fam: 's3' },
   { prefix: 'C3_MINI_1', name: 'ESP32-C3-MINI-1', sym: 'ESP32-C3-MINI-1', fp: 'ESP32-C3-MINI-1', fam: 'c3' },
@@ -190,7 +191,7 @@ const MODULES = [
   { prefix: 'H2_MINI_1', name: 'ESP32-H2-MINI-1', sym: 'ESP32-H2-MINI-1', fp: 'ESP32-H2-MINI-1', fam: 'h2' },
   // Common development boards (two breakout header rows)
   { prefix: 'ESP32_DEVKITC', name: 'ESP32-DevKitC', sym: 'ESP32-DevKitC', fp: 'ESP32-DevKitC', fam: 'esp32' },
-  { prefix: 'S3_DEVKITC', name: 'ESP32-S3-DevKitC-1', sym: 'ESP32-S3-DevKitC', fp: 'ESP32-S3-DevKitC', fam: 's3' },
+  { prefix: 'S3_DEVKITC', name: 'ESP32-S3-DevKitC-1', sym: 'ESP32-S3-DevKitC', fp: 'ESP32-S3-DevKitC', fam: 's3', ospi: true },
   { prefix: 'C3_DEVKITM', name: 'ESP32-C3-DevKitM-1', sym: 'ESP32-C3-DevKitM-1', fp: 'ESP32-C3-DevKitM-1', fam: 'c3' },
   { prefix: 'C6_DEVKITC', name: 'ESP32-C6-DevKitC-1', sym: 'ESP32-C6-DevKitC-1', fp: 'ESP32-C6-DevKitC-1', fam: 'c6' },
 ]
@@ -220,7 +221,8 @@ out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as c
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`
 out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }\n`
-out += `const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }\n\n`
+out += `const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }\n`
+out += `const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }\n\n`
 
 const keys = []
 for (const mod of MODULES) {
