@@ -105,10 +105,11 @@ html.light .bg-green-950\/20 { background-color: #f0fdf4; }
 html.light .border-green-800\/50,
 html.light .border-green-700\/60 { border-color: #bbf7d0; }
 
-/* Gotchas banner + yellow accents */
+/* Gotchas banner + yellow accents: the same yellow as the KiCad schematic
+   symbol body (#fff9c9), so the two surfaces read as one family. */
 html.light .bg-yellow-950\/40,
-html.light .bg-yellow-950\/30 { background-color: #fefce8; }
-html.light .bg-yellow-950\/20 { background-color: #fefce8; }
+html.light .bg-yellow-950\/30 { background-color: #fff9c9; }
+html.light .bg-yellow-950\/20 { background-color: #fffce3; }
 html.light .bg-yellow-900\/40 { background-color: #fef3c7; }
 html.light .border-yellow-700\/50 { border-color: rgba(202, 138, 4, 0.45); }
 html.light .border-yellow-800\/50 { border-color: rgba(202, 138, 4, 0.35); }
