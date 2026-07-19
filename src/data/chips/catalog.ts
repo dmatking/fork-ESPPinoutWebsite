@@ -205,7 +205,6 @@ export const CHIPS: Chip[] = [
   byId('esp32s3'),
   byId('esp32s3wroom2'),
   byId('esp32s3mini1'),
-  esp32S3Zero,
   byId('esp32c3'),
   byId('esp32c3wroom02'),
   byId('esp32c6'),
@@ -216,6 +215,7 @@ export const CHIPS: Chip[] = [
   // Dev boards
   byId('esp32devkitc'),
   byId('esp32s3devkitc'),
+  esp32S3Zero,
   byId('esp32c3devkitm'),
   byId('esp32c6devkitc'),
 ]

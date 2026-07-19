@@ -563,6 +563,11 @@ export function ModuleDiagram() {
     topLayout.every(lp => { const l = (lp.label ?? '').toUpperCase(); return l === 'GND' || l === 'NC' })
   const thermalGnd = topIsThermal ? topLayout.filter(lp => (lp.label ?? '').toUpperCase() === 'GND').length : 0
 
+  // Backside solder pads (e.g. Waveshare S3-Zero) are on the back of the PCB,
+  // not a bottom edge - render them as a labeled chip strip instead of
+  // floating edge columns.
+  const bottomIsBackside = bottomLayout.length > 0 && bottomLayout.every(lp => lp.isBacksidePad)
+
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
   const padCount   = Math.max(bottomLayout.length, topIsThermal ? 0 : topLayout.length, 1)
   const chipWidth  = isBoard ? 150 : Math.max(240, padCount * 30)
@@ -666,8 +671,51 @@ export function ModuleDiagram() {
 
         </div>
 
-        {/* ── Bottom pin row ── */}
-        {bottomLayout.length > 0 && (
+        {/* ── Underside pads (back of the board, not a physical bottom edge) ── */}
+        {bottomLayout.length > 0 && bottomIsBackside && (
+          <div className="flex flex-col items-center" style={{ marginTop: 8, maxWidth: Math.max(chipWidth + 260, 400) }}>
+            <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3, marginBottom: 4 }}>
+              solder pads on the underside
+            </span>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {bottomLayout.map(lp => {
+                const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                if (!pin) return null
+                const color = connectorColor(pin)
+                const { bg, text } = getBadge(pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0])
+                const warn = primaryConstraint(pin)
+                const isSelected = selectedPin?.gpio === pin.gpio
+                const isActive = filteredSet.has(pin.gpio)
+                return (
+                  <div
+                    key={lp.pinNumber}
+                    onClick={() => toggle(pin)}
+                    className={`flex items-center gap-1.5 cursor-pointer select-none rounded-md transition-colors
+                      ${isActive ? '' : 'opacity-[0.07]'}
+                      ${isSelected ? 'bg-violet-950/60' : 'hover:bg-white/[0.05]'}`}
+                    style={{ padding: '3px 7px', border: '1px dashed #2a3a52', background: isSelected ? undefined : '#0b111c' }}
+                  >
+                    <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
+                    <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>{lp.pinNumber}</span>
+                    <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
+                      {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
+                    </span>
+                    {warn && (
+                      <span title={warn.title} className="font-mono font-bold rounded-sm flex items-center justify-center flex-shrink-0"
+                        style={{ background: sevStyle(warn.sev).bg, color: sevStyle(warn.sev).fg, border: `1px solid ${sevStyle(warn.sev).bd}`,
+                          width: 12, height: 12, fontSize: 8, lineHeight: 1 }}>
+                        {sevStyle(warn.sev).icon}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Bottom pin row (a real physical bottom edge) ── */}
+        {bottomLayout.length > 0 && !bottomIsBackside && (
           <div className="flex" style={{ width: chipWidth }}>
             {bottomLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
