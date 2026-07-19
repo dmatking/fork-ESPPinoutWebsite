@@ -12,6 +12,7 @@ const PSRAM_RESERVED = {
 const WROVER_LAYOUT = {
   ...WROOM32_LAYOUT,
   name: 'ESP-WROVER-32',
+  bodyMm: { w: 18, h: 31.4 }, // WROVER-E datasheet outline (taller than WROOM)
 }
 
 export const esp32wrover: Chip = {

@@ -119,6 +119,7 @@ export interface PackageLayout {
   top?:   LayoutPin[]   // left → right (MINI modules have a GND ring on the top edge too)
   leftRailHoles?: number  // limit count of edge through-holes to render on left rail
   rightRailHoles?: number // limit count of edge through-holes to render on right rail
+  bodyMm?: { w: number; h: number } // physical outline in mm (from the KiCad footprint courtyard) - drives true rendered proportions
 }
 
 // Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)

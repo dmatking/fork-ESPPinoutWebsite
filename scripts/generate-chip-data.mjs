@@ -71,6 +71,23 @@ function fpPads(f) {
   while (m = re.exec(t)) { const n = m[1]; if (!n) continue; (o[n] ??= []).push({ x: +m[2], y: +m[3] }) }
   return o
 }
+// Physical module outline in mm, from the footprint's courtyard bounding box
+// (falls back to silkscreen / fab outline). Drives true on-screen proportions.
+function fpBodyMm(f) {
+  const t = fs.readFileSync(`${FP_DIR}/${f}.kicad_mod`, 'utf8')
+  for (const layer of ['F.CrtYd', 'F.SilkS', 'F.Fab']) {
+    const xs = [], ys = []
+    const re = /\((?:start|end|xy|center)\s+(-?[\d.]+)\s+(-?[\d.]+)\)/g
+    for (const item of t.split(/\(fp_(?=line|rect|poly|circle|arc)/).slice(1)) {
+      if (!item.includes(`"${layer}"`)) continue
+      let m; while (m = re.exec(item)) { xs.push(+m[1]); ys.push(+m[2]) }
+    }
+    if (!xs.length) continue
+    const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys)
+    if (w > 5 && h > 5) return { w: +w.toFixed(1), h: +h.toFixed(1) }
+  }
+  return undefined
+}
 const specialLabel = name => {
   const u = (name || '').toUpperCase()
   if (/CHIP[_/]?PU|RESET|^EN$|^RST$/.test(u)) return 'EN'
@@ -153,7 +170,10 @@ function buildModule(mod, fam) {
     if (toks.some(t => /USB_D/i.test(t))) cs.push('USB')
     return { gpio, names: toks, capabilities: flashReserved ? [] : caps(toks, inputOnly), constraints: cs, usable: !flashReserved }
   })
-  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads) } }
+  // mm override for footprints whose courtyard is not the module outline
+  // (WROOM-DA's courtyard includes the dual-antenna keep-out region).
+  const bodyMm = mod.mm ? { w: mod.mm[0], h: mod.mm[1] } : fpBodyMm(mod.fp)
+  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads), bodyMm } }
 }
 
 // Per-family boot/strapping rules (the lore KiCad doesn't encode).
@@ -172,7 +192,7 @@ const FAM = {
 const MODULES = [
   { prefix: 'ESP32_WROOM_32', name: 'ESP32-WROOM-32', sym: 'ESP32-WROOM-E', symOnly: true },
   { prefix: 'ESP32_WROVER_E', name: 'ESP32-WROVER-E', sym: 'ESP32-WROVER-E', symOnly: true },
-  { prefix: 'ESP32_WROOM_DA', name: 'ESP32-WROOM-DA', sym: 'ESP32-WROOM-DA', fp: 'ESP32-WROOM-DA', fam: 'esp32' },
+  { prefix: 'ESP32_WROOM_DA', name: 'ESP32-WROOM-DA', sym: 'ESP32-WROOM-DA', fp: 'ESP32-WROOM-DA', fam: 'esp32', mm: [18, 31.4] },
   { prefix: 'ESP32_MINI_1', name: 'ESP32-MINI-1', sym: 'ESP32-MINI-1', fp: 'ESP32-MINI-1', fam: 'esp32' },
   { prefix: 'ESP32_PICO_MINI_02', name: 'ESP32-PICO-MINI-02', sym: 'ESP32-PICO-MINI-02', fp: 'ESP32-PICO-MINI-02', fam: 'esp32' },
   { prefix: 'S2_WROOM', name: 'ESP32-S2-WROOM', sym: 'ESP32-S2-WROOM', fp: 'ESP32-S2-WROOM', fam: 's2' },
@@ -232,6 +252,7 @@ for (const mod of MODULES) {
     out += `export const ${mod.prefix}_PINS: Pin[] = [\n${pins.map(fmtPin).join(',\n')},\n]\n\n`
     out += `export const ${mod.prefix}_LAYOUT: PackageLayout = {\n  name: '${layout.name}',\n  left: ${fmtArr(layout.left)},\n  bottom: ${fmtArr(layout.bottom)},\n  right: ${fmtArr(layout.right)},\n`
     if (layout.top.length) out += `  top: ${fmtArr(layout.top)},\n`
+    if (layout.bodyMm) out += `  bodyMm: { w: ${layout.bodyMm.w}, h: ${layout.bodyMm.h} },\n`
     out += `}\n\n`
     console.error(`${mod.name}: ${pins.length} pins | pads L${layout.left.length} B${layout.bottom.length} R${layout.right.length} T${layout.top.length} | sym L${sym.left.length} R${sym.right.length} B${sym.bottom.length} T${sym.top.length}`)
   } else {

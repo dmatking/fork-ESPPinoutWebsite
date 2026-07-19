@@ -273,7 +273,13 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
 
   // Layout zones
   const pcbBorder = 7
-  const antennaH  = isMini ? 56 : 46   // top RF / antenna keep-out zone
+  // The antenna keep-out is a fixed physical size (about 6.2 mm on WROOM and
+  // WROVER, the notched tab about 4.6 mm on MINI), so with known real module
+  // dimensions its share of the render scales like the real thing.
+  const mm = chip.packageLayout?.bodyMm
+  const antennaH  = mm
+    ? Math.round(Math.min(130, Math.max(40, H * (isMini ? 4.6 : 6.2) / mm.h)))
+    : isMini ? 56 : 46
   const padH      = 14                  // bottom gold castellated pads
   const shieldL   = pcbBorder
   const shieldW   = W - pcbBorder * 2
@@ -431,9 +437,12 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
   const bare = !!m.bare
 
   const usbW = 26, usbH = 13
-  const modW = W - 26, modL = 13
+  // On a real DevKit the module covers about two thirds of the board width and
+  // half its length (18 of 27.9 mm across on a DevKitC), centered on the PCB.
+  const modW = Math.min(W - 26, Math.round(W * 0.66))
+  const modL = Math.round((W - modW) / 2)
   const modTop = usbTop ? 40 : 16
-  const modH = Math.min(110, Math.max(70, H * 0.26))
+  const modH = Math.round(Math.min(H * 0.5, Math.max(70, modW / 0.71)))
   const modCx = cx
   const chipShort = m.name.replace(/^Dev board · /, '').replace(/^ESP32-?/, 'ESP32 ').replace(/^Waveshare /, '')
 
@@ -497,12 +506,18 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
           <rect x={modL + 1.5} y={modTop + 2} width={modW} height={modH} rx="2.5" fill="#000" opacity="0.4" />
           <rect x={modL} y={modTop} width={modW} height={modH} rx="2.5" fill={`url(#bshield-${uid})`} stroke="#a6b4c0" strokeWidth="1" />
           <rect x={modL} y={modTop} width={modW} height={2.5} rx="1" fill="#dde7f0" opacity="0.5" />
-          {/* meander antenna hint at the top of the module */}
-          <path d={`M ${modL + 8},${modTop + 12} ${Array.from({ length: 6 }, (_, i) => {
-            const x0 = modL + 8 + i * ((modW - 16) / 6)
-            const y = i % 2 === 0 ? modTop + 5 : modTop + 12
-            return `L ${x0.toFixed(1)},${y} L ${(x0 + (modW - 16) / 12).toFixed(1)},${y}`
-          }).join(' ')}`} fill="none" stroke="#7c8896" strokeWidth="1.2" />
+          {/* meander antenna hint at the top of the module, about a fifth of its length */}
+          {(() => {
+            const antB = Math.min(30, Math.max(12, Math.round(modH * 0.18)))
+            const teeth = Math.max(6, Math.round((modW - 16) / 16))
+            return (
+              <path d={`M ${modL + 8},${modTop + antB} ${Array.from({ length: teeth }, (_, i) => {
+                const x0 = modL + 8 + i * ((modW - 16) / teeth)
+                const y = i % 2 === 0 ? modTop + 5 : modTop + antB
+                return `L ${x0.toFixed(1)},${y} L ${(x0 + (modW - 16) / (teeth * 2)).toFixed(1)},${y}`
+              }).join(' ')}`} fill="none" stroke="#7c8896" strokeWidth="1.2" />
+            )
+          })()}
           <text x={modCx} y={modTop + modH / 2 + 1} textAnchor="middle" fontSize="7" fontFamily="monospace" fontWeight="700" fill="#243343" letterSpacing="0.4">ESPRESSIF</text>
           <text x={modCx} y={modTop + modH / 2 + 11} textAnchor="middle" fontSize="6.2" fontFamily="monospace" fill="#33465a">{chipShort}</text>
         </g>
@@ -679,12 +694,16 @@ export function ModuleDiagram() {
 
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
   const padCount   = Math.max(bottomLayout.length, topIsThermal ? 0 : topLayout.length, 1)
-  // Boards with a declared aspect ratio (width/height, from real dimensions)
-  // render in proportion; DevKits keep their narrow default.
-  const boardAspect = chip.module?.aspect
+  // The pin-row grid fixes the rendered height, so the width follows from the
+  // module's true outline (bodyMm, from the KiCad footprint courtyard) to keep
+  // real proportions. Boards may declare an explicit aspect in their spec.
+  const bodyMm = chip.packageLayout?.bodyMm
+  const boardAspect = chip.module?.aspect ?? (bodyMm ? bodyMm.w / bodyMm.h : undefined)
   const chipWidth  = isBoard
     ? (boardAspect ? Math.round(Math.min(340, Math.max(150, sideHeight * boardAspect))) : 150)
-    : Math.max(240, padCount * 30)
+    : bodyMm
+      ? Math.max(Math.round(sideHeight * bodyMm.w / bodyMm.h), padCount * 20, 190)
+      : Math.max(240, padCount * 30)
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
 

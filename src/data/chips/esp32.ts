@@ -84,6 +84,7 @@ export const WROOM32_LAYOUT = {
     { pinNumber: 26, gpio:  4 },
     { pinNumber: 25, gpio:  0 },
   ],
+  bodyMm: { w: 18, h: 25.5 }, // WROOM-32E datasheet outline
 }
 
 export const ESP32_BASE_PINS = [
