@@ -104,7 +104,7 @@ export function ExportPanel() {
     const name = chip.module?.name ?? chip.name
     // A4 printable width at 96dpi with 12mm margins is ~700px.
     let diagramHtml = ''
-    let moduleZoom = 1
+    let moduleCss = ''
     if (view === 'schematic') {
       const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
       if (!svg) { w.close(); return }
@@ -116,8 +116,16 @@ export function ExportPanel() {
     } else {
       const target = document.getElementById('module-diagram-canvas')
       if (!target) { w.close(); return }
-      moduleZoom = Math.min(1, 700 / target.scrollWidth)
-      diagramHtml = `<div class="module-print">${target.outerHTML}</div>`
+      // Explicit measured dimensions + standard transform scale: Safari
+      // mis-lays-out the zoom/fit-content shortcut.
+      const mw = target.scrollWidth
+      const mh = target.scrollHeight
+      const scale = Math.min(1, 700 / mw)
+      moduleCss = `
+      .module-outer { width: ${Math.round(mw * scale)}px; height: ${Math.round(mh * scale)}px;
+                      margin: 0 auto; overflow: hidden; }
+      .module-print { width: ${mw}px; transform: scale(${scale}); transform-origin: top left; }`
+      diagramHtml = `<div class="module-outer"><div class="module-print">${target.outerHTML}</div></div>`
     }
     // Carry the app's stylesheets over so the cloned module DOM renders 1:1.
     const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
@@ -139,8 +147,7 @@ export function ExportPanel() {
       h1 { font-size: 20px; margin: 0 0 2px; }
       .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
       svg { max-width: 100%; height: auto; display: block; }
-      /* Paper is white - the module sits directly on it, no dark app card. */
-      .module-print { zoom: ${moduleZoom}; width: fit-content; margin: 0 auto; }
+      /* Paper is white - the module sits directly on it, no dark app card. */${moduleCss}
       @media print { main { padding: 0; max-width: none; } .foot { margin-bottom: 0; } }
       h2 { font-size: 13px; margin: 12px 0 4px; }
       ul.gotchas { margin: 0; padding-left: 18px; list-style: disc; }
