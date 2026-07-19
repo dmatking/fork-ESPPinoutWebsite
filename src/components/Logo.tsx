@@ -24,7 +24,8 @@ export function LogoIcon({ size = 34 }: { size?: number }) {
   }
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <g fill="var(--logo-body)">{pins}</g>
+      {/* Legs get the same silhouette ring as the body so they read on dark UIs */}
+      <g fill="var(--logo-body)" stroke="var(--logo-ring)" strokeWidth={1.5}>{pins}</g>
       <rect x={11} y={11} width={42} height={42} rx={10} fill="var(--logo-body)"
         stroke="var(--logo-ring)" strokeWidth={1.5} />
       {dots}
@@ -32,15 +33,15 @@ export function LogoIcon({ size = 34 }: { size?: number }) {
   )
 }
 
-export function Logo({ iconSize = 46 }: { iconSize?: number }) {
+export function Logo({ iconSize = 58 }: { iconSize?: number }) {
   return (
     <span className="flex items-center gap-3">
       <LogoIcon size={iconSize} />
-      <span className="flex flex-col" style={{ gap: 2 }}>
-        <span className="font-extrabold leading-none" style={{ fontSize: 26, letterSpacing: 0.2, color: 'var(--logo-ink)' }}>
+      <span className="flex flex-col" style={{ gap: 3 }}>
+        <span className="font-extrabold leading-none" style={{ fontSize: 33, letterSpacing: 0.2, color: 'var(--logo-ink)' }}>
           ESP<span style={{ color: 'var(--logo-green)' }}>32</span>
         </span>
-        <span className="font-semibold leading-none" style={{ fontSize: 10, letterSpacing: 4.2, color: 'var(--logo-ink)', opacity: 0.8 }}>
+        <span className="font-semibold leading-none" style={{ fontSize: 12, letterSpacing: 5.4, color: 'var(--logo-ink)', opacity: 0.8 }}>
           PINOUT STUDIO
         </span>
       </span>
