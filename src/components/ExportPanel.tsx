@@ -34,9 +34,10 @@ async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
     const x = canvas.width - pad - w
     const y = canvas.height - pad - h
     ctx.drawImage(logo, x, y, w, h)
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'middle'
-    ctx.fillText('esp32pin.com', x - 8 * scale, y + h / 2)
+    // Site name in the opposite (bottom-left) corner.
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText('esp32pin.com', pad, canvas.height - pad)
   } catch {
     ctx.textAlign = 'right'
     ctx.textBaseline = 'bottom'
@@ -174,9 +175,11 @@ export function ExportPanel() {
       main.sheet { width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 12mm;
                    margin: 18px auto 40px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.45);
                    position: relative; }
-      .brandmark { position: absolute; bottom: 12mm; right: 12mm;
-                   display: flex; align-items: center; gap: 10px; text-decoration: none; }
-      .brandmark img { width: 26mm; height: auto; }
+      /* Brandmark rides right under the content, right-aligned - pinning it to
+         the bottom of the A4 sheet left it stranded in empty space. */
+      .brandrow { margin-top: 18px; padding-top: 10px; border-top: 1px solid #e5e7eb; }
+      .brandmark { display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
+      .brandmark img { width: 22mm; height: auto; }
       .brandmark span { font: 600 11px -apple-system, "Segoe UI", sans-serif; color: #555; letter-spacing: 0.4px; }
       h1 { font-size: 20px; margin: 0 0 2px; }
       .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
@@ -196,7 +199,6 @@ export function ExportPanel() {
         body { background: #fff; }
         .toolbar { display: none; }
         main.sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
-        .brandmark { position: fixed; bottom: 0; right: 0; }
         .foot { margin-bottom: 0; }
       }
     </style></head><body>
@@ -208,10 +210,12 @@ export function ExportPanel() {
       <h2>Known gotchas</h2><ul class="gotchas">${gotchas}</ul>
       ${rows ? `<h2>Pin mapping</h2><table class="map"><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
       <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
-      <a class="brandmark" href="https://esp32pin.com/${chip.id}">
-        <span>esp32pin.com</span>
-        <img src="${window.location.origin}/brand/logo-stacked.svg" alt="ESP32 Pinout Studio">
-      </a>
+      <div class="brandrow">
+        <a class="brandmark" href="https://esp32pin.com/${chip.id}">
+          <span>esp32pin.com</span>
+          <img src="${window.location.origin}/brand/logo-stacked.svg" alt="ESP32 Pinout Studio">
+        </a>
+      </div>
     </main>
     </body></html>`)
     w.document.close()
