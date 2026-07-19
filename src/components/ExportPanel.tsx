@@ -94,17 +94,75 @@ export function ExportPanel() {
   }
 
   const printPdf = () => {
-    // Print the live page: @media print in index.css isolates the pinout card
-    // (whichever view is active) plus its print-only header/gotchas blocks.
-    // The browser's print engine renders the real CSS - no capture artifacts.
-    const prev = document.title
-    document.title = `${chip.id}-pinout`
-    const restore = () => {
-      document.title = prev
-      window.removeEventListener('afterprint', restore)
+    // A dedicated document tab the user can inspect, print or save as PDF.
+    // The diagram is the live DOM plus the site's stylesheets - the browser
+    // renders it natively (no html2canvas artifacts), scaled to fit A4.
+    const w = window.open('', '_blank', 'width=920,height=760')
+    if (!w) return
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    const name = chip.module?.name ?? chip.name
+    // A4 printable width at 96dpi with 12mm margins is ~700px.
+    let diagramHtml = ''
+    let moduleZoom = 1
+    if (view === 'schematic') {
+      const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+      if (!svg) { w.close(); return }
+      const clone = svg.cloneNode(true) as SVGSVGElement
+      clone.removeAttribute('width')
+      clone.removeAttribute('height')
+      clone.setAttribute('style', 'width:100%;height:auto')
+      diagramHtml = clone.outerHTML
+    } else {
+      const target = document.getElementById('module-diagram-canvas')
+      if (!target) { w.close(); return }
+      moduleZoom = Math.min(1, 700 / target.scrollWidth)
+      diagramHtml = `<div class="module-print">${target.outerHTML}</div>`
     }
-    window.addEventListener('afterprint', restore)
-    window.print()
+    // Carry the app's stylesheets over so the cloned module DOM renders 1:1.
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(n => n.tagName === 'LINK'
+        ? `<link rel="stylesheet" href="${(n as HTMLLinkElement).href}">`
+        : `<style>${n.textContent}</style>`)
+      .join('\n')
+    const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
+    const rows = mapping.map(a =>
+      `<tr><td>GPIO${a.gpio}</td><td>${escapeHtml(a.role)}</td><td>${escapeHtml(a.label)}</td></tr>`).join('')
+    w.document.write(`<!doctype html><html><head><title>${escapeHtml(name)} pinout</title>
+    ${styles}
+    <style>
+      @page { size: A4; margin: 12mm; }
+      html, body { all: revert; }
+      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; background: #fff;
+             -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      main { max-width: 760px; margin: 0 auto; padding: 16px; }
+      h1 { font-size: 20px; margin: 0 0 2px; }
+      .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
+      svg { max-width: 100%; height: auto; }
+      .module-print { background: #060b12; border-radius: 12px; padding: 14px 6px; zoom: ${moduleZoom};
+                      width: fit-content; margin: 0 auto; }
+      h2 { font-size: 13px; margin: 12px 0 4px; }
+      ul.gotchas { margin: 0; padding-left: 18px; list-style: disc; }
+      ul.gotchas li { margin: 2px 0; }
+      table.map { border-collapse: collapse; margin-top: 4px; font-size: 11px; }
+      table.map td, table.map th { border: 1px solid #bbb; padding: 3px 8px; text-align: left; }
+      .foot { margin-top: 10px; color: #555; font-size: 10px; }
+      .toolbar { text-align: right; margin: 0 0 10px; }
+      .toolbar button { font: 600 13px -apple-system, "Segoe UI", sans-serif; padding: 7px 16px;
+                        border-radius: 7px; border: 1px solid #ccc; background: #1d4ed8; color: #fff; cursor: pointer; }
+      @media print { .toolbar { display: none; } }
+    </style></head><body>
+    <main>
+      <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+      <h1>${escapeHtml(name)} pinout</h1>
+      <p class="sub">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
+      ${diagramHtml}
+      <h2>Known gotchas</h2><ul class="gotchas">${gotchas}</ul>
+      ${rows ? `<h2>Pin mapping</h2><table class="map"><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
+      <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
+    </main>
+    </body></html>`)
+    w.document.close()
   }
 
   return (

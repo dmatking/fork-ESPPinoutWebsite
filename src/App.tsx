@@ -12,7 +12,7 @@ import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
 
 export default function App() {
-  const { chip, page, navigate, mapping } = useApp()
+  const { chip, page, navigate } = useApp()
 
   if (page === 'contribute') return <ContributePage />
   if (page === 'build') return <BoardBuilderPage />
@@ -64,41 +64,7 @@ export default function App() {
             )}
 
             <div id="pinout-diagram-export">
-              {/* Print-only header/footer: window.print() shows only this
-                  container (see @media print in index.css). */}
-              <div className="hidden print:block mb-3" style={{ color: '#111' }}>
-                <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{chip.module?.name ?? chip.name} pinout</h1>
-                <p style={{ fontSize: 11, color: '#555', margin: '2px 0 0' }}>
-                  ESP32 Pinout Studio - esp32pin.com/{chip.id} - {new Date().toISOString().slice(0, 10)}
-                </p>
-              </div>
               <PinoutDiagram />
-              <div className="hidden print:block mt-3" style={{ color: '#111' }}>
-                {chip.notes.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 3px' }}>Known gotchas</p>
-                    <ul style={{ fontSize: 11, margin: 0, paddingLeft: 16, listStyle: 'disc' }}>
-                      {chip.notes.map((n, i) => <li key={i}>{n}</li>)}
-                    </ul>
-                  </>
-                )}
-                {mapping.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '10px 0 3px' }}>Pin mapping</p>
-                    <table style={{ fontSize: 11, borderCollapse: 'collapse' }}>
-                      <tbody>
-                        {mapping.map(a => (
-                          <tr key={a.gpio}>
-                            <td style={{ border: '1px solid #bbb', padding: '2px 8px' }}>GPIO{a.gpio}</td>
-                            <td style={{ border: '1px solid #bbb', padding: '2px 8px' }}>{a.role}</td>
-                            <td style={{ border: '1px solid #bbb', padding: '2px 8px' }}>{a.label}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </>
-                )}
-              </div>
             </div>
 
             <RoutingCard />

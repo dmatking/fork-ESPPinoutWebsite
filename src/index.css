@@ -2,21 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Print: show only the pinout card (plus its print-only header/footer blocks),
-   in whichever view is active. Colors print as on screen. display:none (not
-   visibility) so the hidden app chrome doesn't leave blank trailing pages. */
-@media print {
-  @page { size: A4; margin: 12mm; }
-  body { background: #fff !important; }
-  /* Every ancestor of the pinout card: white paper, not app-dark */
-  div:has(#pinout-diagram-export) { background: #fff !important; }
-  header, footer { display: none !important; }
-  /* Right sidebar and everything in the left column except the pinout card */
-  .grid > :not(:has(#pinout-diagram-export)) { display: none !important; }
-  div:has(> #pinout-diagram-export) > :not(#pinout-diagram-export) { display: none !important; }
-  #pinout-diagram-export {
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  /* The module view has a fixed intrinsic width; scale it onto A4. */
-  #module-diagram-canvas { zoom: 0.58; }
-}
