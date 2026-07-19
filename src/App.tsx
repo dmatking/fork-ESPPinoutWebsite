@@ -36,7 +36,9 @@ export default function App() {
                 className="text-xs text-gray-500 hover:text-gray-300"
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {theme === 'dark' ? '☀ Light' : '☾ Dark'}
+                {/* U+FE0E forces the monochrome text glyph - iOS otherwise
+                    renders the sun as a full-color emoji. */}
+                <span className="whitespace-nowrap">{theme === 'dark' ? '☀︎ Light' : '☾︎ Dark'}</span>
               </button>
               <button
                 onClick={() => navigate('contribute')}
