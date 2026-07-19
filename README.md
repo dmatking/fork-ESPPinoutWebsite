@@ -6,7 +6,7 @@
 
 **Live at [esp32pin.com](https://esp32pin.com)** - a free, interactive pinout reference for the whole ESP32 family, built for the maker community.
 
-![ESP32-WROOM-32 schematic pinout](public/og.png)
+![ESP32 Pinout Studio - interactive module view with per-pin constraint warnings](docs/site-screenshot.png)
 
 Pick the wrong pin on an ESP32 and your project boots into download mode, crashes when Wi-Fi starts, or bricks the flash bus. This site exists so that doesn't happen: every pin carries its constraints (strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, USB/JTAG lines) right on the diagram.
 
