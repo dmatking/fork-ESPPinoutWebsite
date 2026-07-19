@@ -37,8 +37,12 @@ export default function App() {
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {/* U+FE0E forces the monochrome text glyph - iOS otherwise
-                    renders the sun as a full-color emoji. */}
-                <span className="whitespace-nowrap">{theme === 'dark' ? '☀︎ Light' : '☾︎ Dark'}</span>
+                    renders the sun as a full-color emoji. Icon-only on small
+                    screens: the header has no room for the label there. */}
+                <span className="whitespace-nowrap text-sm sm:text-xs">
+                  {theme === 'dark' ? '☀︎' : '☾︎'}
+                  <span className="hidden sm:inline">{theme === 'dark' ? ' Light' : ' Dark'}</span>
+                </span>
               </button>
               <button
                 onClick={() => navigate('contribute')}
@@ -50,7 +54,7 @@ export default function App() {
                 href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-gray-300"
+                className="text-xs text-gray-500 hover:text-gray-300 whitespace-nowrap"
               >
                 GitHub ↗
               </a>
