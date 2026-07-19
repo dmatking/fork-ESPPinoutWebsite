@@ -87,6 +87,103 @@ function prerenderHtml(base: string, chip: Chip): string {
   return html
 }
 
+// ---------- per-pin pages (programmatic SEO) ----------
+// Only one representative chip per family: the same GPIO exists on every
+// module of a family, and near-duplicate pages would hurt more than help.
+const FAMILY_REPS = ['esp32', 'esp32s2', 'esp32s3', 'esp32c3', 'esp32c5wroom1', 'esp32c6', 'esp32h2']
+
+const CAP_LABELS: Record<string, string> = {
+  gpio: 'Digital input/output',
+  adc1: 'ADC1 analog input (works while Wi-Fi is active)',
+  adc2: 'ADC2 analog input (unusable while Wi-Fi is active)',
+  dac: 'DAC analog output',
+  touch: 'Capacitive touch sensing',
+  pwm: 'PWM output (LEDC)',
+  i2c: 'I2C (via GPIO matrix)',
+  spi: 'SPI (via GPIO matrix)',
+  uart: 'UART (via GPIO matrix)',
+  rtc: 'RTC GPIO (usable in deep sleep, wake source)',
+  usb: 'Native USB',
+}
+
+function pinVerdict(pin: { isUsable: boolean; constraints: { severity: string }[] }) {
+  if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger'))
+    return { text: 'Avoid this pin', color: '#f87171', detail: 'It has a hard conflict - pick a different GPIO.' }
+  if (pin.constraints.length > 0)
+    return { text: 'Use with care', color: '#fbbf24', detail: 'Fine for many uses, but check the warnings below first.' }
+  return { text: 'Safe to use', color: '#4ade80', detail: 'No boot, flash or radio conflicts known for this pin.' }
+}
+
+function pinPageHtml(chip: Chip, pin: Chip['pins'][number]): string {
+  const fam = chip.family
+  const n = pin.gpio
+  const url = `${SITE}/${chip.id}/gpio${n}`
+  const verdict = pinVerdict(pin)
+  const title = `${fam} GPIO${n}: functions, boot behavior, is it safe? | ESP32 Pinout Studio`
+  const desc = `${fam} GPIO${n} (${pin.names.join(', ')}): ${verdict.text.toLowerCase()}. ${
+    pin.constraints.length
+      ? pin.constraints.map(c => c.title).join(', ') + '.'
+      : 'No known conflicts.'
+  } Full interactive ${fam} pinout with live conflict checking.`
+  const caps = pin.capabilities.map(c => `<li>${esc(CAP_LABELS[c] ?? c)}</li>`).join('')
+  const constraints = pin.constraints.map(c =>
+    `<h3 style="margin:14px 0 4px;color:${c.severity === 'danger' ? '#f87171' : '#fbbf24'}">${esc(c.title)}</h3><p style="margin:0;color:#9ca3af">${esc(c.description)}</p>`).join('')
+  const siblings = chip.pins.map(p =>
+    p.gpio === n
+      ? `<span style="color:#f9fafb">GPIO${p.gpio}</span>`
+      : `<a href="/${chip.id}/gpio${p.gpio}" style="color:#60a5fa;text-decoration:none">GPIO${p.gpio}</a>`).join(' · ')
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(title)}</title>
+  <meta name="description" content="${esc(desc)}">
+  <link rel="canonical" href="${url}">
+  <link rel="icon" href="/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ESP32 Pinout Studio">
+  <meta property="og:title" content="${esc(`${fam} GPIO${n}: ${verdict.text}`)}">
+  <meta property="og:description" content="${esc(desc)}">
+  <meta property="og:url" content="${url}">
+  <meta property="og:image" content="${SITE}/og/${chip.id}.png">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body style="margin:0;background:#030712;color:#e5e7eb;font-family:-apple-system,'Segoe UI',sans-serif;line-height:1.55">
+  <main style="max-width:720px;margin:0 auto;padding:40px 20px">
+    <p style="margin:0 0 4px"><a href="/${chip.id}" style="color:#60a5fa;text-decoration:none">&larr; ${esc(chip.module?.name ?? chip.name)} pinout</a></p>
+    <h1 style="margin:0 0 6px;font-size:32px;color:#f9fafb">${esc(fam)} GPIO${n}</h1>
+    <p style="margin:0 0 18px;color:#6b7280;font-family:monospace">${esc(pin.names.join(' / '))}</p>
+    <div style="border:1px solid ${verdict.color};border-radius:8px;padding:12px 16px;margin-bottom:22px">
+      <strong style="color:${verdict.color}">${verdict.text}</strong>
+      <span style="color:#9ca3af"> - ${esc(verdict.detail)}</span>
+    </div>
+    ${caps ? `<h2 style="font-size:18px;margin:0 0 6px;color:#f9fafb">What GPIO${n} can do</h2><ul style="margin:0 0 18px;padding-left:20px;color:#d1d5db">${caps}</ul>` : ''}
+    ${constraints ? `<h2 style="font-size:18px;margin:18px 0 0;color:#f9fafb">Warnings for GPIO${n}</h2>${constraints}` : ''}
+    ${pin.notes ? `<p style="margin:16px 0 0;color:#9ca3af">${esc(pin.notes)}</p>` : ''}
+    <a href="/${chip.id}" style="display:inline-block;margin:26px 0 0;background:#1d4ed8;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Open the interactive ${esc(fam)} pinout &rarr;</a>
+    <h2 style="font-size:14px;margin:34px 0 6px;color:#6b7280">All ${esc(fam)} pins</h2>
+    <p style="font-size:13px;margin:0">${siblings}</p>
+    <p style="margin:34px 0 0;font-size:12px;color:#4b5563">ESP32 Pinout Studio - free interactive pinout reference. Pin data generated from Espressif's official KiCad libraries. <a href="/" style="color:#60a5fa">esp32pin.com</a></p>
+  </main>
+</body>
+</html>`
+}
+
+function sitemapXml(pinUrls: string[]): string {
+  const today = new Date().toISOString().slice(0, 10)
+  const urls = [
+    `${SITE}/`,
+    `${SITE}/contribute`,
+    `${SITE}/build`,
+    ...CHIPS.map(c => `${SITE}/${c.id}`),
+    ...pinUrls,
+  ]
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
+    urls.map(u => `  <url><loc>${u}</loc><lastmod>${today}</lastmod></url>`).join('\n')
+  }\n</urlset>\n`
+}
+
 async function main() {
   const base = readFileSync(join(DIST, 'index.html'), 'utf8')
   mkdirSync(join(DIST, 'og'), { recursive: true })
@@ -95,7 +192,19 @@ async function main() {
     mkdirSync(join(DIST, chip.id), { recursive: true })
     writeFileSync(join(DIST, chip.id, 'index.html'), prerenderHtml(base, chip))
   }
-  console.log(`postbuild-seo: ${CHIPS.length} chip pages + OG images generated`)
+  const pinUrls: string[] = []
+  for (const id of FAMILY_REPS) {
+    const chip = CHIPS.find(c => c.id === id)
+    if (!chip) throw new Error(`postbuild-seo: family rep chip not found: ${id}`)
+    for (const pin of chip.pins) {
+      const dir = join(DIST, chip.id, `gpio${pin.gpio}`)
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(join(dir, 'index.html'), pinPageHtml(chip, pin))
+      pinUrls.push(`${SITE}/${chip.id}/gpio${pin.gpio}`)
+    }
+  }
+  writeFileSync(join(DIST, 'sitemap.xml'), sitemapXml(pinUrls))
+  console.log(`postbuild-seo: ${CHIPS.length} chip pages, ${pinUrls.length} pin pages, sitemap + OG images generated`)
 }
 
 main()
