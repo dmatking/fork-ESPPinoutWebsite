@@ -26,7 +26,7 @@ function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
 }
 
 export function ExportPanel() {
-  const { chip, mapping, shareUrl, view, setView } = useApp()
+  const { chip, mapping, shareUrl, view } = useApp()
   const [copied, setCopied] = useState<'url' | 'code' | null>(null)
 
   const code = generateArduinoDefines(chip, mapping)
@@ -93,53 +93,18 @@ export function ExportPanel() {
     download(canvas)
   }
 
-  const printPdf = async () => {
-    // Open the window synchronously so popup blockers allow it, fill it async.
-    const w = window.open('', '_blank', 'width=920,height=720')
-    if (!w) return
-    const escapeHtml = (s: string) =>
-      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    // Always print the schematic sheet: white, vector, made for paper. The
-    // module view is a screen artifact (dark, rotated bottom labels).
-    const restoreView = view
-    if (view !== 'schematic') {
-      setView('schematic')
-      await new Promise(r => setTimeout(r, 150)) // let React mount the sheet
+  const printPdf = () => {
+    // Print the live page: @media print in index.css isolates the pinout card
+    // (whichever view is active) plus its print-only header/gotchas blocks.
+    // The browser's print engine renders the real CSS - no capture artifacts.
+    const prev = document.title
+    document.title = `${chip.id}-pinout`
+    const restore = () => {
+      document.title = prev
+      window.removeEventListener('afterprint', restore)
     }
-    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
-    if (restoreView !== 'schematic') setView(restoreView)
-    if (!svg) { w.close(); return }
-    const clone = svg.cloneNode(true) as SVGSVGElement
-    clone.removeAttribute('width')
-    clone.removeAttribute('height')
-    clone.setAttribute('style', 'width:100%;height:auto')
-    const diagramHtml = clone.outerHTML
-    const name = chip.module?.name ?? chip.name
-    const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
-    const rows = mapping.map(a =>
-      `<tr><td>GPIO${a.gpio}</td><td>${escapeHtml(a.role)}</td><td>${escapeHtml(a.label)}</td></tr>`).join('')
-    w.document.write(`<!doctype html><html><head><title>${escapeHtml(name)} pinout</title><style>
-      @page { size: A4; margin: 12mm; }
-      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; }
-      h1 { font-size: 20px; margin: 0 0 2px; }
-      .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
-      svg, img { max-width: 100%; height: auto; }
-      h2 { font-size: 13px; margin: 12px 0 4px; }
-      ul { margin: 0; padding-left: 18px; }
-      li { margin: 2px 0; }
-      table { border-collapse: collapse; margin-top: 4px; }
-      td, th { border: 1px solid #bbb; padding: 3px 8px; text-align: left; }
-      .foot { margin-top: 10px; color: #555; font-size: 10px; }
-    </style></head><body>
-      <h1>${escapeHtml(name)} pinout</h1>
-      <p class="sub">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
-      ${diagramHtml}
-      <h2>Known gotchas</h2><ul>${gotchas}</ul>
-      ${rows ? `<h2>Pin mapping</h2><table><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
-      <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
-    </body></html>`)
-    w.document.close()
-    setTimeout(() => { w.focus(); w.print() }, 350)
+    window.addEventListener('afterprint', restore)
+    window.print()
   }
 
   return (
