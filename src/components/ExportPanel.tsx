@@ -161,6 +161,11 @@ export function ExportPanel() {
     const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
     const rows = mapping.map(a =>
       `<tr><td>GPIO${a.gpio}</td><td>${escapeHtml(a.role)}</td><td>${escapeHtml(a.label)}</td></tr>`).join('')
+    // Touch devices view this page zoomed out (no viewport meta, ~980px layout
+    // width on iOS), so the button must be CSS-large to be finger-sized.
+    const touchCss = navigator.maxTouchPoints > 0 ? `
+      .toolbar { padding: 16px 0; }
+      .toolbar button { font-size: 34px; padding: 22px 0; width: min(90%, 640px); border-radius: 16px; }` : ''
     // class="light": the print sheet is white paper, so the diagram's themed
     // CSS variables must resolve to their light values regardless of app theme.
     w.document.write(`<!doctype html><html class="light"><head><title>${escapeHtml(name)} pinout</title>
@@ -194,7 +199,7 @@ export function ExportPanel() {
       .toolbar { position: sticky; top: 0; z-index: 10; text-align: center; padding: 10px 0;
                  background: rgba(38, 41, 46, 0.92); backdrop-filter: blur(4px); }
       .toolbar button { font: 600 13px -apple-system, "Segoe UI", sans-serif; padding: 7px 16px;
-                        border-radius: 7px; border: none; background: #1d4ed8; color: #fff; cursor: pointer; }
+                        border-radius: 7px; border: none; background: #1d4ed8; color: #fff; cursor: pointer; }${touchCss}
       @media print {
         body { background: #fff; }
         .toolbar { display: none; }
