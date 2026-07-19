@@ -93,6 +93,56 @@ export function ExportPanel() {
     download(canvas)
   }
 
+  const printPdf = async () => {
+    // Open the window synchronously so popup blockers allow it, fill it async.
+    const w = window.open('', '_blank', 'width=920,height=720')
+    if (!w) return
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    let diagramHtml = ''
+    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+    if (view === 'schematic' && svg) {
+      // Vector schematic prints crisp at any size.
+      const clone = svg.cloneNode(true) as SVGSVGElement
+      clone.removeAttribute('width')
+      clone.removeAttribute('height')
+      clone.setAttribute('style', 'width:100%;height:auto')
+      diagramHtml = clone.outerHTML
+    } else {
+      const target = document.getElementById('module-diagram-canvas')
+        ?? document.getElementById('pinout-diagram-export')
+      if (!target) { w.close(); return }
+      const canvas = await html2canvas(target, { backgroundColor: '#060b12', scale: 2 })
+      diagramHtml = `<img src="${canvas.toDataURL('image/png')}" style="width:100%">`
+    }
+    const name = chip.module?.name ?? chip.name
+    const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
+    const rows = mapping.map(a =>
+      `<tr><td>GPIO${a.gpio}</td><td>${escapeHtml(a.role)}</td><td>${escapeHtml(a.label)}</td></tr>`).join('')
+    w.document.write(`<!doctype html><html><head><title>${escapeHtml(name)} pinout</title><style>
+      @page { size: A4; margin: 12mm; }
+      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; }
+      h1 { font-size: 20px; margin: 0 0 2px; }
+      .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
+      svg, img { max-width: 100%; height: auto; }
+      h2 { font-size: 13px; margin: 12px 0 4px; }
+      ul { margin: 0; padding-left: 18px; }
+      li { margin: 2px 0; }
+      table { border-collapse: collapse; margin-top: 4px; }
+      td, th { border: 1px solid #bbb; padding: 3px 8px; text-align: left; }
+      .foot { margin-top: 10px; color: #555; font-size: 10px; }
+    </style></head><body>
+      <h1>${escapeHtml(name)} pinout</h1>
+      <p class="sub">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
+      ${diagramHtml}
+      <h2>Known gotchas</h2><ul>${gotchas}</ul>
+      ${rows ? `<h2>Pin mapping</h2><table><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
+      <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
+    </body></html>`)
+    w.document.close()
+    setTimeout(() => { w.focus(); w.print() }, 350)
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-sm font-semibold text-gray-300">Export</h2>
@@ -137,7 +187,13 @@ export function ExportPanel() {
         >
           ⬇ Download Pinout PNG
         </button>
-        <p className="text-xs text-gray-600 mt-1">Captures the diagram including your mapping labels.</p>
+        <button
+          onClick={printPdf}
+          className="w-full mt-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-sm text-gray-200 font-medium transition-colors"
+        >
+          🖨 Print / Save as PDF
+        </button>
+        <p className="text-xs text-gray-600 mt-1">PNG captures the diagram; PDF makes an A4 cheat sheet with the gotcha list.</p>
       </div>
     </div>
   )
