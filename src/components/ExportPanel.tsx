@@ -17,23 +17,28 @@ function generateArduinoDefines(chip: { name: string }, mapping: PinAssignment[]
 async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
-  const pad = 8 * scale
+  const pad = 10 * scale
   ctx.font = `${11 * scale}px ui-monospace, SFMono-Regular, Menlo, monospace`
-  ctx.textAlign = 'right'
-  ctx.fillStyle = 'rgba(156, 163, 175, 0.85)'
+  ctx.fillStyle = 'rgba(156, 163, 175, 0.9)'
   try {
-    // Brand icon + site name, bottom right.
-    const icon = new Image()
+    // Stacked brand logo bottom right, ink matching the themed canvas.
+    const light = document.documentElement.classList.contains('light')
+    const logo = new Image()
     await new Promise<void>((res, rej) => {
-      icon.onload = () => res()
-      icon.onerror = () => rej(new Error('logo load failed'))
-      icon.src = '/brand/logo-icon.svg'
+      logo.onload = () => res()
+      logo.onerror = () => rej(new Error('logo load failed'))
+      logo.src = light ? '/brand/logo-stacked.svg' : '/brand/logo-stacked-dark.svg'
     })
-    const size = 20 * scale
-    ctx.drawImage(icon, canvas.width - pad - size, canvas.height - pad - size, size, size)
-    ctx.textBaseline = 'middle'
-    ctx.fillText('esp32pin.com', canvas.width - pad - size - 5 * scale, canvas.height - pad - size / 2)
+    const h = 76 * scale
+    const w = h * (300 / 292)
+    const x = canvas.width - pad - w
+    const y = canvas.height - pad - h - 14 * scale
+    ctx.drawImage(logo, x, y, w, h)
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText('esp32pin.com', x + w / 2, canvas.height - pad)
   } catch {
+    ctx.textAlign = 'right'
     ctx.textBaseline = 'bottom'
     ctx.fillText('esp32pin.com', canvas.width - pad, canvas.height - pad)
   }
@@ -163,26 +168,37 @@ export function ExportPanel() {
       @page { size: A4; margin: 12mm; }
       html, body { all: revert; height: auto; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; background: #fff; }
-      main { max-width: 760px; margin: 0 auto; padding: 16px; }
+      /* On screen: a PDF-viewer look - the A4 sheet floats on a gray backdrop.
+         In print, the sheet IS the page: backdrop and shadow disappear. */
+      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; background: #4a4f56; }
+      main.sheet { width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 12mm;
+                   margin: 18px auto 40px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+                   position: relative; }
+      .brandmark { position: absolute; bottom: 12mm; right: 12mm; width: 32mm; height: auto; }
       h1 { font-size: 20px; margin: 0 0 2px; }
       .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
       svg { max-width: 100%; height: auto; display: block; }
       /* Paper is white - the module sits directly on it, no dark app card. */${moduleCss}
-      @media print { main { padding: 0; max-width: none; } .foot { margin-bottom: 0; } }
       h2 { font-size: 13px; margin: 12px 0 4px; }
       ul.gotchas { margin: 0; padding-left: 18px; list-style: disc; }
       ul.gotchas li { margin: 2px 0; }
       table.map { border-collapse: collapse; margin-top: 4px; font-size: 11px; }
       table.map td, table.map th { border: 1px solid #bbb; padding: 3px 8px; text-align: left; }
       .foot { margin-top: 10px; color: #555; font-size: 10px; }
-      .toolbar { text-align: right; margin: 0 0 10px; }
+      .toolbar { position: sticky; top: 0; z-index: 10; text-align: center; padding: 10px 0;
+                 background: rgba(38, 41, 46, 0.92); backdrop-filter: blur(4px); }
       .toolbar button { font: 600 13px -apple-system, "Segoe UI", sans-serif; padding: 7px 16px;
-                        border-radius: 7px; border: 1px solid #ccc; background: #1d4ed8; color: #fff; cursor: pointer; }
-      @media print { .toolbar { display: none; } }
+                        border-radius: 7px; border: none; background: #1d4ed8; color: #fff; cursor: pointer; }
+      @media print {
+        body { background: #fff; }
+        .toolbar { display: none; }
+        main.sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+        .brandmark { position: fixed; bottom: 0; right: 0; width: 28mm; }
+        .foot { margin-bottom: 0; }
+      }
     </style></head><body>
-    <main>
-      <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+    <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
+    <main class="sheet">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
         <img src="${window.location.origin}/brand/logo-icon.svg" width="44" height="44" alt="">
         <div>
@@ -194,6 +210,7 @@ export function ExportPanel() {
       <h2>Known gotchas</h2><ul class="gotchas">${gotchas}</ul>
       ${rows ? `<h2>Pin mapping</h2><table class="map"><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
       <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
+      <img class="brandmark" src="${window.location.origin}/brand/logo-stacked.svg" alt="ESP32 Pinout Studio">
     </main>
     </body></html>`)
     w.document.close()

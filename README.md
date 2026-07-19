@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-horizontal-dark.svg">
-    <img src="public/brand/logo-horizontal.svg" alt="ESP32 Pinout Studio" width="420">
-  </picture>
+  <img src="public/brand/logo-card.svg" alt="ESP32 Pinout Studio" width="440">
 </p>
 
 # ESP32 Pinout Studio

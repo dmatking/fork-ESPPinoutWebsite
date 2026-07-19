@@ -719,9 +719,16 @@ export function ModuleDiagram() {
     <div ref={scrollRef} className="p-4 pb-2 overflow-x-auto">
       <div id="module-diagram-canvas" className="flex flex-col items-center min-w-fit mx-auto p-2">
 
+        {/* The banks + body + edge rows live in one grid: the two 1fr bank
+            tracks equalize, so the body column (and with it the thermal bar
+            and the top/bottom pin rows) is always exactly centered - with a
+            plain centered flex column, unequal bank widths shifted the bottom
+            pins off the module's pads. */}
+        <div className="grid" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+
         {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}
         {topIsThermal && (
-          <div className="flex justify-center" style={{ width: chipWidth, marginBottom: 4 }}>
+          <div className="flex justify-center" style={{ gridColumn: 2, gridRow: 1, width: chipWidth, marginBottom: 4, justifySelf: 'center' }}>
             <div className="flex items-center gap-2 rounded-md"
               style={{ padding: '4px 10px', background: 'var(--dg-chip-bg)', border: '1px solid var(--dg-chip-border)' }}>
               <span className="font-mono font-bold rounded-sm"
@@ -737,7 +744,7 @@ export function ModuleDiagram() {
 
         {/* ── Top pin row (only when the top edge carries real signals) ── */}
         {topLayout.length > 0 && !topIsThermal && (
-          <div className="flex" style={{ width: chipWidth }}>
+          <div className="flex" style={{ gridColumn: 2, gridRow: 2, width: chipWidth, justifySelf: 'center' }}>
             {topLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
               return (
@@ -757,10 +764,9 @@ export function ModuleDiagram() {
         )}
 
         {/* ── Middle row: left pins + chip body + right pins ── */}
-        <div className="flex items-start">
 
           {/* Left pin bank */}
-          <div className="flex flex-col">
+          <div className="flex flex-col" style={{ gridColumn: 1, gridRow: 3 }}>
             {leftLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
               return (
@@ -779,12 +785,14 @@ export function ModuleDiagram() {
           </div>
 
           {/* IC body */}
-          {isBoard
-            ? <BoardBody chip={chip} sideHeight={sideHeight} width={chipWidth} selectedPin={selectedPin} />
-            : <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} width={chipWidth} />}
+          <div style={{ gridColumn: 2, gridRow: 3, justifySelf: 'center' }}>
+            {isBoard
+              ? <BoardBody chip={chip} sideHeight={sideHeight} width={chipWidth} selectedPin={selectedPin} />
+              : <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} width={chipWidth} />}
+          </div>
 
           {/* Right pin bank */}
-          <div className="flex flex-col">
+          <div className="flex flex-col" style={{ gridColumn: 3, gridRow: 3 }}>
             {rightLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
               return (
@@ -801,6 +809,27 @@ export function ModuleDiagram() {
               )
             })}
           </div>
+
+        {/* ── Bottom pin row (a real physical bottom edge) ── */}
+        {bottomLayout.length > 0 && !bottomIsBackside && (
+          <div className="flex" style={{ gridColumn: 2, gridRow: 4, width: chipWidth, justifySelf: 'center' }}>
+            {bottomLayout.map(lp => {
+              const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+              return (
+                <EdgePinCol
+                  key={lp.pinNumber}
+                  layoutPin={lp}
+                  pin={pin}
+                  colWidth={colWidth}
+                  edge="bottom"
+                  isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                  isFiltered={!pin || filteredSet.has(pin.gpio)}
+                  onClick={() => toggle(pin)}
+                />
+              )
+            })}
+          </div>
+        )}
 
         </div>
 
@@ -828,27 +857,6 @@ export function ModuleDiagram() {
             filteredSet={filteredSet}
             onToggle={toggle}
           />
-        )}
-
-        {/* ── Bottom pin row (a real physical bottom edge) ── */}
-        {bottomLayout.length > 0 && !bottomIsBackside && (
-          <div className="flex" style={{ width: chipWidth }}>
-            {bottomLayout.map(lp => {
-              const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
-              return (
-                <EdgePinCol
-                  key={lp.pinNumber}
-                  layoutPin={lp}
-                  pin={pin}
-                  colWidth={colWidth}
-                  edge="bottom"
-                  isSelected={!!pin && selectedPin?.gpio === pin.gpio}
-                  isFiltered={!pin || filteredSet.has(pin.gpio)}
-                  onClick={() => toggle(pin)}
-                />
-              )
-            })}
-          </div>
         )}
 
       </div>

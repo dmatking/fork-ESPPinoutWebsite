@@ -69,6 +69,18 @@ html.light .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(15, 23, 42
 html.light .bg-violet-950\/40 { background-color: #ede9fe; }
 html.light .bg-violet-950\/60 { background-color: #ddd6fe; }
 
+/* Native selects: kill the glossy OS widget, draw our own flat chevron.
+   Colors come from the element's own (themed) bg/border classes. */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c8ba1' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 10px 6px;
+  padding-right: 28px !important;
+}
+
 /* Page + card chrome */
 html.light .bg-gray-950 { background-color: #eef1f5; }
 html.light .bg-gray-950\/95 { background-color: rgba(248, 250, 252, 0.92); }

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 132">
+  <!-- README/social variant: the lockup on its own navy card so it reads on
+       any background (GitHub light AND dark - <picture> theme switching
+       follows the OS, not the GitHub theme, so a self-contained card is the
+       only rendering that always works). -->
+  <rect width="460" height="132" rx="18" fill="#0e1a2b"/>
+  <g transform="translate(28, 16) scale(1.5625)">
+    <g fill="#1b2c47">
+      <rect x="16.7" y="3" width="4.6" height="10" rx="2.3"/><rect x="25.4" y="3" width="4.6" height="10" rx="2.3"/><rect x="34" y="3" width="4.6" height="10" rx="2.3"/><rect x="42.7" y="3" width="4.6" height="10" rx="2.3"/>
+      <rect x="16.7" y="51" width="4.6" height="10" rx="2.3"/><rect x="25.4" y="51" width="4.6" height="10" rx="2.3"/><rect x="34" y="51" width="4.6" height="10" rx="2.3"/><rect x="42.7" y="51" width="4.6" height="10" rx="2.3"/>
+      <rect x="3" y="16.7" width="10" height="4.6" rx="2.3"/><rect x="3" y="25.4" width="10" height="4.6" rx="2.3"/><rect x="3" y="34" width="10" height="4.6" rx="2.3"/><rect x="3" y="42.7" width="10" height="4.6" rx="2.3"/>
+      <rect x="51" y="16.7" width="10" height="4.6" rx="2.3"/><rect x="51" y="25.4" width="10" height="4.6" rx="2.3"/><rect x="51" y="34" width="10" height="4.6" rx="2.3"/><rect x="51" y="42.7" width="10" height="4.6" rx="2.3"/>
+    </g>
+    <rect x="11" y="11" width="42" height="42" rx="10" fill="#16233a" stroke="rgba(148,163,184,0.5)" stroke-width="1.5"/>
+    <g fill="#f8fafc">
+      <circle cx="22.5" cy="22.5" r="3.3"/><circle cx="32" cy="22.5" r="3.3"/>
+      <circle cx="22.5" cy="32" r="3.3"/><circle cx="41.5" cy="32" r="3.3"/>
+      <circle cx="32" cy="41.5" r="3.3"/><circle cx="41.5" cy="41.5" r="3.3"/>
+    </g>
+    <g fill="#22c55e">
+      <circle cx="41.5" cy="22.5" r="3.3"/><circle cx="32" cy="32" r="3.3"/><circle cx="22.5" cy="41.5" r="3.3"/>
+    </g>
+  </g>
+  <text x="152" y="69" font-family="'Helvetica Neue', Arial, sans-serif" font-size="50" font-weight="800" letter-spacing="1" fill="#f1f5f9">ESP<tspan fill="#22c55e">32</tspan></text>
+  <text x="154" y="97" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="600" letter-spacing="7.9" fill="#cbd5e1">PINOUT STUDIO</text>
+</svg>
