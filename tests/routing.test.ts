@@ -62,11 +62,13 @@ describe('peripheral routing data', () => {
     expect(group('esp32h2', 'usb')!.present.length).toBe(2)
   })
 
-  it('C6 and H2 derive JTAG from MT* names; C3/C5 (no MT names in symbols) do not', () => {
+  it('C6/H2 derive JTAG from symbol MT* names; C5 gets it from the enrichment overlay; C3 has none', () => {
     expect(ids('esp32c6')).toContain('jtag')
     expect(ids('esp32h2')).toContain('jtag')
+    // C5's KiCad symbol lacked MT* names, so the JTAG functions come from the
+    // datasheet enrichment overlay (src/data/chips/enrich.ts) instead.
+    expect(ids('esp32c5mini1')).toContain('jtag')
     expect(ids('esp32c3')).not.toContain('jtag')
-    expect(ids('esp32c5mini1')).not.toContain('jtag')
   })
 
   it('specialInterfaces maps GPIO14 on classic ESP32 to SD CLK, HSPI SCLK and JTAG MTMS', () => {
