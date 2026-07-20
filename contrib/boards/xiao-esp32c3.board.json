@@ -21,13 +21,13 @@
       { "gpio": 21 }
     ],
     "right": [
+      { "label": "5V" },
+      { "label": "GND" },
+      { "label": "3V3" },
       { "gpio": 10 },
       { "gpio": 9 },
       { "gpio": 8 },
-      { "gpio": 20 },
-      { "label": "3V3" },
-      { "label": "5V" },
-      { "label": "GND" }
+      { "gpio": 20 }
     ]
   },
   "overrides": {
