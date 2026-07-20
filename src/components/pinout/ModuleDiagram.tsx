@@ -116,8 +116,6 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
     ? (pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0] ?? `${pin.gpio}`)
     : (layoutPin.label ?? 'NC')
 
-  const { bg, text } = getBadge(pin ? shortLabel : (layoutPin.label ?? 'NC'))
-
   const warn = pin ? primaryConstraint(pin) : null
   const isActive = isFiltered || !pin
 
@@ -137,21 +135,37 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
       {sevStyle(warn.sev).icon}
     </span>
   ) : <div style={{ width: 14, height: 14 }} />
-  const label = (
-    <span
-      className="font-mono font-bold rounded-sm"
-      style={{
-        background: bg, color: text,
-        fontSize: 9,
-        padding: '3px 3px',
-        writingMode: 'vertical-rl',
-        transform: edge === 'bottom' ? 'rotate(180deg)' : undefined,
-        lineHeight: 1.1,
-      }}
-    >
-      {shortLabel}
-    </span>
-  )
+  // Full function info (the USP) on the bottom/top pads too, not just the GPIO
+  // name: every alternate function as its own vertical colored badge, GPIO name
+  // first, stacked reading outward from the chip body.
+  const orderedNames = pin
+    ? [shortLabel, ...pin.names.filter(n => n !== shortLabel)]
+    : [layoutPin.label ?? 'NC']
+  const vbadge = (name: string, isPrimary: boolean) => {
+    const b = getBadge(name)
+    return (
+      <span
+        key={name}
+        className="font-mono font-bold rounded-sm"
+        style={{
+          background: b.bg, color: b.text,
+          fontSize: isPrimary ? 9 : 8,
+          padding: isPrimary ? '3px 3px' : '2px 2.5px',
+          writingMode: 'vertical-rl',
+          transform: edge === 'bottom' ? 'rotate(180deg)' : undefined,
+          lineHeight: 1.1,
+        }}
+      >
+        {name}
+      </span>
+    )
+  }
+  // For the bottom edge the stack grows downward, so the GPIO name (primary)
+  // must render first (closest to the pad); for the top edge, reversed.
+  const badgeStack = orderedNames.map((n, i) => vbadge(n, i === 0))
+  const label = <span className="flex flex-col items-center" style={{ gap: 3 }}>{
+    edge === 'bottom' ? badgeStack : [...badgeStack].reverse()
+  }</span>
 
   // Reading order mirrors the physical direction: bottom edge grows downward,
   // top edge grows upward from the chip body.
