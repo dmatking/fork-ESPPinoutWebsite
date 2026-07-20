@@ -7,6 +7,7 @@ import { esp32 } from './esp32'
 import { esp32wrover } from './esp32wrover'
 import esp32S3ZeroJson from '../../../contrib/boards/esp32-s3-zero.board.json'
 import esp32Devkit38Json from '../../../contrib/boards/esp32-devkit-38pin.board.json'
+import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import type { BoardSpec } from '../boards/types'
 
@@ -153,7 +154,8 @@ const MODULES: ModuleSpec[] = [
   // ESP32-H2
   { id: 'esp32h2',        fam: 'h2', name: 'ESP32-H2-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'H2_MINI_1' },
   // Development boards
-  { id: 'esp32devkitc',   fam: 'esp32', name: 'ESP32-DevKitC',       form: 'board', pcb: 'black', prefix: 'ESP32_DEVKITC', arch: 'Dev board · ESP32-WROOM-32' },
+  // esp32devkitc is built from a contrib board spec below (rich WROOM-32 base),
+  // not from the sparse KiCad-generated ESP32_DEVKITC_* set.
   { id: 'esp32s3devkitc', fam: 's3',    name: 'ESP32-S3-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'S3_DEVKITC',    arch: 'Dev board · ESP32-S3-WROOM-1' },
   { id: 'esp32c3devkitm', fam: 'c3',    name: 'ESP32-C3-DevKitM-1',  form: 'board', pcb: 'black', prefix: 'C3_DEVKITM',    arch: 'Dev board · ESP32-C3-MINI-1' },
   { id: 'esp32c6devkitc', fam: 'c6',    name: 'ESP32-C6-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'C6_DEVKITC',    arch: 'Dev board · ESP32-C6-WROOM-1' },
@@ -191,6 +193,10 @@ const byId = (id: string) => generated.find(c => c.id === id)!
 
 export const esp32S3Zero = resolveBoard(esp32S3ZeroJson as unknown as BoardSpec, byId('esp32s3')).chip!
 export const esp32Devkit38 = resolveBoard(esp32Devkit38Json as unknown as BoardSpec, esp32).chip!
+// DevKitC is hand-authored on the rich WROOM-32 base (esp32.ts) so its per-pin
+// peripheral labels (VSPID/MOSI, UART, etc.) match /esp32 and the Elegoo board,
+// instead of the sparse KiCad-generated set. Same silicon, same functions.
+export const esp32Devkitc = resolveBoard(esp32DevkitcJson as unknown as BoardSpec, esp32).chip!
 
 
 // Ordered, grouped by family for the selector.
@@ -215,7 +221,7 @@ export const CHIPS: Chip[] = [
   byId('esp32c5mini1'),
   byId('esp32h2'),
   // Dev boards
-  byId('esp32devkitc'),
+  esp32Devkitc,
   esp32Devkit38,
   byId('esp32s3devkitc'),
   esp32S3Zero,
