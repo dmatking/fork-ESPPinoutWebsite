@@ -9,6 +9,7 @@ import esp32S3ZeroJson from '../../../contrib/boards/esp32-s3-zero.board.json'
 import esp32Devkit38Json from '../../../contrib/boards/esp32-devkit-38pin.board.json'
 import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
+import { enrichPins } from './enrich'
 import type { BoardSpec } from '../boards/types'
 
 
@@ -184,7 +185,7 @@ function build(spec: ModuleSpec): Chip {
     },
     packageLayout: GEN[`${spec.prefix}_LAYOUT`] as PackageLayout,
     symbolLayout: GEN[`${spec.prefix}_SYMBOL`] as SymbolLayout | undefined,
-    pins: GEN[`${spec.prefix}_PINS`] as Pin[],
+    pins: enrichPins(spec.id, GEN[`${spec.prefix}_PINS`] as Pin[]),
   }
 }
 
