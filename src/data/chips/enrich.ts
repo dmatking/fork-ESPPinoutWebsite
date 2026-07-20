@@ -32,9 +32,22 @@ const C5: Record<number, Enrich> = {
   6: { names: ['ADC1_CH5'], caps: ['adc1', 'rtc'] },
 }
 
+// ESP32-C3 (ESP32-C3 Series Datasheet, IO MUX table): ADC1/ADC2 and the 32 kHz
+// crystal are already in the generated symbol; only the JTAG pins were missing.
+// External JTAG: GPIO4-7 = MTMS/MTDI/MTCK/MTDO.
+const C3: Record<number, Enrich> = {
+  4: { names: ['MTMS'], caps: ['jtag'] },
+  5: { names: ['MTDI'], caps: ['jtag'] },
+  6: { names: ['MTCK'], caps: ['jtag'] },
+  7: { names: ['MTDO'], caps: ['jtag'] },
+}
+
 const TABLE: Record<string, Record<number, Enrich>> = {
   esp32c5wroom1: C5,
   esp32c5mini1: C5,
+  esp32c3: C3,
+  esp32c3wroom02: C3,
+  esp32c3devkitm: C3,
 }
 
 export function enrichPins(chipId: string, pins: Pin[]): Pin[] {
