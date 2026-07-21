@@ -145,6 +145,7 @@ interface ModuleSpec {
   pcb: 'green' | 'black'
   prefix: string      // const prefix in generated.ts
   arch?: string       // override (e.g. PSRAM variants)
+  notes?: string[]    // module-specific gotchas, prepended to the family's
 }
 
 const MODULES: ModuleSpec[] = [
@@ -173,9 +174,11 @@ const MODULES: ModuleSpec[] = [
   // ESP32-H2
   { id: 'esp32h2',        fam: 'h2', name: 'ESP32-H2-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'H2_MINI_1' },
   // ESP8685 carries ESP32-C3 silicon, so it inherits the C3 family rules.
-  { id: 'esp8685wroom06', fam: 'c3', name: 'ESP8685-WROOM-06',  form: 'wroom', pcb: 'black', prefix: 'ESP8685_WROOM_06', arch: 'Single-core RISC-V · ESP32-C3 silicon' },
+  { id: 'esp8685wroom06', fam: 'c3', name: 'ESP8685-WROOM-06',  form: 'wroom', pcb: 'black', prefix: 'ESP8685_WROOM_06', arch: 'Single-core RISC-V · ESP32-C3 silicon',
+    notes: ['Despite the ESP86xx name, this is not ESP8266 silicon: "The ESP8685 chip series is a member of the ESP32-C3 chip series group" (ESP8685 datasheet). It is a C3 in a QFN28 package with 4 MB of in-package flash, so every C3 rule below applies.'] },
   // ESP32-C2
-  { id: 'esp8684wroom02c', fam: 'c2', name: 'ESP8684-WROOM-02C', form: 'wroom', pcb: 'black', prefix: 'ESP8684_WROOM_02C' },
+  { id: 'esp8684wroom02c', fam: 'c2', name: 'ESP8684-WROOM-02C', form: 'wroom', pcb: 'black', prefix: 'ESP8684_WROOM_02C',
+    notes: ['Same naming trap as the ESP8685: "The ESP8684 chip series belongs to the ESP32-C2 group" (ESP8684 datasheet). ESP86xx is Espressif\'s numbering for RISC-V parts with in-package flash, not ESP8266 lineage.'] },
   // Development boards
   // esp32devkitc is built from a contrib board spec below (rich WROOM-32 base),
   // not from the sparse KiCad-generated ESP32_DEVKITC_* set.
@@ -201,7 +204,7 @@ function build(spec: ModuleSpec): Chip {
     hasBluetooth: f.hasBluetooth,
     cores: f.cores,
     datasheetUrl: f.datasheetUrl,
-    notes: f.notes,
+    notes: spec.notes ? [...spec.notes, ...f.notes] : f.notes,
     module: {
       name: spec.name,
       form: spec.form,
