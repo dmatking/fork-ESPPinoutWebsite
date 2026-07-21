@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { FilterBar } from './FilterBar'
 import { PinTable } from './PinTable'
@@ -6,6 +6,8 @@ import { MappingBuilder } from './MappingBuilder'
 import { ExportPanel } from './ExportPanel'
 import { CommunitySubmit } from './CommunitySubmit'
 import { IconList, IconSliders, IconDownload, IconMore } from './icons'
+import { BottomSheet } from './BottomSheet'
+import { PinDetailHeader, PinDetailBody } from './PinDetailContent'
 
 // On a phone the studio was one long scroll: diagram, gotchas, specs,
 // flashing, filters, a 40-row pin table, then the mapping builder and export
@@ -24,51 +26,25 @@ const SHEETS: { id: SheetId; Icon: typeof IconList; label: string; title: string
   { id: 'more',   Icon: IconMore,     label: 'More',    title: 'Contribute' },
 ]
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  // Lock the page behind the sheet so a scroll gesture moves the sheet's own
-  // content rather than the studio underneath it.
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [onClose])
-
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative rounded-t-2xl border-t border-gray-700 bg-gray-950 flex flex-col"
-        style={{ maxHeight: '85vh' }}
-      >
-        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
-          <h2 className="text-sm font-semibold text-gray-200">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label={`Close ${title}`}
-            className="text-gray-400 hover:text-gray-100 text-xl leading-none px-2"
-          >
-            ✕
-          </button>
-        </div>
-        <div className="overflow-y-auto px-4 py-4 space-y-4">{children}</div>
-      </div>
-    </div>
-  )
-}
-
 export function MobileActionBar() {
-  const { mapping } = useApp()
+  const { mapping, selectedPin, setSelectedPin } = useApp()
   const [open, setOpen] = useState<SheetId | null>(null)
   const close = () => setOpen(null)
   const sheet = SHEETS.find(s => s.id === open)
+
+  // This component is the only sheet host on phones. A pin selected while the
+  // pin table is open drills down inside that same sheet rather than stacking
+  // a second one on top and stranding the table behind it. A pin selected
+  // from the diagram, with no section open, brings the sheet up on its own.
+  //
+  // Both cases render the same <BottomSheet> element in the same position, so
+  // moving between the table and a pin swaps the contents of a sheet that is
+  // already up instead of animating one out and another back in.
+  const showSheet = !!sheet || !!selectedPin
+  const showPin = !!selectedPin && (open === 'pins' || open === null)
+  const fromTable = showPin && open === 'pins'
+
+  const dismissSheet = () => { setSelectedPin(null); close() }
 
   return (
     <>
@@ -101,14 +77,44 @@ export function MobileActionBar() {
         </div>
       </nav>
 
-      {sheet && (
-        <Sheet title={sheet.title} onClose={close}>
-          {sheet.id === 'pins' && <><FilterBar /><PinTable /></>}
-          {sheet.id === 'map' && <MappingBuilder />}
-          {sheet.id === 'export' && <ExportPanel />}
-          {sheet.id === 'more' && <CommunitySubmit />}
-        </Sheet>
+      {showSheet && (
+        <BottomSheet
+          ariaLabel={showPin && selectedPin ? `GPIO${selectedPin.gpio} details` : sheet?.title ?? 'Section'}
+          onClose={dismissSheet}
+          header={dismiss => showPin && selectedPin ? (
+            <PinDetailHeader
+              pin={selectedPin}
+              onClose={dismiss}
+              // Back returns to the table it was opened from; from the
+              // diagram there is nothing to go back to, so it dismisses.
+              onBack={fromTable ? () => setSelectedPin(null) : undefined}
+            />
+          ) : (
+            <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+              <h2 className="text-sm font-semibold text-gray-200">{sheet?.title}</h2>
+              <button
+                onClick={dismiss}
+                aria-label={`Close ${sheet?.title}`}
+                className="text-gray-400 hover:text-gray-100 text-xl leading-none px-2"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        >
+          {showPin && selectedPin
+            ? <PinDetailBody pin={selectedPin} />
+            : (
+              <div className="px-4 py-4 space-y-4">
+                {open === 'pins' && <><FilterBar /><PinTable /></>}
+                {open === 'map' && <MappingBuilder />}
+                {open === 'export' && <ExportPanel />}
+                {open === 'more' && <CommunitySubmit />}
+              </div>
+            )}
+        </BottomSheet>
       )}
+
     </>
   )
 }

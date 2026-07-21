@@ -1,6 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
+import { useMediaQuery } from '../../utils/useMediaQuery'
 import type { Pin, Chip, LayoutPin } from '../../types/chip'
 import { ROW_H, getBadge, connectorColor, sevStyle, SpecialBadge, ConstraintChips, FunctionBadges, primaryConstraint, resolveModule, pinActivationProps, pinAriaLabel } from './shared'
 
@@ -13,19 +14,20 @@ interface PinRowProps {
   isSelected: boolean
   isFiltered: boolean
   mappingLabel?: string
+  compact?: boolean
   onClick: () => void
 }
 
-function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, onClick }: PinRowProps) {
+function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, compact, onClick }: PinRowProps) {
   const color = pin ? connectorColor(pin) : '#4b5563'
 
   const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
   const hasWarning = !hasDanger && !!pin?.constraints.length
 
-  const constraintChips = pin ? <ConstraintChips pin={pin} /> : null
+  const constraintChips = pin ? <ConstraintChips pin={pin} compact={compact} /> : null
 
   const functionBadges = pin
-    ? <FunctionBadges pin={pin} side={side} mappingLabel={mappingLabel} />
+    ? <FunctionBadges pin={pin} side={side} mappingLabel={mappingLabel} compact={compact} />
     : <SpecialBadge label={layoutPin.label ?? 'NC'} />
 
   const pinNumBox = (
@@ -46,7 +48,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
   )
 
   const connLine = (
-    <div className="flex-shrink-0" style={{ width: 14, height: 1.5, background: color + '80' }} />
+    <div className="flex-shrink-0" style={{ width: compact ? 8 : 14, height: 1.5, background: color + '80' }} />
   )
 
   const isActive = isFiltered || !pin
@@ -73,22 +75,24 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
     >
       {side === 'left' ? (
         <>
-          <div className="flex-1 flex items-center justify-end gap-[3px] min-w-0 overflow-hidden pr-1.5">
+          <div className={`flex items-center justify-end gap-[3px] pr-1.5 ${
+            compact ? 'grow shrink-0 basis-auto' : 'flex-1 min-w-0 overflow-hidden'}`}>
             {constraintChips}
             {functionBadges}
           </div>
           {connLine}
           {pinNumBox}
-          <div style={{ width: 5, flexShrink: 0 }} />
+          <div style={{ width: compact ? 3 : 5, flexShrink: 0 }} />
           {solderDot}
         </>
       ) : (
         <>
           {solderDot}
-          <div style={{ width: 5, flexShrink: 0 }} />
+          <div style={{ width: compact ? 3 : 5, flexShrink: 0 }} />
           {pinNumBox}
           {connLine}
-          <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
+          <div className={`flex items-center justify-start gap-[3px] pl-1.5 ${
+            compact ? 'grow shrink-0 basis-auto' : 'flex-1 min-w-0 overflow-hidden'}`}>
             {functionBadges}
             {constraintChips}
           </div>
@@ -107,10 +111,11 @@ interface EdgePinColProps {
   edge: 'top' | 'bottom'
   isSelected: boolean
   isFiltered: boolean
+  compact?: boolean
   onClick: () => void
 }
 
-function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, onClick }: EdgePinColProps) {
+function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, compact, onClick }: EdgePinColProps) {
   const color = pin ? connectorColor(pin) : '#4b5563'
   const shortLabel = pin
     ? (pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0] ?? `${pin.gpio}`)
@@ -139,7 +144,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
   // name: every alternate function as its own vertical colored badge, GPIO name
   // first, stacked reading outward from the chip body.
   const orderedNames = pin
-    ? [shortLabel, ...pin.names.filter(n => n !== shortLabel)]
+    ? (compact ? [shortLabel] : [shortLabel, ...pin.names.filter(n => n !== shortLabel)])
     : [layoutPin.label ?? 'NC']
   const vbadge = (name: string, isPrimary: boolean) => {
     const b = getBadge(name)
@@ -656,6 +661,8 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
 
 export function ModuleDiagram() {
   const { chip, selectedPin, setSelectedPin, filter, mapping } = useApp()
+  // Compact rows on phones - see compactNames in ./shared for why.
+  const compact = useMediaQuery('(max-width: 767px)')
   const filteredSet = new Set(filterPins(chip.pins, filter).map(p => p.gpio))
   const pinByGpio   = new Map(chip.pins.map(p => [p.gpio, p]))
 
@@ -729,16 +736,138 @@ export function ModuleDiagram() {
     if (el) el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2)
   }, [chip.id])
 
+  // Phones default to fit-width, the same way the schematic view does: the
+  // module keeps its true proportions and is scaled down as a whole, rather
+  // than being clipped at both edges or squashed out of shape. 1:1 stays
+  // available for reading the labels at full size.
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const reserveRef = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(true)
+  const scaled = compact && fit
+
+  // Applied imperatively rather than through state. Two reasons: the measure
+  // has to run against an untransformed layout, which means clearing the
+  // transform first - impossible if the transform is the render output it
+  // feeds - and it avoids a setState per measurement.
+  useLayoutEffect(() => {
+    const el = canvasRef.current
+    const wrap = wrapRef.current
+    const reserve = reserveRef.current
+    if (!el || !wrap || !reserve) return
+
+    const apply = () => {
+      // Always measure from a clean slate. The clipping in particular has to
+      // come off: it is what keeps the untransformed layout box from showing
+      // a scrollbar, but while it is on, the canvas is sized against the
+      // clipped box and the outermost badges get cut.
+      wrap.style.transform = 'none'
+      reserve.style.height = ''
+      reserve.style.overflow = ''
+      if (!scaled) return
+
+      // scrollWidth is not enough: it counts what spills to the right of the
+      // box but not to the left, and the left bank's rows do exactly that.
+      // The union of the descendant rects is the real drawn extent.
+      const base = el.getBoundingClientRect()
+      let left = base.left, right = base.right, bottom = base.bottom
+      for (const n of el.querySelectorAll<HTMLElement>('*')) {
+        const r = n.getBoundingClientRect()
+        if (r.width === 0 && r.height === 0) continue
+        if (r.left < left) left = r.left
+        if (r.right > right) right = r.right
+        if (r.bottom > bottom) bottom = r.bottom
+      }
+      const w = right - left
+      // Measured against the reserve box, because that is the element that
+      // does the clipping. Going through the scroll container instead meant
+      // mixing its border-box left with its content-box width - clientLeft is
+      // the border, not the padding - which placed the diagram a padding's
+      // width to the left of the box that clips it, shaving the outermost
+      // badge off every row.
+      const frame = reserve.getBoundingClientRect()
+      const avail = reserve.clientWidth
+      if (!avail || w <= 0) return
+      const s = Math.min(1, avail / w)
+      if (s >= 1) return
+
+      // Scaling happens about the wrapper's top-left, so a point p lands at
+      // origin + x + (p - origin) * s. Solve x for the leftmost content to
+      // sit centred in the available width.
+      const origin = wrap.getBoundingClientRect().left
+      const target = frame.left + (avail - w * s) / 2
+      const x = target - origin - (left - origin) * s
+
+      wrap.style.transform = `translateX(${x}px) scale(${s})`
+      // The transform leaves the layout box at full size, so the row has to
+      // be told what the scaled drawing actually occupies, and the leftover
+      // box clipped away. Only ever with a scale in effect - see above.
+      reserve.style.height = `${(bottom - base.top) * s}px`
+      reserve.style.overflow = 'hidden'
+    }
+
+    apply()
+
+    // A single measurement at mount is not enough: it can land before the
+    // layout has settled, and the diagram then sits unscaled and overflowing
+    // for the life of the page. Re-measure whenever either box changes width,
+    // which also covers rotation and late font loads.
+    //
+    // Width only, and only on an actual change: applying a scale sets the
+    // reserve height, which resizes the container, which would otherwise
+    // notify us straight back into applying it again.
+    let lastAvail = reserve.clientWidth
+    let lastWidth = el.offsetWidth
+    const onResize = () => {
+      const avail = reserve.clientWidth
+      const width = el.offsetWidth
+      if (avail === lastAvail && width === lastWidth) return
+      lastAvail = avail
+      lastWidth = width
+      apply()
+    }
+    // Guarded: not every environment provides it (jsdom, older browsers).
+    // The resize listener below is the fallback.
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null
+    ro?.observe(reserve)
+    ro?.observe(el)
+    window.addEventListener('resize', onResize)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
+  }, [scaled, chip.id, filter, mapping.length, selectedPin?.gpio])
+
   return (
-    <div ref={scrollRef} className="p-4 pb-2 overflow-x-auto">
-      <div id="module-diagram-canvas" className="flex flex-col items-center min-w-fit mx-auto p-2">
+    <>
+    {compact && (
+      <div className="flex justify-end px-3 pt-2">
+        <button
+          onClick={() => setFit(f => !f)}
+          className="font-mono rounded"
+          style={{ fontSize: 10, padding: '3px 9px', color: 'var(--dg-muted)', border: '1px solid var(--dg-toggle-border)', background: 'transparent' }}
+        >
+          {fit ? 'View 1:1' : 'Fit width'}
+        </button>
+      </div>
+    )}
+    <div ref={scrollRef} className={`${compact ? 'px-2 pt-2' : 'p-4'} pb-2 overflow-x-auto`}>
+      <div ref={reserveRef}>
+      <div ref={wrapRef} style={scaled ? { transformOrigin: 'top left', width: 'max-content' } : undefined}>
+      <div ref={canvasRef} id="module-diagram-canvas" className={`flex flex-col items-center min-w-fit mx-auto ${compact ? 'p-0' : 'p-2'}`}>
 
         {/* The banks + body + edge rows live in one grid: the two 1fr bank
             tracks equalize, so the body column (and with it the thermal bar
             and the top/bottom pin rows) is always exactly centered - with a
             plain centered flex column, unequal bank widths shifted the bottom
             pins off the module's pads. */}
-        <div className="grid" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+        {/* 1fr banks equalize, which centers the body - but an fr track is
+            sized from the space available, not from its content, so on a
+            narrow screen the banks came up short and the rows spilled past
+            their track (the warning markers went first). Compact sizes the
+            banks to their content instead: nothing overflows, so the width
+            the fit-to-width measurement reads back is the real one. */}
+        <div className="grid" style={{ gridTemplateColumns: compact ? 'max-content auto max-content' : '1fr auto 1fr' }}>
 
         {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}
         {topIsThermal && (
@@ -770,6 +899,7 @@ export function ModuleDiagram() {
                   edge="top"
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -792,6 +922,7 @@ export function ModuleDiagram() {
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
                   mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -818,6 +949,7 @@ export function ModuleDiagram() {
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
                   mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -838,6 +970,7 @@ export function ModuleDiagram() {
                   edge="bottom"
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -874,6 +1007,9 @@ export function ModuleDiagram() {
         )}
 
       </div>
+      </div>
+      </div>
     </div>
+    </>
   )
 }

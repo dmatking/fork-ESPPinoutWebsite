@@ -2,18 +2,22 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { AppProvider } from '../src/context/AppContext'
+import { AppProvider, AppContext, type AppState, type DiagramView } from '../src/context/AppContext'
+import { CHIPS } from '../src/data/chips/index'
+import { ModuleDiagram } from '../src/components/pinout/ModuleDiagram'
 import { PinTable } from '../src/components/PinTable'
 import { PinDetailPanel } from '../src/components/PinDetailPanel'
+import { MobileActionBar } from '../src/components/MobileActionBar'
 import { deinteractivize } from '../src/utils/exportDiagram'
 
 afterEach(cleanup)
 
-function Studio() {
+function Studio({ phone = false }: { phone?: boolean } = {}) {
   return (
     <AppProvider>
       <PinTable />
       <PinDetailPanel />
+      {phone && <MobileActionBar />}
     </AppProvider>
   )
 }
@@ -116,5 +120,93 @@ describe('pin table on a phone', () => {
     mockPhone(false)
     const { container } = render(<Studio />)
     expect(container.querySelector('table')).not.toBeNull()
+  })
+
+  it('opens pin details as a modal bottom sheet, not the side panel', async () => {
+    mockPhone(true)
+    const user = userEvent.setup()
+    render(<Studio phone />)
+
+    await user.click(document.querySelector('[data-pin-anchor]') as HTMLElement)
+    const dialog = screen.getByRole('dialog')
+    // A tall narrow side panel is the wrong shape for a phone; the sheet is
+    // modal and shares the shell the bottom action bar already uses.
+    expect(dialog.getAttribute('aria-modal')).toBe('true')
+    expect(dialog.className).not.toContain('right-0')
+  })
+
+  it('drills down inside the pin-table sheet instead of stacking a second one', async () => {
+    mockPhone(true)
+    const user = userEvent.setup()
+    render(<Studio phone />)
+
+    await user.click(screen.getByRole('button', { name: 'Pins' }))
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+
+    // Pick a pin row from inside the sheet.
+    const sheet = screen.getByRole('dialog')
+    await user.click(sheet.querySelector('[data-pin-anchor]') as HTMLElement)
+
+    // Still exactly one sheet - the table did not get stranded behind a
+    // second one - and it now shows the pin with a way back.
+    const dialogs = screen.getAllByRole('dialog')
+    expect(dialogs).toHaveLength(1)
+    expect(dialogs[0].getAttribute('aria-label')).toMatch(/^GPIO\d+ details$/)
+
+    const back = screen.getByRole('button', { name: /back to the pin table/i })
+    await user.click(back)
+    expect(screen.getByRole('dialog').getAttribute('aria-label')).toBe('Pin table')
+  })
+
+  it('keeps the docked side panel on desktop', async () => {
+    mockPhone(false)
+    const user = userEvent.setup()
+    render(<Studio />)
+
+    await user.click(document.querySelector('[data-pin-anchor]') as HTMLElement)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.getAttribute('aria-modal')).toBeNull()
+    expect(dialog.className).toContain('right-0')
+  })
+})
+
+describe('module diagram on a phone', () => {
+  function mockPhone(matches: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: () => ({ matches, addEventListener() {}, removeEventListener() {} }),
+    })
+  }
+
+  const ctx = (view: DiagramView): AppState => ({
+    chip: CHIPS[0], setChip: () => {}, page: 'studio', navigate: () => {},
+    view, setView: () => {}, theme: 'dark', toggleTheme: () => {},
+    selectedPin: null, setSelectedPin: () => {},
+    filter: 'all', setFilter: () => {}, mapping: [], assignPin: () => {},
+    unassignPin: () => {}, clearMapping: () => {}, shareUrl: '',
+  })
+
+  const render_ = (phone: boolean) => {
+    mockPhone(phone)
+    return render(
+      <AppContext.Provider value={ctx('module')}>
+        <ModuleDiagram />
+      </AppContext.Provider>,
+    )
+  }
+
+  // The full badge stacks made the diagram ~900px wide, so on a phone it was
+  // a scrolling strip with the labels cut off both edges.
+  it('drops the alternate-function badges on a phone', () => {
+    const { container } = render_(true)
+    const text = container.textContent ?? ''
+    expect(text).toContain('GPIO36')
+    expect(text).not.toContain('ADC1_CH0')
+  })
+
+  it('keeps the full badge stacks on wider screens', () => {
+    const { container } = render_(false)
+    expect(container.textContent ?? '').toContain('ADC1_CH0')
   })
 })
