@@ -53,7 +53,8 @@ export interface ModuleInfo {
   radios: string             // accurate radio markings, e.g. 'Wi-Fi 4 · BT · BLE'
   // Board appearance hints (form 'board' only):
   usbEdge?: 'top' | 'bottom' // where the USB connector sits (default bottom)
-  bare?: boolean             // bare chip + ceramic antenna instead of a shielded module
+  bare?: boolean             // bare chip + antenna instead of a shielded module
+  antenna?: 'ceramic' | 'pcb' // bare-board antenna style (default ceramic)
   aspect?: number            // board width / height ratio for realistic proportions
 }
 
@@ -121,6 +122,7 @@ export interface PackageLayout {
   leftRailHoles?: number  // limit count of edge through-holes to render on left rail
   rightRailHoles?: number // limit count of edge through-holes to render on right rail
   bodyMm?: { w: number; h: number } // physical outline in mm (from the KiCad footprint courtyard) - drives true rendered proportions
+  antennaMm?: number   // pad-free strip at the top of the outline (the antenna keep-out), in mm
 }
 
 // Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)
