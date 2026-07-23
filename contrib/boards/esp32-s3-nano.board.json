@@ -4,10 +4,9 @@
   "baseChip": "esp32s3",
   "pcb": "black",
   "notes": [
-    "Arduino Nano form factor (43.18 x 17.78 mm) built on the ESP32-S3R8: 16MB flash, 8MB PSRAM. In the Arduino IDE select the 'Arduino Nano ESP32' board; the D and A silkscreen labels map to the GPIOs shown here.",
-    "The pads silkscreened B0 and B1 sit where a classic Nano has AREF and RESET, but they are wired to GPIO46 and GPIO0. Both are ESP32-S3 boot strapping pins, which Waveshare flags on the schematic. B1 does NOT reset the board: use the RST pad on the opposite header or the RST button.",
-    "The onboard RGB LED is a common-anode part driven by GPIO46 (red), GPIO0 (green) and GPIO45 (blue), so it is active low and shares two of its channels with the B0 and B1 pads.",
-    "Onboard 2.4GHz ceramic antenna: keep the antenna end of the board clear of metal and do not cover it."
+    "Arduino Nano form factor on the ESP32-S3R8 (16MB flash, 8MB PSRAM). Pin-compatible with the official Arduino Nano ESP32; select that board in the Arduino IDE.",
+    "The B0 and B1 pads sit at the classic Nano's AREF and RESET positions but are GPIO46 and GPIO0, both boot strapping pins. B1 does not reset the board (use RST), and B0/B1 also drive the onboard RGB LED (GPIO46/0/45).",
+    "Keep the onboard ceramic antenna clear of metal."
   ],
   "headers": {
     "left": [
@@ -46,10 +45,7 @@
     ]
   },
   "overrides": {
-    "0": {
-      "label": "B1",
-      "note": "Broken out at the RESET footprint position, but it is GPIO0, the boot strapping pin, and it also drives the green channel of the onboard RGB LED. This pad does not reset the board."
-    },
+    "0": { "label": "B1" },
     "1": { "label": "A0" },
     "2": { "label": "A1" },
     "3": { "label": "A2" },
@@ -60,23 +56,18 @@
     "8": { "label": "D5" },
     "9": { "label": "D6" },
     "10": { "label": "D7" },
-    "11": { "label": "A4", "note": "Default I2C SDA on the Arduino Nano ESP32 core." },
-    "12": { "label": "A5", "note": "Default I2C SCL on the Arduino Nano ESP32 core." },
+    "11": { "label": "A4" },
+    "12": { "label": "A5" },
     "13": { "label": "A6" },
     "14": { "label": "A7" },
     "17": { "label": "D8" },
     "18": { "label": "D9" },
-    "21": { "label": "D10", "note": "Default SPI chip select (SS)." },
-    "38": { "label": "D11", "note": "SPI MOSI." },
-    "43": { "label": "D1", "note": "Silkscreen TX1. UART0 console transmit line." },
-    "44": { "label": "D0", "note": "Silkscreen RX0. UART0 console receive line." },
-    "45": { "note": "Drives the blue channel of the onboard RGB LED. Not broken out on the headers." },
-    "46": {
-      "label": "B0",
-      "note": "Broken out at the AREF footprint position, but it is GPIO46, an ESP32-S3 boot strapping pin, and it also drives the red channel of the onboard RGB LED."
-    },
-    "47": { "label": "D12", "note": "SPI MISO." },
-    "48": { "label": "D13", "note": "SPI SCK. Also drives the onboard user LED through a MOSFET." }
+    "21": { "label": "D10" },
+    "38": { "label": "D11" },
+    "43": { "label": "D1" },
+    "44": { "label": "D0" },
+    "47": { "label": "D12" },
+    "48": { "label": "D13" }
   },
   "usbEdge": "top",
   "bare": true,
