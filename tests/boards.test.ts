@@ -46,6 +46,30 @@ describe('board spec pipeline', () => {
     expect(chip!.pins.find(p => p.gpio === 19)!.names[0]).toBe('USB_N')
   })
 
+  it('resolves the waveshare s3 nano with the Arduino Nano ESP32 mapping', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/esp32-s3-nano.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    // Verified against Waveshare's ESP32-S3-Nano schematic and the
+    // arduino-esp32 `arduino_nano_nora` variant.
+    const silk: Record<string, number> = {
+      D0: 44, D1: 43, D2: 5, D3: 6, D4: 7, D5: 8, D6: 9, D7: 10,
+      D8: 17, D9: 18, D10: 21, D11: 38, D12: 47, D13: 48,
+      A0: 1, A1: 2, A2: 3, A3: 4, A4: 11, A5: 12, A6: 13, A7: 14,
+      // The two pads at the classic Nano's AREF / RESET positions are
+      // actually boot strapping pins, not AREF and not a reset.
+      B0: 46, B1: 0,
+    }
+    for (const [label, gpio] of Object.entries(silk)) {
+      expect(chip!.pins.find(p => p.gpio === gpio)!.names[0], `${label} -> GPIO${gpio}`).toBe(label)
+    }
+    expect(chip!.packageLayout!.left.length).toBe(15)
+    expect(chip!.packageLayout!.right.length).toBe(15)
+  })
+
   it('flags an unknown base chip', () => {
     const spec: BoardSpec = { id: 'x', name: 'X', baseChip: 'nope', headers: { left: [], right: [] } }
     const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))
